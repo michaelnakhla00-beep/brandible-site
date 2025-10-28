@@ -519,6 +519,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     prevBtn?.addEventListener('click', () => { view.setMonth(view.getMonth()-1); renderCalendar(); });
     nextBtn?.addEventListener('click', () => { view.setMonth(view.getMonth()+1); renderCalendar(); });
+    
+    // Handle "Change date or time" button
+    const changeBtn = document.getElementById('bk-change-btn');
+    if (changeBtn) {
+      changeBtn.addEventListener('click', () => {
+        // Check if previously selected slot is still valid
+        if (selectedDate && selectedTime) {
+          const dateStr = formatDate(selectedDate);
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const selected = new Date(selectedDate);
+          selected.setHours(0, 0, 0, 0);
+          const isToday = selected.getTime() === today.getTime();
+          
+          const isBooked = isSlotBooked(selectedDate, selectedTime);
+          const hasPassed = isToday && isTimePassed(selectedTime);
+          
+          if (isBooked || hasPassed) {
+            showToast('That slot is no longer available. Please select another.', false);
+            // Clear the selection so user picks a new one
+            selectedDate = null;
+            selectedTime = null;
+          }
+        }
+        
+        // Switch back to Step 1
+        step2.classList.add('opacity-0', 'translate-y-1');
+        setTimeout(() => {
+          step2.classList.add('hidden');
+          step1.classList.remove('hidden');
+          step1.classList.add('opacity-0', 'translate-y-1');
+          setTimeout(() => {
+            step1.classList.remove('opacity-0', 'translate-y-1');
+          }, 10);
+        }, 180);
+        
+        // Re-render calendar and times to show current state
+        renderCalendar();
+        renderTimes();
+      });
+    }
 
     renderCalendar();
 
