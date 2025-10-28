@@ -227,6 +227,85 @@ document.addEventListener('DOMContentLoaded', () => {
       revealEls.forEach(el => el.classList.add('reveal-show'));
     }
   }
+
+  /* ===========================
+   * Supabase init (global)
+   * =========================== */
+  const SUPABASE_URL = 'https://mzcdpnpzplgkmshfxmgi.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Y2RwbnB6cGxna21zaGZ4bWdpaSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzMwNjA5MDY2LCJleHAiOjIwNDYxODUwNjZ9.EEs70KyLS63EyVyyUj4ph5HMC4MdZIgEfWjRZclWDG8';
+
+  function ensureSupabase(callback){
+    if (window.supabase && window.supabase.createClient){
+      return callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.async = true;
+    script.onload = () => callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+    document.head.appendChild(script);
+  }
+
+  /* ===========================
+   * Homepage booking form (Supabase → leads)
+   * =========================== */
+  const bookingForm = document.getElementById('bookingFormHome');
+  if (bookingForm){
+    const nameEl    = document.getElementById('bf-name');
+    const emailEl   = document.getElementById('bf-email');
+    const msgEl     = document.getElementById('bf-message');
+    const serviceEl = document.getElementById('bf-service');
+    const btn       = document.getElementById('bf-submit');
+    const spin      = document.getElementById('bf-spinner');
+    const toast     = document.getElementById('bf-toast');
+
+    function showToast(text, ok){
+      if (!toast) return;
+      toast.textContent = text;
+      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl text-sm font-medium shadow ' + (ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3200);
+    }
+
+    function setLoading(isLoading){
+      if (btn) btn.disabled = isLoading;
+      if (spin) spin.classList.toggle('hidden', !isLoading);
+    }
+
+    bookingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = (nameEl?.value || '').trim();
+      const email = (emailEl?.value || '').trim();
+      const message = (msgEl?.value || '').trim();
+      const service = (serviceEl?.value || '').trim();
+
+      if (!name || !email || !message || !service){
+        showToast('Please complete all fields.', false);
+        return;
+      }
+      // simple email check
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        showToast('Enter a valid email address.', false);
+        return;
+      }
+
+      setLoading(true);
+      ensureSupabase(async (client) => {
+        try {
+          const { error } = await client
+            .from('leads')
+            .insert({ name, email, message, service });
+          if (error) throw error;
+          bookingForm.reset();
+          showToast("Thanks for reaching out — we’ll get back to you shortly!", true);
+        } catch (err){
+          console.error(err);
+          showToast('Sorry, something went wrong. Please try again.', false);
+        } finally {
+          setLoading(false);
+        }
+      });
+    });
+  }
 });
 
 /* ===========================
