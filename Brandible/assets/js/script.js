@@ -232,16 +232,17 @@ document.addEventListener('DOMContentLoaded', () => {
    * Supabase init (global)
    * =========================== */
   const SUPABASE_URL = "https://jijjjpduroyivrd.bgmnqo.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqampwZHVyb3lpdnJkYmdtbnFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NjM5NTcsImV4cCI6MjA3NzEzOTk1N30.m_NC1QBvaSdF9S5bIIWIfhAa1L8HfZpSZN9nzVEPiP0";
+  // Public key safe to expose — only used for client-side Supabase inserts
+  const SUPABASE_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqampwZHVyb3lpdnJkYmdtbnFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NjM5NTcsImV4cCI6MjA3NzEzOTk1N30.m_NC1QBvaSdF9S5bIIWIfhAa1L8HfZpSZN9nzVEPiP0";
 
   function ensureSupabase(callback){
     if (window.supabase && window.supabase.createClient){
-      return callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+      return callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY));
     }
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
     script.async = true;
-    script.onload = () => callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+    script.onload = () => callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY));
     document.head.appendChild(script);
   }
 
