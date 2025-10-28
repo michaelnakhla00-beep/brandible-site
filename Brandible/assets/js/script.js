@@ -358,6 +358,24 @@ document.addEventListener('DOMContentLoaded', () => {
       checkDate.setHours(0, 0, 0, 0);
       return checkDate < today;
     }
+    
+    // Helper: parse time string like "10:00 AM" to hour and minute
+    function parseTimeStr(timeStr) {
+      const [time, meridian] = timeStr.split(' ');
+      const [hour, minute] = time.split(':').map(Number);
+      let hour24 = hour;
+      if (meridian === 'PM' && hour !== 12) hour24 += 12;
+      else if (meridian === 'AM' && hour === 12) hour24 = 0;
+      return { hour: hour24, minute };
+    }
+    
+    // Helper: check if a time slot has passed today
+    function isTimePassed(timeStr) {
+      const now = new Date();
+      const { hour, minute } = parseTimeStr(timeStr);
+      const slotTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+      return slotTime < now;
+    }
 
     function showToast(msg, ok){
       if (!toast) return;
@@ -460,18 +478,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTimes(){
       timesWrap.innerHTML = '';
       if (!selectedDate) return;
+      
+      // Check if selected date is today
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const selected = new Date(selectedDate);
+      selected.setHours(0, 0, 0, 0);
+      const isToday = selected.getTime() === today.getTime();
+      
       TIMES.forEach(t => {
         const btn = document.createElement('button');
         btn.type='button';
         const isBooked = isSlotBooked(selectedDate, t);
-        btn.className = isBooked 
-          ? 'px-3 py-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 text-sm cursor-not-allowed opacity-50'
-          : 'px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm transition';
-        btn.textContent = t;
-        if (isBooked) {
+        const hasPassed = isToday && isTimePassed(t);
+        
+        if (isBooked || hasPassed) {
+          btn.className = 'px-3 py-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 text-sm cursor-not-allowed opacity-50';
           btn.setAttribute('disabled', 'true');
-          btn.title = 'Already booked';
+          btn.title = isBooked ? 'Already booked' : 'This time has passed';
         } else {
+          btn.className = 'px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm transition';
           btn.addEventListener('click', () => {
             selectedTime = t;
             // transition to step 2
@@ -485,6 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 180);
           });
         }
+        
+        btn.textContent = t;
         timesWrap.appendChild(btn);
       });
     }
