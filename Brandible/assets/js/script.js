@@ -335,8 +335,29 @@ document.addEventListener('DOMContentLoaded', () => {
     view.setDate(1);
     let selectedDate = null;
     let selectedTime = null;
+    let bookedSlots = new Map(); // cache for booked slots
 
     const TIMES = ['10:00 AM','11:30 AM','1:00 PM','3:30 PM','5:00 PM'];
+    
+    // Helper: format date as YYYY-MM-DD
+    function formatDate(d) {
+      if (!d) return '';
+      return d.toISOString().slice(0, 10);
+    }
+    
+    // Helper: format datetime for Supabase
+    function toSupabaseDate(d) {
+      return d.toISOString().slice(0, 10);
+    }
+
+    // Helper: check if date is in past
+    function isPastDate(date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+      return checkDate < today;
+    }
 
     function showToast(msg, ok){
       if (!toast) return;
@@ -348,6 +369,36 @@ document.addEventListener('DOMContentLoaded', () => {
       void toast.offsetWidth; // force reflow
       toast.classList.add('toast-show');
       setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-show'); }, 3200);
+    }
+    
+    // Fetch booked slots from Supabase
+    async function fetchBookedSlots() {
+      try {
+        const client = window.supabaseClient;
+        if (!client) {
+          ensureSupabase((c) => { window.supabaseClient = c; });
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        const { data, error } = await window.supabaseClient
+          .from('leads')
+          .select('date, time')
+          .gte('date', formatDate(new Date()));
+        if (error) throw error;
+        bookedSlots.clear();
+        (data || []).forEach(({ date, time }) => {
+          const key = `${date}-${time}`;
+          bookedSlots.set(key, true);
+        });
+      } catch (err) {
+        console.error('Error fetching booked slots:', err);
+      }
+    }
+    
+    // Check if slot is booked
+    function isSlotBooked(date, time) {
+      if (!date || !time) return false;
+      const key = `${toSupabaseDate(date)}-${time}`;
+      return bookedSlots.has(key);
     }
 
     function fmtMonth(d){
@@ -369,21 +420,39 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.appendChild(cell);
       }
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       for (let d=1; d<=daysInMonth; d++){
         const cell = document.createElement('button');
         cell.type='button';
         const thisDate = new Date(view.getFullYear(), view.getMonth(), d);
         const isToday = sameDay(thisDate, today);
         const isSelected = sameDay(thisDate, selectedDate);
+        const isPast = thisDate < today;
+        
+        // Check if date is fully booked
+        const dateKey = formatDate(thisDate);
+        const allTimesBooked = TIMES.every(time => bookedSlots.has(`${dateKey}-${time}`));
+        
         cell.className = 'text-sm py-2 rounded-lg text-center transition ' +
-          (isSelected ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' : 'hover:bg-gray-100 text-gray-700') +
-          (isToday && !isSelected ? ' ring-1 ring-blue-300' : '');
+          (isSelected ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' : 
+          isPast || allTimesBooked ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 
+          'hover:bg-gray-100 text-gray-700') +
+          (isToday && !isSelected && !isPast ? ' ring-1 ring-blue-300' : '');
         cell.textContent = String(d);
-        cell.addEventListener('click', () => {
-          selectedDate = thisDate;
-          renderCalendar();
-          renderTimes();
-        });
+        
+        if (isPast) {
+          cell.setAttribute('disabled', 'true');
+          cell.title = 'Past date';
+        } else if (allTimesBooked) {
+          cell.setAttribute('disabled', 'true');
+          cell.title = 'Fully booked';
+        } else {
+          cell.addEventListener('click', () => {
+            selectedDate = thisDate;
+            renderCalendar();
+            renderTimes();
+          });
+        }
         grid.appendChild(cell);
       }
     }
@@ -394,20 +463,28 @@ document.addEventListener('DOMContentLoaded', () => {
       TIMES.forEach(t => {
         const btn = document.createElement('button');
         btn.type='button';
-        btn.className = 'px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm transition';
+        const isBooked = isSlotBooked(selectedDate, t);
+        btn.className = isBooked 
+          ? 'px-3 py-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 text-sm cursor-not-allowed opacity-50'
+          : 'px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm transition';
         btn.textContent = t;
-        btn.addEventListener('click', () => {
-          selectedTime = t;
-          // transition to step 2
-          step1.classList.add('opacity-0','translate-y-1');
-          setTimeout(() => {
-            step1.classList.add('hidden');
-            step2.classList.remove('hidden');
-            step2.classList.add('opacity-0','translate-y-1');
-            selectedLabel.textContent = selectedDate.toLocaleDateString() + ' at ' + selectedTime;
-            setTimeout(()=>{ step2.classList.remove('opacity-0','translate-y-1'); }, 10);
-          }, 180);
-        });
+        if (isBooked) {
+          btn.setAttribute('disabled', 'true');
+          btn.title = 'Already booked';
+        } else {
+          btn.addEventListener('click', () => {
+            selectedTime = t;
+            // transition to step 2
+            step1.classList.add('opacity-0','translate-y-1');
+            setTimeout(() => {
+              step1.classList.add('hidden');
+              step2.classList.remove('hidden');
+              step2.classList.add('opacity-0','translate-y-1');
+              selectedLabel.textContent = selectedDate.toLocaleDateString() + ' at ' + selectedTime;
+              setTimeout(()=>{ step2.classList.remove('opacity-0','translate-y-1'); }, 10);
+            }, 180);
+          });
+        }
         timesWrap.appendChild(btn);
       });
     }
@@ -418,41 +495,98 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
 
     // Submit booking
-    form?.addEventListener('submit', (e) => {
+    form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!selectedDate || !selectedTime){ showToast('Please select a date and time first.', false); return; }
+      
+      // Validate date/time selection
+      if (!selectedDate || !selectedTime){ 
+        showToast('Please select a date and time first.', false); 
+        return; 
+      }
+      
+      // Check if date is in past
+      if (isPastDate(selectedDate)) {
+        showToast('You can\'t select a past date. Please choose a future date.', false);
+        return;
+      }
+      
+      // Collect form values
       const name = document.getElementById('bk-name')?.value.trim();
       const email = document.getElementById('bk-email')?.value.trim();
       const phone = document.getElementById('bk-phone')?.value.trim();
       const message = document.getElementById('bk-message')?.value.trim();
       const service = document.getElementById('bk-service')?.value.trim();
-      if (!name || !email || !phone || !message || !service){ showToast('Please complete all fields.', false); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showToast('Enter a valid email address.', false); return; }
+      
+      // Validate required fields
+      if (!name || !email || !phone || !message || !service) { 
+        showToast('Please complete all fields.', false); 
+        return; 
+      }
+      
+      // Validate email format
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { 
+        showToast('Enter a valid email address.', false); 
+        return; 
+      }
+      
+      // Validate phone (basic)
+      if (!/^[\d\s\-()+]{7,}$/.test(phone)) {
+        showToast('Enter a valid phone number.', false);
+        return;
+      }
 
-      // save
+      // Disable submit button
       submitBtn && (submitBtn.disabled = true);
       spin?.classList.remove('hidden');
+      
       ensureSupabase(async (client) => {
         try {
+          // Check for existing booking
+          const dateStr = toSupabaseDate(selectedDate);
+          const { data: existing, error: checkError } = await client
+            .from('leads')
+            .select('*')
+            .eq('date', dateStr)
+            .eq('time', selectedTime);
+            
+          if (checkError) throw checkError;
+          
+          if (existing && existing.length > 0) {
+            showToast('This time slot is already booked. Please choose another.', false);
+            submitBtn && (submitBtn.disabled = false);
+            spin?.classList.add('hidden');
+            return;
+          }
+          
+          // Insert booking
           const payload = {
             name,
             email,
             phone,
             message,
             service,
-            date: selectedDate.toISOString().slice(0,10),
+            date: dateStr,
             time: selectedTime
           };
-          const { error } = await client.from('leads').insert(payload);
-          if (error) throw error;
-          showToast('Thanks! Your consultation is booked.', true);
+          
+          const { error: insertError } = await client.from('leads').insert(payload);
+          if (insertError) throw insertError;
+          
+          // Success! Update booked slots and show toast
+          const key = `${dateStr}-${selectedTime}`;
+          bookedSlots.set(key, true);
+          
+          showToast('✓ Thanks! Your consultation is booked successfully.', true);
           form.reset();
+          
           // back to step 1
           step2.classList.add('opacity-0','translate-y-1');
           setTimeout(()=>{
             step2.classList.add('hidden');
             step1.classList.remove('hidden');
-            selectedDate = null; selectedTime = null; renderCalendar(); timesWrap.innerHTML='';
+            selectedDate = null; selectedTime = null; 
+            renderCalendar(); 
+            timesWrap.innerHTML='';
           }, 180);
         } catch (err){
           console.error(err);
@@ -463,6 +597,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+    
+    // Fetch booked slots on page load
+    fetchBookedSlots().then(() => renderCalendar());
   })();
 });
 
