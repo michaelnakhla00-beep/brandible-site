@@ -117,14 +117,74 @@
                   <p class="text-gray-600 leading-relaxed">Schedule a 30-minute call to discuss your business goals and how we can help you grow your digital presence.</p>
                 </div>
 
-                <!-- Calendly placeholder -->
-                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 text-center mb-6 border border-gray-200">
-                  <div class="text-gray-500 mb-4">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-brandblue" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                <!-- Two-step Booking: Step 1 (Calendar & Times) -->
+                <div id="bk-step1" class="mb-6">
+                  <div class="rounded-2xl border border-gray-200 p-5 bg-white">
+                    <div class="flex items-center justify-between mb-3">
+                      <button id="bk-prev" class="p-2 rounded-lg hover:bg-gray-50" aria-label="Previous month">
+                        <svg class="w-5 h-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                      <div id="bk-monthLabel" class="text-lg font-semibold text-gray-900">Month YYYY</div>
+                      <button id="bk-next" class="p-2 rounded-lg hover:bg-gray-50" aria-label="Next month">
+                        <svg class="w-5 h-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-xs text-gray-500 mb-1">
+                      <div class="text-center">Sun</div><div class="text-center">Mon</div><div class="text-center">Tue</div><div class="text-center">Wed</div><div class="text-center">Thu</div><div class="text-center">Fri</div><div class="text-center">Sat</div>
+                    </div>
+                    <div id="bk-grid" class="grid grid-cols-7 gap-1"></div>
                   </div>
-                  <p class="text-sm font-medium text-gray-700 mb-2">Calendly booking widget would appear here</p>
-                  <p class="text-xs text-gray-500">Embed URL: https://calendly.com/YOUR_CALENDLY_LINK</p>
+
+                  <div class="mt-5">
+                    <div class="text-sm text-gray-700 mb-2 font-medium">Available times</div>
+                    <div id="bk-times" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                  </div>
                 </div>
+
+                <!-- Two-step Booking: Step 2 (Form) -->
+                <div id="bk-step2" class="hidden">
+                  <form id="bk-form" class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label for="bk-name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                        <input id="bk-name" type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="Your full name" />
+                      </div>
+                      <div>
+                        <label for="bk-email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                        <input id="bk-email" type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="your@email.com" />
+                      </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label for="bk-phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                        <input id="bk-phone" type="tel" required pattern="[\d\s\-\(\)\+]{7,}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="(555) 123-4567" />
+                      </div>
+                      <div>
+                        <label for="bk-service" class="block text-sm font-semibold text-gray-700 mb-2">Service Type *</label>
+                        <select id="bk-service" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white">
+                          <option value="">Select a service</option>
+                          <option>Web Design</option>
+                          <option>SEO</option>
+                          <option>Social Media</option>
+                          <option>Advertising</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label for="bk-message" class="block text-sm font-semibold text-gray-700 mb-2">Message *</label>
+                      <textarea id="bk-message" rows="4" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue resize-none bg-gray-50 focus:bg-white" placeholder="Tell us about your business and goals..."></textarea>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <div id="bk-selected" class="text-sm text-gray-600"></div>
+                      <button id="bk-submit" type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:shadow-md transition focus:ring-4 focus:ring-blue-300">Book Consultation</button>
+                      <div id="bk-spin" class="hidden">
+                        <svg class="animate-spin h-6 w-6 text-blue-600" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                <div id="bk-toast" class="hidden"></div>
               </div>
 
               <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">

@@ -306,6 +306,155 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  /* ===========================
+   * Contact page two‑step booking (calendar → form)
+   * =========================== */
+  (function(){
+    const grid = document.getElementById('bk-grid');
+    const monthLabel = document.getElementById('bk-monthLabel');
+    const prevBtn = document.getElementById('bk-prev');
+    const nextBtn = document.getElementById('bk-next');
+    const timesWrap = document.getElementById('bk-times');
+    const step1 = document.getElementById('bk-step1');
+    const step2 = document.getElementById('bk-step2');
+    const toast = document.getElementById('bk-toast');
+    const form = document.getElementById('bk-form');
+    const selectedLabel = document.getElementById('bk-selected');
+    const spin = document.getElementById('bk-spin');
+    const submitBtn = document.getElementById('bk-submit');
+
+    if (!grid || !monthLabel || !timesWrap) return;
+
+    let view = new Date();
+    view.setDate(1);
+    let selectedDate = null;
+    let selectedTime = null;
+
+    const TIMES = ['10:00 AM','11:30 AM','1:00 PM','3:30 PM','5:00 PM'];
+
+    function showToast(msg, ok){
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl text-sm font-medium shadow ' + (ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3200);
+    }
+
+    function fmtMonth(d){
+      return d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+    }
+
+    function sameDay(a,b){
+      return a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+    }
+
+    function renderCalendar(){
+      monthLabel.textContent = fmtMonth(view);
+      grid.innerHTML = '';
+      const firstDay = new Date(view);
+      const startWeekday = firstDay.getDay();
+      const daysInMonth = new Date(view.getFullYear(), view.getMonth()+1, 0).getDate();
+      for (let i=0;i<startWeekday;i++){
+        const cell = document.createElement('div');
+        grid.appendChild(cell);
+      }
+      const today = new Date();
+      for (let d=1; d<=daysInMonth; d++){
+        const cell = document.createElement('button');
+        cell.type='button';
+        const thisDate = new Date(view.getFullYear(), view.getMonth(), d);
+        const isToday = sameDay(thisDate, today);
+        const isSelected = sameDay(thisDate, selectedDate);
+        cell.className = 'text-sm py-2 rounded-lg text-center transition ' +
+          (isSelected ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' : 'hover:bg-gray-100 text-gray-700') +
+          (isToday && !isSelected ? ' ring-1 ring-blue-300' : '');
+        cell.textContent = String(d);
+        cell.addEventListener('click', () => {
+          selectedDate = thisDate;
+          renderCalendar();
+          renderTimes();
+        });
+        grid.appendChild(cell);
+      }
+    }
+
+    function renderTimes(){
+      timesWrap.innerHTML = '';
+      if (!selectedDate) return;
+      TIMES.forEach(t => {
+        const btn = document.createElement('button');
+        btn.type='button';
+        btn.className = 'px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm transition';
+        btn.textContent = t;
+        btn.addEventListener('click', () => {
+          selectedTime = t;
+          // transition to step 2
+          step1.classList.add('opacity-0','translate-y-1');
+          setTimeout(() => {
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+            step2.classList.add('opacity-0','translate-y-1');
+            selectedLabel.textContent = selectedDate.toLocaleDateString() + ' at ' + selectedTime;
+            setTimeout(()=>{ step2.classList.remove('opacity-0','translate-y-1'); }, 10);
+          }, 180);
+        });
+        timesWrap.appendChild(btn);
+      });
+    }
+
+    prevBtn?.addEventListener('click', () => { view.setMonth(view.getMonth()-1); renderCalendar(); });
+    nextBtn?.addEventListener('click', () => { view.setMonth(view.getMonth()+1); renderCalendar(); });
+
+    renderCalendar();
+
+    // Submit booking
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!selectedDate || !selectedTime){ showToast('Please select a date and time first.', false); return; }
+      const name = document.getElementById('bk-name')?.value.trim();
+      const email = document.getElementById('bk-email')?.value.trim();
+      const phone = document.getElementById('bk-phone')?.value.trim();
+      const message = document.getElementById('bk-message')?.value.trim();
+      const service = document.getElementById('bk-service')?.value.trim();
+      if (!name || !email || !phone || !message || !service){ showToast('Please complete all fields.', false); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showToast('Enter a valid email address.', false); return; }
+
+      // save
+      submitBtn && (submitBtn.disabled = true);
+      spin?.classList.remove('hidden');
+      ensureSupabase(async (client) => {
+        try {
+          const payload = {
+            name,
+            email,
+            phone,
+            message,
+            service,
+            date: selectedDate.toISOString().slice(0,10),
+            time: selectedTime
+          };
+          const { error } = await client.from('leads').insert(payload);
+          if (error) throw error;
+          showToast('Thanks! Your consultation is booked.', true);
+          form.reset();
+          // back to step 1
+          step2.classList.add('opacity-0','translate-y-1');
+          setTimeout(()=>{
+            step2.classList.add('hidden');
+            step1.classList.remove('hidden');
+            selectedDate = null; selectedTime = null; renderCalendar(); timesWrap.innerHTML='';
+          }, 180);
+        } catch (err){
+          console.error(err);
+          showToast('Sorry, something went wrong. Please try again.', false);
+        } finally {
+          submitBtn && (submitBtn.disabled = false);
+          spin?.classList.add('hidden');
+        }
+      });
+    });
+  })();
 });
 
 /* ===========================
