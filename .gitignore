@@ -1,0 +1,28 @@
+# Build artifacts
+Brandible/assets/js/config.js
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+.npm
+.yarn
+
+# Build outputs
+dist/
+build/
+.next/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+

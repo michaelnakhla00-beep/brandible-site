@@ -1,0 +1,14 @@
+[build]
+  base = "Brandible"
+  command = "bash ./scripts/inject-env.sh"
+  publish = "."
+
+# Configure Netlify to allow Supabase public keys in the generated config.js
+# These are intentionally public values (anon keys) meant for client-side use
+[build.environment]
+  # Allow Supabase public keys (anon keys are safe to expose)
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_PUBLIC_KEY,SUPABASE_URL"
+
+# Alternative: Instead of omitting keys, you can omit the specific file path
+# SECRETS_SCAN_OMIT_PATHS = "Brandible/assets/js/config.js"
+
