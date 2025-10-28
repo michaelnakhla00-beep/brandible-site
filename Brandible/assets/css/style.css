@@ -253,3 +253,29 @@ body.modal-open{ overflow:hidden; }
 .menu-open{ opacity:1; transform: translateY(0); pointer-events:auto; transition: opacity .25s ease, transform .25s ease; }
 .overlay{ position:fixed; inset:0; background: rgba(0,0,0,.35); opacity:0; transition: opacity .25s ease; pointer-events:none; }
 .overlay-show{ opacity:1; pointer-events:auto; }
+
+/* ===== Global toast (success/info) ===== */
+.toast-brandible{
+  position: fixed;
+  /* Place just below the fixed navbar (approx 4.5rem) */
+  top: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70; /* above header z-50 */
+  background: linear-gradient(135deg, var(--hero-from), var(--hero-via) 50%, var(--hero-to));
+  color: #fff;
+  padding: .75rem 1rem;
+  border-radius: .75rem; /* ~rounded-xl */
+  box-shadow: 0 14px 30px rgba(2,6,23,.18);
+  opacity: 0;
+  pointer-events: none;
+  font-weight: 600;
+}
+
+@keyframes toast-fade {
+  0%   { opacity: 0; transform: translate(-50%, -8px); }
+  10%, 85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -8px); }
+}
+
+.toast-show { animation: toast-fade 3s ease-in-out forwards; }

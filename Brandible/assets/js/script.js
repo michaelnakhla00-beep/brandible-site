@@ -262,9 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(text, ok){
       if (!toast) return;
       toast.textContent = text;
-      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl text-sm font-medium shadow ' + (ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white');
+      toast.className = 'toast-brandible';
       toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 3200);
+      // retrigger animation
+      toast.classList.remove('toast-show');
+      void toast.offsetWidth; // force reflow
+      toast.classList.add('toast-show');
+      setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-show'); }, 3200);
     }
 
     function setLoading(isLoading){
@@ -337,9 +341,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(msg, ok){
       if (!toast) return;
       toast.textContent = msg;
-      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl text-sm font-medium shadow ' + (ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white');
+      toast.className = 'toast-brandible';
       toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 3200);
+      // retrigger animation
+      toast.classList.remove('toast-show');
+      void toast.offsetWidth; // force reflow
+      toast.classList.add('toast-show');
+      setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-show'); }, 3200);
     }
 
     function fmtMonth(d){
