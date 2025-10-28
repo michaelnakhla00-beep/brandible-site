@@ -5,7 +5,39 @@ document.addEventListener('DOMContentLoaded', () => {
    * =========================== */
   const menuBtn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
-  if (menuBtn && menu) menuBtn.addEventListener('click', () => menu.classList.toggle('hidden'));
+  // overlay for mobile menu
+  let overlay = document.getElementById('menu-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'menu-overlay';
+    overlay.className = 'overlay';
+    document.body.appendChild(overlay);
+  }
+  const openMenu = () => {
+    menu?.classList.remove('hidden');
+    menu?.classList.remove('menu-closed');
+    menu?.classList.add('menu-open');
+    overlay?.classList.add('overlay-show');
+    overlay?.setAttribute('aria-hidden','false');
+  };
+  const closeMenu = () => {
+    if (!menu) return;
+    menu.classList.remove('menu-open');
+    menu.classList.add('menu-closed');
+    overlay?.classList.remove('overlay-show');
+    overlay?.setAttribute('aria-hidden','true');
+    // delay hiding to allow animation
+    setTimeout(() => menu.classList.add('hidden'), 200);
+  };
+  if (menuBtn && menu) {
+    menuBtn.addEventListener('click', () => {
+      if (menu.classList.contains('hidden') || menu.classList.contains('menu-closed')) openMenu();
+      else closeMenu();
+    });
+    overlay?.addEventListener('click', closeMenu);
+    // auto-close on link click
+    menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  }
 
   /* ===========================
    * Contact form -> Netlify (AJAX) + inline validation
@@ -174,6 +206,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const target = document.getElementById('book-call');
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  /* ===========================
+   * Scroll reveal (IntersectionObserver)
+   * =========================== */
+  const revealEls = Array.from(document.querySelectorAll('[data-reveal]'));
+  if (revealEls.length) {
+    const onIntersect = (entries, obs) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('reveal-show');
+          obs.unobserve(e.target);
+        }
+      });
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(onIntersect, { rootMargin: '80px' });
+      revealEls.forEach(el => io.observe(el));
+    } else {
+      revealEls.forEach(el => el.classList.add('reveal-show'));
+    }
+  }
 });
 
 /* ===========================
@@ -292,12 +345,7 @@ document.querySelectorAll('.typed').forEach(el => {
   let isDeleting = false;
   const caret = el.nextElementSibling; // the blinking bar
 
-  // Independent caret blinking (every 600ms)
-  if (caret) {
-    setInterval(() => {
-      caret.classList.toggle('opacity-0');
-    }, 600);
-  }
+  // Caret blinks via CSS, keep DOM clean
 
   const type = () => {
     const word = words[i % words.length];
@@ -309,12 +357,12 @@ document.querySelectorAll('.typed').forEach(el => {
 
     let speed = isDeleting ? 60 : 100;
     if (!isDeleting && txt === word) {
-      speed = 1800; // pause after full word
+      speed = 1400; // shorter pause after full word
       isDeleting = true;
     } else if (isDeleting && txt === '') {
       isDeleting = false;
       i++;
-      speed = 500; // pause before next word
+      speed = 400; // shorter pause before next word
     }
 
     setTimeout(type, speed);
