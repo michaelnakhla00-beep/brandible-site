@@ -208,25 +208,33 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /* ===========================
-   * Scroll reveal (IntersectionObserver)
+   * Scroll reveal (variants + stagger)
    * =========================== */
-  const revealEls = Array.from(document.querySelectorAll('[data-reveal]'));
-  if (revealEls.length) {
+  (function(){
+    const els = Array.from(document.querySelectorAll('[data-reveal]'));
+    if (!els.length) return;
+
     const onIntersect = (entries, obs) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
-          e.target.classList.add('reveal-show');
-          obs.unobserve(e.target);
+          const el = e.target;
+          const baseDelay = parseInt(el.getAttribute('data-reveal-delay') || '0', 10);
+          if (baseDelay) el.style.transitionDelay = (baseDelay / 1000) + 's';
+          el.classList.add('reveal-show');
+          if (el.getAttribute('data-reveal-repeat') !== 'true') {
+            obs.unobserve(el);
+          }
         }
       });
     };
-    if ('IntersectionObserver' in window) {
+
+    if ('IntersectionObserver' in window && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
       const io = new IntersectionObserver(onIntersect, { rootMargin: '80px' });
-      revealEls.forEach(el => io.observe(el));
+      els.forEach(el => io.observe(el));
     } else {
-      revealEls.forEach(el => el.classList.add('reveal-show'));
+      els.forEach(el => el.classList.add('reveal-show'));
     }
-  }
+  })();
 
   /* ===========================
    * Supabase init (global)
@@ -669,6 +677,67 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Fetch booked slots on page load
     fetchBookedSlots().then(() => renderCalendar());
+  })();
+
+  /* ===========================
+   * Subtle hero parallax
+   * =========================== */
+  (function(){
+    const hero = document.getElementById('hero');
+    if (!hero || !matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
+
+    let ticking = false;
+    const max = 10;
+
+    function onScroll(){
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const rect = hero.getBoundingClientRect();
+        const vh = window.innerHeight || 800;
+        const p = Math.max(0, Math.min(1, 1 - (rect.top / vh)));
+        const ty = Math.round((p - 0.5) * 2 * max);
+        hero.style.transform = `translateY(${ty}px)`;
+        hero.style.willChange = 'transform';
+        ticking = false;
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  /* ===========================
+   * Count-up on reveal
+   * =========================== */
+  (function(){
+    const nums = Array.from(document.querySelectorAll('[data-count-to]'));
+    if (!nums.length) return;
+
+    function animate(el){
+      const to = parseInt(el.getAttribute('data-count-to') || '0', 10);
+      const dur = parseInt(el.getAttribute('data-count-duration') || '1200', 10);
+      const start = performance.now();
+      const fmt = new Intl.NumberFormat();
+
+      function step(now){
+        const t = Math.min(1, (now - start) / dur);
+        const eased = (t<.5) ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+        el.textContent = fmt.format(Math.round(to * eased));
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    nums.forEach(el => {
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries, obs) => {
+          entries.forEach(e => { if (e.isIntersecting) { animate(el); obs.unobserve(el); } });
+        }, { rootMargin: '100px' });
+        io.observe(el);
+      } else {
+        animate(el);
+      }
+    });
   })();
 });
 
