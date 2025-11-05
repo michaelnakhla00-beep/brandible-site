@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         consentError?.classList.add('hidden');
       } catch (err) {
         console.error(err);
-        alert('Sorry, there was an error sending your message. Please try again or email hello@brandiblemarketing.com.');
+        alert('Sorry, there was an error sending your message. Please try again or email hello@brandiblemg.com.');
       } finally {
         setLoading(false);
       }
