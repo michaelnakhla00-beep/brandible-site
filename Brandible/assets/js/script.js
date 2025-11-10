@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * =========================== */
   const menuBtn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
+  let submenuToggles = [];
   // overlay for mobile menu
   let overlay = document.getElementById('menu-overlay');
   if (!overlay) {
@@ -13,6 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.className = 'overlay';
     document.body.appendChild(overlay);
   }
+  const resetSubmenus = () => {
+    submenuToggles.forEach(btn => {
+      const targetId = btn.getAttribute('data-submenu-toggle');
+      const target = targetId ? document.getElementById(targetId) : null;
+      const icon = btn.querySelector('[data-submenu-icon]');
+      btn.setAttribute('aria-expanded', 'false');
+      target?.classList.add('hidden');
+      icon?.classList.remove('rotate-180');
+    });
+  };
+
   const openMenu = () => {
     menu?.classList.remove('hidden');
     menu?.classList.remove('menu-closed');
@@ -28,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay?.setAttribute('aria-hidden','true');
     // delay hiding to allow animation
     setTimeout(() => menu.classList.add('hidden'), 200);
+    resetSubmenus();
   };
   if (menuBtn && menu) {
     menuBtn.addEventListener('click', () => {
@@ -37,6 +50,21 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay?.addEventListener('click', closeMenu);
     // auto-close on link click
     menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+    submenuToggles = Array.from(menu.querySelectorAll('[data-submenu-toggle]'));
+    submenuToggles.forEach(btn => {
+      const targetId = btn.getAttribute('data-submenu-toggle');
+      const target = targetId ? document.getElementById(targetId) : null;
+      const icon = btn.querySelector('[data-submenu-icon]');
+      btn.setAttribute('aria-expanded', 'false');
+      if (!target) return;
+      btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', (!expanded).toString());
+        if (expanded) target.classList.add('hidden');
+        else target.classList.remove('hidden');
+        icon?.classList.toggle('rotate-180', !expanded);
+      });
+    });
   }
 
   /* ===========================
