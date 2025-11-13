@@ -127,12 +127,62 @@
     </section>
 
     <!-- Services Overview Section -->
-    <section id="overview" class="bg-white py-16">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">What We Do</h2>
-        <p class="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">We help small businesses and entrepreneurs build authentic brands that connect with their audience and drive real growth.</p>
+    <section id="overview" class="bg-gradient-to-b from-white to-gray-50 py-20 relative overflow-hidden">
+      <!-- Subtle background pattern -->
+      <div class="absolute inset-0 opacity-5">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgb(99 102 241) 1px, transparent 0); background-size: 40px 40px;"></div>
       </div>
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 space-y-10">
+      
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <!-- Eyebrow label -->
+        <p class="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3">Our Approach</p>
+        <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">What We Do</h2>
+        <p class="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto mb-12">We help small businesses and entrepreneurs build authentic brands that connect with their audience and drive real growth.</p>
+        
+        <!-- Value Proposition Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 max-w-5xl mx-auto">
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">Custom Solutions</h3>
+            <p class="text-sm text-gray-600">Tailored to your unique business needs</p>
+          </div>
+          
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">Fast Turnaround</h3>
+            <p class="text-sm text-gray-600">Quick delivery without sacrificing quality</p>
+          </div>
+          
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">Ongoing Support</h3>
+            <p class="text-sm text-gray-600">We're here for you long after launch</p>
+          </div>
+          
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+            <div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">Proven Results</h3>
+            <p class="text-sm text-gray-600">Data-driven strategies that deliver</p>
+          </div>
+        </div>
+      </div>
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 relative z-10">
         <!-- Web Design & Development -->
         <article class="group flex flex-col lg:flex-row items-center bg-white border border-gray-200 rounded-3xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden relative">
           <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -426,14 +476,62 @@
       </div>
     </section>
 
-    <section id="cta" class="bg-white py-20">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Ready to grow your business?</h2>
-        <p class="text-xl text-gray-600 mb-8">Let's build your brand together.</p>
-        <div class="mb-6">
-          <a href="/contact/#book-call" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-md transition-all focus:outline-none focus:ring-4 focus:ring-blue-300">Book Your Free Consultation</a>
+    <section id="cta" class="bg-gradient-to-br from-purple-400 via-pink-300 to-indigo-400 py-24 relative overflow-hidden">
+      <!-- Subtle texture overlay -->
+      <div class="absolute inset-0 opacity-10">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 30px 30px;"></div>
+      </div>
+      
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Ready to Transform Your Business?</h2>
+        <p class="text-xl md:text-2xl text-white/95 mb-6 max-w-2xl mx-auto">Get a custom strategy that drives real results — no cookie-cutter solutions.</p>
+        
+        <!-- Benefit Points with Icons -->
+        <div class="flex flex-wrap justify-center items-center gap-6 mb-10 text-white/90">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm font-medium">No obligation</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm font-medium">Free consultation</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm font-medium">Same-day response</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm font-medium">Custom solutions</span>
+          </div>
         </div>
-        <p class="text-sm text-gray-500">✓ No obligation • ✓ Free consultation • ✓ Same-day response</p>
+        
+        <!-- Multiple CTAs -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+          <a href="/contact/#book-call" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-yellow-300">
+            Book Your Free Consultation
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </a>
+          <a href="/portfolio/" class="inline-flex items-center justify-center gap-2 bg-white/20 backdrop-blur-sm text-white border-2 border-white/30 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/30 hover:border-white/50 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/50">
+            View Our Work
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </a>
+        </div>
+        
+        <p class="text-sm text-white/80">Start your journey today — let's build something amazing together.</p>
       </div>
     </section>
   </main>
