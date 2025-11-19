@@ -88,3 +88,51 @@
   to = "/services/media-management/"
   status = 301
 
+# Explicit rewrites to ensure trailing-slash URLs return 200 OK
+# This prevents Google from seeing redirect errors
+[[redirects]]
+  from = "/about/"
+  to = "/about/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact/"
+  to = "/contact/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portfolio/"
+  to = "/portfolio/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/"
+  to = "/services/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/faqs/"
+  to = "/faqs/index.html"
+  status = 200
+
+# Explicit rewrites for service subdirectories
+[[redirects]]
+  from = "/services/web-design/"
+  to = "/services/web-design/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/digital-marketing/"
+  to = "/services/digital-marketing/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/branding/"
+  to = "/services/branding/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/media-management/"
+  to = "/services/media-management/index.html"
+  status = 200
+
