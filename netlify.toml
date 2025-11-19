@@ -27,10 +27,19 @@
   force = true
 
 # Redirect non-www HTTPS to www HTTPS (canonical domain)
+# This must come before the catch-all to ensure proper domain canonicalization
 [[redirects]]
   from = "https://brandiblemg.com/*"
   to = "https://www.brandiblemg.com/:splat"
   status = 301
+  force = true
+
+# Explicitly prevent www from redirecting - ensure www returns 200 OK
+# This overrides any Netlify domain redirect settings
+[[redirects]]
+  from = "https://www.brandiblemg.com/*"
+  to = "https://www.brandiblemg.com/:splat"
+  status = 200
   force = true
 
 # Catch-all HTTP to HTTPS redirect (fallback)
