@@ -109,8 +109,14 @@
   to = "/services/media-management/"
   status = 301
 
-# Explicit rewrites to ensure trailing-slash URLs return 200 OK
+# Explicit rewrites to ensure URLs return 200 OK
 # This prevents Google from seeing redirect errors
+# Homepage rewrite - ensure root returns 200 OK
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
 [[redirects]]
   from = "/about/"
   to = "/about/index.html"
