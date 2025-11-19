@@ -12,7 +12,28 @@
 # Alternative: Instead of omitting keys, you can omit the specific file path
 # SECRETS_SCAN_OMIT_PATHS = "Brandible/assets/js/config.js"
 
-# Force HTTPS redirects
+# Force HTTPS redirects - must be first to ensure all HTTP traffic is redirected
+# Redirect non-www HTTP to www HTTPS (canonical domain)
+[[redirects]]
+  from = "http://brandiblemg.com/*"
+  to = "https://www.brandiblemg.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.brandiblemg.com/*"
+  to = "https://www.brandiblemg.com/:splat"
+  status = 301
+  force = true
+
+# Redirect non-www HTTPS to www HTTPS (canonical domain)
+[[redirects]]
+  from = "https://brandiblemg.com/*"
+  to = "https://www.brandiblemg.com/:splat"
+  status = 301
+  force = true
+
+# Catch-all HTTP to HTTPS redirect (fallback)
 [[redirects]]
   from = "http://*"
   to = "https://:splat"
