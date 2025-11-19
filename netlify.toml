@@ -110,6 +110,12 @@
   to = "/services/media-management/"
   status = 301
 
+# Favicon rewrite - serve favicon.ico from assets directory
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/assets/favicon.ico"
+  status = 200
+
 # Explicit rewrites to ensure URLs return 200 OK
 # This prevents Google from seeing redirect errors
 # Homepage rewrite - ensure root returns 200 OK
