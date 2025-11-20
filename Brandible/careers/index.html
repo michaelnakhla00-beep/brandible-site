@@ -165,21 +165,27 @@
   </header>
 
   <!-- Main Content -->
-  <main id="main" class="pt-24">
+  <main id="main">
     <!-- Hero Section -->
-    <section class="py-20 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white">
-      <div class="container mx-auto px-6 text-center">
-        <h1 class="text-5xl md:text-6xl font-bold mb-6">Join the Brandible Team</h1>
-        <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-          We're always looking for talented individuals to join our dynamic team! Whether you specialize in marketing, sales, media, paid ads, or operations, we have exciting opportunities for you.
-        </p>
+    <section class="pt-36 md:pt-48 pb-24 md:pb-32 bg-gradient-to-br from-purple-400 via-pink-300 to-indigo-400" id="hero">
+      <div class="container mx-auto px-6">
+        <div class="max-w-4xl mx-auto text-center">
+          <p class="text-sm font-semibold text-white/90 uppercase tracking-wider mb-3 reveal" data-reveal="fade-up">Join Our Team</p>
+          <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 reveal" data-reveal="fade-up" data-reveal-delay="100">
+            <span class="typed" data-words='["Join the Brandible Team", "Grow With Us", "Build Something Great"]'></span>
+            <span class="caret text-yellow-300">|</span>
+          </h1>
+          <p class="text-xl md:text-2xl text-white/90 mb-4 max-w-3xl mx-auto reveal" data-reveal="fade-up" data-reveal-delay="200">
+            While we're not always hiring for every role, we're always interested in meeting talented creatives, builders, and problem-solvers. Share your info below, and we'll reach out when the right opportunity opens up.
+          </p>
+        </div>
       </div>
     </section>
 
     <!-- Application Form Section -->
     <section class="py-20">
       <div class="container mx-auto px-6">
-        <div class="max-w-3xl mx-auto">
+        <div class="max-w-4xl mx-auto">
           <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 md:p-12">
             <div class="text-center mb-8">
               <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -247,15 +253,18 @@
                        placeholder="https://linkedin.com/in/yourprofile">
               </div>
 
-              <!-- Position Type -->
+              <!-- Role Interest -->
               <div>
-                <label for="positionType" class="block text-sm font-semibold text-gray-700 mb-2">Position Type Request *</label>
+                <label for="positionType" class="block text-sm font-semibold text-gray-700 mb-2">Which role are you interested in? *</label>
                 <select id="positionType" name="Position Type" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue transition-all bg-gray-50 focus:bg-white">
-                  <option value="">Select position type</option>
-                  <option value="Paid Internship">Paid Internship</option>
-                  <option value="Part Time Employment">Part Time Employment</option>
-                  <option value="Full Time Employment">Full Time Employment</option>
+                  <option value="">Select a role</option>
+                  <option value="Web Designer">Web Designer</option>
+                  <option value="Web Developer">Web Developer</option>
+                  <option value="Graphic Designer">Graphic Designer</option>
+                  <option value="Copywriter / Content Writer">Copywriter / Content Writer</option>
+                  <option value="Social Media Manager">Social Media Manager</option>
+                  <option value="Marketing Intern">Marketing Intern</option>
                 </select>
               </div>
 
@@ -363,41 +372,53 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 text-gray-300 py-12">
-    <div class="container mx-auto px-6">
-      <div class="grid md:grid-cols-4 gap-8">
-        <div>
-          <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-12 mb-4" />
-          <p class="text-sm leading-relaxed">Helping local businesses grow with professional websites, SEO, and digital marketing.</p>
+  <footer class="bg-gray-800 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-12">
+        <div class="md:col-span-2">
+          <div class="text-2xl font-bold mb-4"><span class="text-blue-300">Brand<span class="italic text-yellow-400">i</span>ble</span><span class="text-yellow-400">!</span></div>
+          <p class="text-gray-300 mb-6 max-w-md">Professional digital marketing for established local businesses. We help you build the online presence your business deserves.</p>
+          <div class="flex space-x-4">
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition" aria-label="LinkedIn">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/brandiblemarketing/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition" aria-label="Instagram">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.2 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition" aria-label="X">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition" aria-label="Facebook">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="mailto:hello@brandiblemg.com" class="text-gray-400 hover:text-white transition" aria-label="Email">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </a>
+          </div>
         </div>
         <div>
-          <h3 class="font-semibold text-white mb-4">Company</h3>
-          <ul class="space-y-2 text-sm">
-            <li><a href="/about/" class="hover:text-white transition duration-300">About</a></li>
-            <li><a href="/careers/" class="hover:text-white transition duration-300">Join Our Team</a></li>
-            <li><a href="/portfolio/" class="hover:text-white transition duration-300">Portfolio</a></li>
-            <li><a href="/contact/" class="hover:text-white transition duration-300">Contact</a></li>
+          <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-gray-300 hover:text-white transition">Home</a></li>
+            <li><a href="/about/" class="text-gray-300 hover:text-white transition">About</a></li>
+            <li><a href="/careers/" class="text-gray-300 hover:text-white transition">Join Our Team</a></li>
+            <li><a href="/services/" class="text-gray-300 hover:text-white transition">Services</a></li>
+            <li><a href="/portfolio/" class="text-gray-300 hover:text-white transition">Portfolio</a></li>
+            <li><a href="/faqs/" class="text-gray-300 hover:text-white transition">FAQs</a></li>
+            <li><a href="/contact/" class="text-gray-300 hover:text-white transition">Contact</a></li>
           </ul>
         </div>
         <div>
-          <h3 class="font-semibold text-white mb-4">Services</h3>
-          <ul class="space-y-2 text-sm">
-            <li><a href="/services/web-design/" class="hover:text-white transition duration-300">Web Design</a></li>
-            <li><a href="/services/digital-marketing/" class="hover:text-white transition duration-300">Digital Marketing</a></li>
-            <li><a href="/services/branding/" class="hover:text-white transition duration-300">Branding</a></li>
-            <li><a href="/services/media-management/" class="hover:text-white transition duration-300">Media Management</a></li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="font-semibold text-white mb-4">Legal</h3>
-          <ul class="space-y-2 text-sm">
-            <li><a href="/privacy.html" class="hover:text-white transition duration-300">Privacy Policy</a></li>
-            <li><a href="/terms.html" class="hover:text-white transition duration-300">Terms of Service</a></li>
-            <li><a href="/faqs/" class="hover:text-white transition duration-300">FAQs</a></li>
+          <h3 class="text-lg font-semibold text-white mb-4">Services</h3>
+          <ul class="space-y-2">
+            <li><a href="/services/web-design/" class="text-gray-300 hover:text-white transition">Web Design</a></li>
+            <li><a href="/services/digital-marketing/" class="text-gray-300 hover:text-white transition">Digital Marketing</a></li>
+            <li><a href="/services/branding/" class="text-gray-300 hover:text-white transition">Branding</a></li>
+            <li><a href="/services/media-management/" class="text-gray-300 hover:text-white transition">Media Management</a></li>
           </ul>
         </div>
       </div>
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+      <div class="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400 text-sm">
         <p>&copy; 2025 Brandible Marketing Group. All rights reserved.</p>
       </div>
     </div>
