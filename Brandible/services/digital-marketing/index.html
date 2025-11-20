@@ -36,6 +36,7 @@
   <!-- Performance & Styling -->
   <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
   <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
+  <link rel="prefetch" href="/contact/" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/style.css" />
   <script src="../../assets/js/config.js"></script>
@@ -71,7 +72,37 @@
     "offers": {
       "@type": "Offer",
       "priceRange": "$750-$3,000+/month",
-      "description": "Custom pricing based on services, ad spend, and campaign complexity"
+      "priceCurrency": "USD",
+      "description": "Custom pricing based on services, ad spend, and campaign complexity",
+      "availability": "https://schema.org/InStock",
+      "url": "https://www.brandiblemg.com/services/digital-marketing/"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Digital Marketing Services",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "SEO Optimization"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Paid Advertising"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Email Marketing"
+          }
+        }
+      ]
     }
   }
   </script>

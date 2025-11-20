@@ -36,6 +36,7 @@
   <!-- Performance & Styling -->
   <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
   <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
+  <link rel="prefetch" href="/contact/" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/style.css" />
   <script src="../../assets/js/config.js"></script>
@@ -71,7 +72,37 @@
     "offers": {
       "@type": "Offer",
       "priceRange": "$2,000-$10,000+",
-      "description": "Custom pricing based on project complexity and requirements"
+      "priceCurrency": "USD",
+      "description": "Custom pricing based on project complexity and requirements",
+      "availability": "https://schema.org/InStock",
+      "url": "https://www.brandiblemg.com/services/web-design/"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Web Design Services",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Landing Pages"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Business Websites"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "E-commerce Stores"
+          }
+        }
+      ]
     }
   }
   </script>
