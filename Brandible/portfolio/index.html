@@ -87,7 +87,20 @@
         <!-- Desktop -->
         <div class="hidden md:flex items-center space-x-8">
           <a href="/" class="text-gray-700 hover:text-blue-600 font-medium transition">Home</a>
-          <a href="/about/" class="text-gray-700 hover:text-blue-600 font-medium transition">About</a>
+          <div class="relative group">
+            <a href="/about/" class="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition" aria-haspopup="true">
+              <span>About</span>
+              <svg class="w-4 h-4 text-gray-500 transition-transform duration-200 group-hover:-rotate-180 group-focus-within:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </a>
+            <div class="absolute left-0 top-full hidden pt-3 z-20 group-hover:block group-focus-within:block">
+              <div class="w-64 rounded-md bg-white shadow-lg ring-1 ring-black/5">
+                <div class="py-2">
+                  <a href="/about/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition">About Us</a>
+                  <a href="/careers/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition">Join Our Team</a>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="relative group">
             <a href="/services/" class="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition" aria-haspopup="true">
               <span>Services</span>
@@ -118,7 +131,14 @@
       <!-- Mobile menu -->
       <div id="mobile-menu" class="hidden menu-closed md:hidden mt-4 pb-4 space-y-2">
         <a href="/" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Home</a>
-        <a href="/about/" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">About</a>
+        <button type="button" class="flex w-full items-center justify-between py-2 text-gray-700 hover:text-blue-600 font-medium mobile-submenu-toggle" data-submenu-toggle="mobile-about-submenu" aria-controls="mobile-about-submenu" aria-expanded="false">
+          <span>About</span>
+          <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-submenu-icon><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        <div id="mobile-about-submenu" class="hidden pl-4 space-y-2">
+          <a href="/about/" class="block py-1 text-gray-700 hover:text-blue-600 font-medium">About Us</a>
+          <a href="/careers/" class="block py-1 text-gray-600 hover:text-blue-600">Join Our Team</a>
+        </div>
         <button type="button" class="flex w-full items-center justify-between py-2 text-gray-700 hover:text-blue-600 font-medium mobile-submenu-toggle" data-submenu-toggle="mobile-services-submenu" aria-controls="mobile-services-submenu" aria-expanded="false">
           <span>Services</span>
           <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-submenu-icon><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
@@ -497,6 +517,7 @@
           <ul class="space-y-2">
             <li><a href="/" class="text-gray-300 hover:text-white transition">Home</a></li>
             <li><a href="/about/" class="text-gray-300 hover:text-white transition">About</a></li>
+            <li><a href="/careers/" class="text-gray-300 hover:text-white transition">Join Our Team</a></li>
             <li><a href="/services/" class="text-gray-300 hover:text-white transition">Services</a></li>
             <li><a href="/portfolio/" class="text-gray-300 hover:text-white transition">Portfolio</a></li>
             <li><a href="/faqs/" class="text-gray-300 hover:text-white transition">FAQs</a></li>
