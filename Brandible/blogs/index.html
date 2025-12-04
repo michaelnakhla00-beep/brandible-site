@@ -160,8 +160,46 @@
     <!-- Hero Section -->
     <section class="bg-gradient-to-br from-purple-400 via-pink-300 to-indigo-400 py-20 lg:py-32 pt-24 lg:pt-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">Blog</h1>
-        <p class="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">Insights, tips, and updates on digital marketing, web design, and growing your local business.</p>
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 reveal" data-reveal="fade-up">
+          <span class="typed" data-words='["Blog", "Insights & Tips", "Marketing Resources"]'></span><span class="caret text-yellow-300">|</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto reveal" data-reveal="fade-up" data-reveal-delay="100">Insights, tips, and updates on digital marketing, web design, and growing your local business.</p>
+      </div>
+    </section>
+
+    <!-- Filters & Search -->
+    <section class="bg-white py-12 border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <!-- Category filter chips -->
+          <div class="flex flex-wrap gap-2" role="tablist" aria-label="Blog categories">
+            <button class="px-4 py-2 rounded-full border text-sm font-semibold cursor-pointer transition blog-filter-active bg-blue-600 text-white border-blue-600"
+                    data-category="all" aria-pressed="true" role="tab">All</button>
+            <button class="px-4 py-2 rounded-full border text-sm font-semibold cursor-pointer transition hover:bg-gray-100 blog-filter"
+                    data-category="Marketing" aria-pressed="false" role="tab">Marketing</button>
+            <button class="px-4 py-2 rounded-full border text-sm font-semibold cursor-pointer transition hover:bg-gray-100 blog-filter"
+                    data-category="Web Design" aria-pressed="false" role="tab">Web Design</button>
+            <button class="px-4 py-2 rounded-full border text-sm font-semibold cursor-pointer transition hover:bg-gray-100 blog-filter"
+                    data-category="SEO" aria-pressed="false" role="tab">SEO</button>
+            <button class="px-4 py-2 rounded-full border text-sm font-semibold cursor-pointer transition hover:bg-gray-100 blog-filter"
+                    data-category="Social Media" aria-pressed="false" role="tab">Social Media</button>
+            <button class="px-4 py-2 rounded-full border text-sm font-semibold cursor-pointer transition hover:bg-gray-100 blog-filter"
+                    data-category="Business Tips" aria-pressed="false" role="tab">Business Tips</button>
+            <button class="px-4 py-2 rounded-full border text-sm font-semibold cursor-pointer transition hover:bg-gray-100 blog-filter"
+                    data-category="Case Studies" aria-pressed="false" role="tab">Case Studies</button>
+          </div>
+
+          <!-- Search box -->
+          <label for="blog-search" class="relative block w-full sm:w-96 cursor-text">
+            <input id="blog-search" type="search" placeholder="Search blog posts..."
+                   class="w-full pl-10 pr-4 py-2.5 rounded-xl border focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+                   aria-label="Search blog posts">
+            <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8" stroke-width="2"></circle>
+              <path d="M21 21l-4.3-4.3" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </label>
+        </div>
       </div>
     </section>
 
@@ -169,9 +207,9 @@
     <section class="py-16 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Placeholder Blog Posts Grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="blog-posts-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- Blog Post Card 1 -->
-          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+          <article class="blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100" data-category="Marketing">
             <div class="h-48 bg-gradient-to-br from-blue-400 to-indigo-500"></div>
             <div class="p-6">
               <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
@@ -192,7 +230,7 @@
           </article>
 
           <!-- Blog Post Card 2 -->
-          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+          <article class="blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100" data-category="Web Design">
             <div class="h-48 bg-gradient-to-br from-purple-400 to-pink-500"></div>
             <div class="p-6">
               <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
@@ -213,7 +251,7 @@
           </article>
 
           <!-- Blog Post Card 3 -->
-          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+          <article class="blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100" data-category="SEO">
             <div class="h-48 bg-gradient-to-br from-yellow-400 to-orange-500"></div>
             <div class="p-6">
               <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
@@ -234,7 +272,7 @@
           </article>
 
           <!-- Blog Post Card 4 -->
-          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+          <article class="blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100" data-category="Social Media">
             <div class="h-48 bg-gradient-to-br from-green-400 to-teal-500"></div>
             <div class="p-6">
               <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
@@ -255,7 +293,7 @@
           </article>
 
           <!-- Blog Post Card 5 -->
-          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+          <article class="blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100" data-category="Business Tips">
             <div class="h-48 bg-gradient-to-br from-red-400 to-pink-500"></div>
             <div class="p-6">
               <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
@@ -276,7 +314,7 @@
           </article>
 
           <!-- Blog Post Card 6 -->
-          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+          <article class="blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100" data-category="Case Studies">
             <div class="h-48 bg-gradient-to-br from-indigo-400 to-blue-500"></div>
             <div class="p-6">
               <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
@@ -366,6 +404,87 @@
       </div>
     </div>
   </footer>
+
+  <!-- Blog Filter & Search Script -->
+  <script>
+    (function() {
+      const filterButtons = document.querySelectorAll('.blog-filter, .blog-filter-active');
+      const searchInput = document.getElementById('blog-search');
+      const blogPosts = document.querySelectorAll('.blog-post');
+      let currentCategory = 'all';
+      let currentSearch = '';
+
+      // Filter by category
+      filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Update active state
+          filterButtons.forEach(btn => {
+            btn.classList.remove('blog-filter-active', 'bg-blue-600', 'text-white', 'border-blue-600');
+            btn.classList.add('blog-filter', 'hover:bg-gray-100');
+            btn.setAttribute('aria-pressed', 'false');
+          });
+          
+          this.classList.remove('blog-filter', 'hover:bg-gray-100');
+          this.classList.add('blog-filter-active', 'bg-blue-600', 'text-white', 'border-blue-600');
+          this.setAttribute('aria-pressed', 'true');
+          
+          currentCategory = this.getAttribute('data-category');
+          filterPosts();
+        });
+      });
+
+      // Search functionality
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          currentSearch = this.value.toLowerCase().trim();
+          filterPosts();
+        });
+      }
+
+      // Filter posts based on category and search
+      function filterPosts() {
+        let visibleCount = 0;
+        
+        blogPosts.forEach(post => {
+          const category = post.getAttribute('data-category');
+          const title = post.querySelector('h2 a')?.textContent.toLowerCase() || '';
+          const excerpt = post.querySelector('p')?.textContent.toLowerCase() || '';
+          const searchText = title + ' ' + excerpt;
+          
+          const matchesCategory = currentCategory === 'all' || category === currentCategory;
+          const matchesSearch = !currentSearch || searchText.includes(currentSearch);
+          
+          if (matchesCategory && matchesSearch) {
+            post.style.display = 'block';
+            visibleCount++;
+          } else {
+            post.style.display = 'none';
+          }
+        });
+
+        // Show message if no posts match
+        const grid = document.getElementById('blog-posts-grid');
+        let noResultsMsg = grid.querySelector('.no-results-message');
+        
+        if (visibleCount === 0) {
+          if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.className = 'no-results-message col-span-full text-center py-12';
+            noResultsMsg.innerHTML = `
+              <p class="text-gray-500 text-lg mb-2">No blog posts found</p>
+              <p class="text-gray-400 text-sm">Try adjusting your filters or search terms</p>
+            `;
+            grid.appendChild(noResultsMsg);
+          }
+          noResultsMsg.style.display = 'block';
+        } else {
+          if (noResultsMsg) {
+            noResultsMsg.style.display = 'none';
+          }
+        }
+      }
+    })();
+  </script>
 </body>
 </html>
 
