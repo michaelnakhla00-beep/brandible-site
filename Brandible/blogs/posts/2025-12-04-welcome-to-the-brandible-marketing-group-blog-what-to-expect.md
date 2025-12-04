@@ -1,7 +1,7 @@
 ---
 title: "Welcome to the Brandible Marketing Group Blog: What to Expect"
 date: 2025-12-04T17:00:00.000Z
-author: From the Brandible Team
+author: The Brandible Team
 featured_image: /assets/blog-images/brandiblesmaller.png
 excerpt: A sincere welcome to our new blog. Here is what you can expect from
   Brandible going forward, including marketing insights, practical guidance, and
