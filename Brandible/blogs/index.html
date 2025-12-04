@@ -42,6 +42,7 @@
   <script src="../assets/js/config.js"></script>
   <script defer src="../assets/js/script.js"></script>
   <script defer src="../assets/js/lazy-all.js"></script>
+  <script defer src="../assets/js/blog-renderer.js"></script>
 
   <!-- Optional extras -->
   <meta name="robots" content="index, follow" />
@@ -208,8 +209,9 @@
     <!-- Blog Posts Section -->
     <section class="py-16 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Placeholder Blog Posts Grid -->
+        <!-- Blog Posts Grid (loaded dynamically) -->
         <div id="blog-posts-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Placeholder posts (will be replaced when real posts are loaded) -->
           <!-- Blog Post Card 1 -->
           <article class="blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100" data-category="Marketing">
             <div class="h-48 bg-gradient-to-br from-blue-400 to-indigo-500"></div>
@@ -335,6 +337,7 @@
               </a>
             </div>
           </article>
+          <!-- End placeholder posts -->
         </div>
       </div>
     </section>
@@ -407,8 +410,10 @@
     </div>
   </footer>
 
-  <!-- Blog Filter & Search Script -->
+  <!-- Blog Filter & Search Script (for placeholder posts) -->
   <script>
+    // This script handles filtering for placeholder posts
+    // Once real posts are loaded, blog-renderer.js will re-initialize filters
     (function() {
       const filterButtons = document.querySelectorAll('.blog-filter, .blog-filter-active');
       const searchInput = document.getElementById('blog-search');
