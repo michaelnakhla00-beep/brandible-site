@@ -70,13 +70,18 @@ async function loadBlogPosts() {
       console.log('No posts index found, will use placeholder posts');
     }
 
-    // If no posts index, show placeholder message or existing placeholder posts
+    // If no posts index, show a message
     if (postsList.length === 0) {
-      // Keep existing placeholder posts visible
+      blogContainer.innerHTML = `
+        <div class="col-span-full text-center py-12">
+          <p class="text-gray-500 text-lg mb-2">No blog posts yet</p>
+          <p class="text-gray-400 text-sm">Check back soon for updates!</p>
+        </div>
+      `;
       return;
     }
 
-    // Clear existing placeholder posts if we have real posts
+    // Clear container before loading posts
     blogContainer.innerHTML = '';
 
     // Load each post
