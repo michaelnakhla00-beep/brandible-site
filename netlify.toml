@@ -94,6 +94,11 @@
   to = "/careers/"
   status = 301
 
+[[redirects]]
+  from = "/blogs"
+  to = "/blogs/"
+  status = 301
+
 # Service subdirectories - ensure trailing slashes
 [[redirects]]
   from = "/services/web-design"
@@ -158,6 +163,11 @@
 [[redirects]]
   from = "/careers/"
   to = "/careers/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/blogs/"
+  to = "/blogs/index.html"
   status = 200
 
 # Explicit rewrites for service subdirectories
