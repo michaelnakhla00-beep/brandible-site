@@ -147,6 +147,9 @@ async function loadBlogPost() {
       }
     }
 
+    // Add Article structured data
+    addArticleSchema(frontmatter, postFile);
+
   } catch (error) {
     console.error('Error loading blog post:', error);
     postContainer.innerHTML = `
@@ -156,6 +159,65 @@ async function loadBlogPost() {
       </div>
     `;
   }
+}
+
+// Add Article structured data
+function addArticleSchema(frontmatter, postFile) {
+  // Remove existing Article schema if present
+  const existingSchema = document.querySelector('script[data-schema="article"]');
+  if (existingSchema) {
+    existingSchema.remove();
+  }
+
+  // Generate slug from filename
+  const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
+  const postUrl = `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`;
+  
+  // Build Article schema
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": frontmatter.title || "Blog Post",
+    "description": frontmatter.excerpt || frontmatter.title || "",
+    "image": frontmatter.featured_image ? `https://www.brandiblemg.com${frontmatter.featured_image}` : "https://www.brandiblemg.com/assets/Brandible.png",
+    "datePublished": frontmatter.date || new Date().toISOString(),
+    "dateModified": frontmatter.date || new Date().toISOString(),
+    "author": {
+      "@type": "Organization",
+      "name": frontmatter.author || "Brandible Marketing Group",
+      "url": "https://www.brandiblemg.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Brandible Marketing Group",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.brandiblemg.com/assets/Brandible.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": postUrl
+    },
+    "url": postUrl
+  };
+
+  // Add category if present
+  if (frontmatter.category) {
+    articleSchema.articleSection = frontmatter.category;
+  }
+
+  // Add keywords/tags if present
+  if (frontmatter.tags && frontmatter.tags.length > 0) {
+    articleSchema.keywords = frontmatter.tags.join(", ");
+  }
+
+  // Inject schema into page
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.setAttribute('data-schema', 'article');
+  script.textContent = JSON.stringify(articleSchema);
+  document.head.appendChild(script);
 }
 
 // Render the post content
