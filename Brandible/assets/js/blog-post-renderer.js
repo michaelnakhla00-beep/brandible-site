@@ -260,14 +260,111 @@ function renderPost(frontmatter, body, container) {
       
       ${frontmatter.tags && frontmatter.tags.length > 0 ? `
         <footer class="mt-12 pt-8 border-t border-gray-200">
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap gap-2 mb-8">
             <span class="text-sm text-gray-600 font-medium">Tags:</span>
             ${frontmatter.tags.map(tag => `<span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">${tag}</span>`).join('')}
           </div>
         </footer>
       ` : ''}
+      
+      <!-- Related Services -->
+      <div class="mt-12 pt-8 border-t border-gray-200">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6">Related Services</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          ${getRelatedServices(frontmatter.category, frontmatter.tags)}
+        </div>
+      </div>
     </article>
   `;
+}
+
+// Get related services based on category and tags
+function getRelatedServices(category, tags) {
+  const serviceMap = {
+    'Marketing': '/services/digital-marketing/',
+    'Web Design': '/services/web-design/',
+    'SEO': '/services/digital-marketing/',
+    'Social Media': '/services/media-management/',
+    'Business Tips': '/services/',
+    'Case Studies': '/portfolio/'
+  };
+
+  const tagMap = {
+    'website': '/services/web-design/',
+    'web design': '/services/web-design/',
+    'development': '/services/web-design/',
+    'seo': '/services/digital-marketing/',
+    'marketing': '/services/digital-marketing/',
+    'advertising': '/services/digital-marketing/',
+    'social media': '/services/media-management/',
+    'branding': '/services/branding/',
+    'brand': '/services/branding/'
+  };
+
+  let relatedServices = [];
+  
+  // Add service based on category
+  if (category && serviceMap[category]) {
+    const serviceName = category === 'Web Design' ? 'Web Design & Development' : 
+                       category === 'Marketing' ? 'Digital Marketing' :
+                       category === 'Social Media' ? 'Media Management' : category;
+    relatedServices.push({
+      name: serviceName,
+      url: serviceMap[category],
+      description: category === 'Web Design' ? 'Custom websites built to convert' :
+                   category === 'Marketing' ? 'Data-driven marketing strategies' :
+                   category === 'Social Media' ? 'Social media management & content' : 'Professional services'
+    });
+  }
+
+  // Add services based on tags
+  if (tags && Array.isArray(tags)) {
+    tags.forEach(tag => {
+      const lowerTag = tag.toLowerCase();
+      for (const [key, url] of Object.entries(tagMap)) {
+        if (lowerTag.includes(key) && !relatedServices.find(s => s.url === url)) {
+          const serviceName = key === 'website' || key === 'web design' || key === 'development' ? 'Web Design & Development' :
+                            key === 'seo' || key === 'marketing' || key === 'advertising' ? 'Digital Marketing' :
+                            key === 'social media' ? 'Media Management' :
+                            key === 'branding' || key === 'brand' ? 'Branding & Identity' : '';
+          if (serviceName) {
+            relatedServices.push({
+              name: serviceName,
+              url: url,
+              description: key === 'website' || key === 'web design' ? 'Custom websites built to convert' :
+                          key === 'seo' || key === 'marketing' ? 'Data-driven marketing strategies' :
+                          key === 'social media' ? 'Social media management & content' :
+                          key === 'branding' ? 'Complete brand identity design' : 'Professional services'
+            });
+          }
+        }
+      }
+    });
+  }
+
+  // Default to main services page if no matches
+  if (relatedServices.length === 0) {
+    relatedServices = [
+      { name: 'Web Design & Development', url: '/services/web-design/', description: 'Custom websites built to convert' },
+      { name: 'Digital Marketing', url: '/services/digital-marketing/', description: 'Data-driven marketing strategies' }
+    ];
+  }
+
+  // Limit to 2 services
+  relatedServices = relatedServices.slice(0, 2);
+
+  return relatedServices.map(service => `
+    <a href="${service.url}" class="block p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition-all hover:border-blue-200">
+      <h4 class="text-lg font-bold text-gray-900 mb-2">${service.name}</h4>
+      <p class="text-gray-600 text-sm mb-3">${service.description}</p>
+      <span class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1">
+        Learn More
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </span>
+    </a>
+  `).join('');
 }
 
 // Initialize when DOM is ready
