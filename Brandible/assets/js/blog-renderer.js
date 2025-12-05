@@ -209,8 +209,11 @@ function initializeFilters() {
     button.parentNode.replaceChild(newButton, button);
     
     newButton.addEventListener('click', function() {
-      // Update active state
-      filterButtons.forEach(btn => {
+      // Get fresh reference to all filter buttons (after DOM changes)
+      const allFilterButtons = document.querySelectorAll('.blog-filter, .blog-filter-active');
+      
+      // Update active state on all buttons
+      allFilterButtons.forEach(btn => {
         btn.classList.remove('blog-filter-active', 'bg-blue-600', 'text-white', 'border-blue-600');
         btn.classList.add('blog-filter', 'hover:bg-gray-100');
         btn.setAttribute('aria-pressed', 'false');
