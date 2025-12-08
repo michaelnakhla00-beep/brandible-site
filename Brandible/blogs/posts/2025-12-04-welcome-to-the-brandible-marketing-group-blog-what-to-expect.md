@@ -20,19 +20,19 @@ Marketing changes quickly. Business owners are often pulled in many directions, 
 
 We will be posting regularly on a variety of topics, including:
 
-**Actionable marketing tips**
+**Actionable marketing tips:**
 Clear and practical guidance that you can apply immediately. This includes topics such as SEO, content creation, social media, and digital advertising.
 
-**Website and design insights**
+**Website and design insights:**
 Thoughts on clean design, user experience, and the principles we use when building websites for our clients.
 
-**Branding and identity**
+**Branding and identity:**
 Content focused on building trust, communicating clearly, and presenting your business in a professional and compelling way.
 
-**Case studies and real examples**
+**Case studies and real examples:**
 Stories that highlight the challenges businesses face and how the right strategies can create meaningful improvements.
 
-**Tools, checklists, and how to guides**
+**Tools, checklists, and how to guides:**
 Resources designed to help you apply what you learn with clarity and consistency.
 
 **Who This Blog Is For:**
