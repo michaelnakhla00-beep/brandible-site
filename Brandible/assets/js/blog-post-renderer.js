@@ -147,6 +147,13 @@ async function loadBlogPost() {
       }
     }
 
+    // Update canonical URL to point to actual page URL (fixes canonical pointing to redirect issue)
+    const canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (canonicalLink && slug) {
+      const postUrl = `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`;
+      canonicalLink.setAttribute('href', postUrl);
+    }
+
     // Add Article structured data
     addArticleSchema(frontmatter, postFile);
 
