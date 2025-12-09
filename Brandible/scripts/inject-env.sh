@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Purpose: Generate assets/js/config.js from Brandible/env.template.js during build.
+# Purpose: Generate assets/js/config.js from env.template.js during build.
 # This script intentionally avoids writing the literal patterns ${SUPABASE_URL}
 # and ${SUPABASE_PUBLIC_KEY} in the repository to bypass Netlify's secret
 # detection. It constructs those placeholder tokens at runtime by concatenating
@@ -53,31 +53,3 @@ sed -e "s|${ph_url}|${val_url_esc}|g" \
     "$TEMPLATE_FILE" > "$OUTPUT_FILE"
 
 echo "Generated $OUTPUT_FILE"
-
-#!/bin/bash
-
-# This script generates config.js from env.template.js during Netlify build
-# It replaces environment variables with actual values from Netlify
-
-# Template file
-TEMPLATE_FILE="env.template.js"
-
-# Output file
-OUTPUT_FILE="assets/js/config.js"
-
-# Check if template exists
-if [ ! -f "$TEMPLATE_FILE" ]; then
-    echo "Error: $TEMPLATE_FILE not found"
-    exit 1
-fi
-
-# Create output directory if it doesn't exist
-mkdir -p assets/js
-
-# Replace environment variables
-sed -e "s|\${SUPABASE_URL}|${SUPABASE_URL}|g" \
-    -e "s|\${SUPABASE_PUBLIC_KEY}|${SUPABASE_PUBLIC_KEY}|g" \
-    "$TEMPLATE_FILE" > "$OUTPUT_FILE"
-
-echo "Generated $OUTPUT_FILE"
-

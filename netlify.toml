@@ -1,7 +1,7 @@
 [build]
-  base = "Brandible"
+  base = "."
   command = "npm install && npm run build"
-  publish = "."
+  publish = "Brandible"
 
 # Configure Netlify to allow Supabase public keys in the generated config.js
 # These are intentionally public values (anon keys) meant for client-side use
