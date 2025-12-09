@@ -1,0 +1,14 @@
+{
+  "name": "brandible-site",
+  "version": "1.0.0",
+  "description": "Brandible Marketing Group Website",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/tailwind.css -o ./Brandible/assets/css/tailwind.css --minify",
+    "build": "npm run build:css && node Brandible/scripts/generate-sitemap.js && bash ./Brandible/scripts/inject-env.sh"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.35",
+    "autoprefixer": "^10.4.17"
+  }
+}

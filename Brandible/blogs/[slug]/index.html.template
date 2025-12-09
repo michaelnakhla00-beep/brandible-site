@@ -32,9 +32,7 @@
   <link rel="canonical" href="https://www.brandiblemg.com/blogs/[slug]/" />
 
   <!-- Performance & Styling -->
-  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
-  <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/tailwind.css" />
   <link rel="stylesheet" href="../../assets/css/style.css" />
   <script src="../../assets/js/config.js"></script>
   <script defer src="../../assets/js/script.js"></script>

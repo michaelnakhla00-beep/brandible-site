@@ -1,6 +1,6 @@
 [build]
   base = "Brandible"
-  command = "node scripts/generate-sitemap.js && bash ./scripts/inject-env.sh"
+  command = "npm install && npm run build"
   publish = "."
 
 # Configure Netlify to allow Supabase public keys in the generated config.js
