@@ -15,6 +15,16 @@
   --hero-to:   #818CF8;  /* indigo-400 */
 }
 
+/* ---------- Font optimization ---------- */
+/* Note: Currently using system fonts (via Tailwind), which render immediately.
+   If loading custom fonts in the future, use font-display: swap to ensure text
+   remains visible during font load. Example:
+   @font-face {
+     font-family: 'CustomFont';
+     src: url('font.woff2') format('woff2');
+     font-display: swap; /* or optional for above-the-fold content */
+   } */
+
 /* ---------- Global polish ---------- */
 html{ scroll-behavior:smooth; }
 body{
