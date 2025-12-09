@@ -281,6 +281,33 @@ function renderPost(frontmatter, body, container) {
           ${getRelatedServices(frontmatter.category, frontmatter.tags)}
         </div>
       </div>
+      
+      <!-- Related Posts -->
+      <section class="mt-16 pt-12 border-t border-gray-200">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6">More from Our Blog</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+          <article class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition">
+            <h4 class="text-lg font-bold text-gray-900 mb-2">
+              <a href="/blogs/post.html?slug=welcome-to-the-brandible-marketing-group-blog-what-to-expect" class="hover:text-blue-600">Welcome to the Brandible Marketing Group Blog</a>
+            </h4>
+            <p class="text-gray-600 text-sm mb-3">Learn about our blog and what content you can expect from Brandible Marketing Group.</p>
+            <a href="/blogs/post.html?slug=welcome-to-the-brandible-marketing-group-blog-what-to-expect" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1">
+              Read More
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+          </article>
+        </div>
+        <div class="mt-8 text-center">
+          <a href="/blogs/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2">
+            View All Blog Posts
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </section>
     </article>
   `;
 }
