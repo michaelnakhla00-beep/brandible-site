@@ -137,6 +137,12 @@ async function loadBlogPosts() {
       blogContainer.appendChild(postCard);
     });
 
+    // Hide static posts when dynamic posts are loaded (for SEO - static links remain in HTML source)
+    const staticPosts = document.getElementById('static-blog-posts');
+    if (staticPosts) {
+      staticPosts.style.display = 'none';
+    }
+
     // Re-initialize filter functionality with new posts
     initializeFilters();
   } catch (error) {
