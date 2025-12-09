@@ -247,7 +247,7 @@ function renderPost(frontmatter, body, container) {
     <article class="max-w-4xl mx-auto">
       ${frontmatter.featured_image ? `
         <div class="mb-8">
-          <img src="${frontmatter.featured_image}" alt="${frontmatter.title || ''}" class="w-full h-64 md:h-96 object-cover rounded-lg" />
+          <img src="${frontmatter.featured_image}" alt="${frontmatter.title ? `Featured image for ${frontmatter.title}` : 'Blog post featured image'}" class="w-full h-64 md:h-96 object-cover rounded-lg" loading="lazy" decoding="async" />
         </div>
       ` : ''}
       

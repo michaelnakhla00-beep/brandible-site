@@ -926,3 +926,46 @@ document.querySelectorAll('.typed').forEach(el => {
 
   type();
 });
+
+/* ===========================
+ * Character counters for textareas
+ * =========================== */
+document.addEventListener('DOMContentLoaded', () => {
+  // Function to update character counter
+  function updateCounter(textarea, counterId) {
+    const counter = document.getElementById(counterId);
+    if (!counter || !textarea) return;
+    
+    const current = textarea.value.length;
+    const max = textarea.getAttribute('maxlength') || 0;
+    
+    counter.textContent = `${current} / ${max}`;
+    
+    // Change color when approaching limit
+    if (current > max * 0.9) {
+      counter.classList.remove('text-gray-500');
+      counter.classList.add('text-red-600', 'font-semibold');
+    } else {
+      counter.classList.remove('text-red-600', 'font-semibold');
+      counter.classList.add('text-gray-500');
+    }
+  }
+  
+  // Initialize counters for all textareas with maxlength
+  const textareas = [
+    { id: 'bk-message', counterId: 'bk-message-counter' },
+    { id: 'userMessage', counterId: 'userMessage-counter' },
+    { id: 'skills', counterId: 'skills-counter' },
+    { id: 'whyJoin', counterId: 'whyJoin-counter' }
+  ];
+  
+  textareas.forEach(({ id, counterId }) => {
+    const textarea = document.getElementById(id);
+    if (textarea && textarea.hasAttribute('maxlength')) {
+      // Update on input
+      textarea.addEventListener('input', () => updateCounter(textarea, counterId));
+      // Update on load (in case of pre-filled values)
+      updateCounter(textarea, counterId);
+    }
+  });
+});
