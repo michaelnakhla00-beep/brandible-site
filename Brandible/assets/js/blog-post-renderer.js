@@ -291,7 +291,7 @@ function renderPost(frontmatter, body, container) {
               <a href="/blogs/post.html?slug=welcome-to-the-brandible-marketing-group-blog-what-to-expect" class="hover:text-blue-600">Welcome to the Brandible Marketing Group Blog</a>
             </h4>
             <p class="text-gray-600 text-sm mb-3">Learn about our blog and what content you can expect from Brandible Marketing Group.</p>
-            <a href="/blogs/post.html?slug=welcome-to-the-brandible-marketing-group-blog-what-to-expect" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1">
+            <a href="/blogs/post.html?slug=welcome-to-the-brandible-marketing-group-blog-what-to-expect" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1" aria-label="Read More: Welcome to the Brandible Marketing Group Blog">
               Read More
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
