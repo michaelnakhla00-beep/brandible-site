@@ -267,18 +267,34 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ===========================
    * Supabase init (global)
    * =========================== */
-  const SUPABASE_URL = window.SUPABASE_URL || "https://jijjjpduroyivrd.bgmnqo.supabase.co";
-  // Public key safe to expose — only used for client-side Supabase inserts
-  const SUPABASE_PUBLIC_KEY = window.SUPABASE_PUBLIC_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqampwZHVyb3lpdnJkYmdtbnFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NjM5NTcsImV4cCI6MjA3NzEzOTk1N30.m_NC1QBvaSdF9S5bIIWIfhAa1L8HfZpSZN9nzVEPiP0";
+  // Supabase config loaded from config.js (generated during build from environment variables)
+  const SUPABASE_URL = window.SUPABASE_URL;
+  const SUPABASE_PUBLIC_KEY = window.SUPABASE_PUBLIC_KEY;
+
+  // Validate that config was loaded
+  if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
+    console.error('Supabase configuration is missing. Ensure SUPABASE_URL and SUPABASE_PUBLIC_KEY are set in Netlify environment variables.');
+  }
 
   function ensureSupabase(callback){
+    if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
+      console.error('Cannot initialize Supabase: configuration missing');
+      return;
+    }
+    
     if (window.supabase && window.supabase.createClient){
       return callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY));
     }
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
     script.async = true;
-    script.onload = () => callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY));
+    script.onload = () => {
+      if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
+        console.error('Cannot initialize Supabase: configuration missing');
+        return;
+      }
+      callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY));
+    };
     document.head.appendChild(script);
   }
 

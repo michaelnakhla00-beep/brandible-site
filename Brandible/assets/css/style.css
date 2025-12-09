@@ -237,13 +237,6 @@ body.modal-open{ overflow:hidden; }
   50% { opacity: 1; }
 }
 
-.caret {
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
 /* ===== Scroll reveal (slide-up + fade) ===== */
 .reveal{ opacity:0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
 .reveal-show{ opacity:1; transform: translateY(0); }
