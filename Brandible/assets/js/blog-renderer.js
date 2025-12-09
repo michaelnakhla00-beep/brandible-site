@@ -168,7 +168,7 @@ function createPostCard(post) {
   const categoryColor = categoryColors[post.category] || 'bg-gray-100 text-gray-700';
   
   const featuredImage = post.featured_image 
-    ? `<img src="${post.featured_image}" alt="${post.title}" class="w-full h-48 object-cover" />`
+    ? `<img src="${post.featured_image}" alt="${post.title ? `Featured image for ${post.title}` : 'Blog post featured image'}" class="w-full h-48 object-cover" loading="lazy" decoding="async" width="800" height="192" />`
     : `<div class="h-48 bg-gradient-to-br from-blue-400 to-indigo-500"></div>`;
   
   article.innerHTML = `
