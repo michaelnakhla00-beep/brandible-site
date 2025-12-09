@@ -4,7 +4,8 @@
   "description": "Brandible Marketing Group Website",
   "scripts": {
     "build:css": "tailwindcss -i ./src/tailwind.css -o ./Brandible/assets/css/tailwind.css --minify",
-    "build": "npm run build:css && cd Brandible && node scripts/generate-sitemap.js && bash scripts/inject-env.sh"
+    "build:blog-index": "cd Brandible && node scripts/generate-blog-index.js",
+    "build": "npm run build:css && npm run build:blog-index && cd Brandible && node scripts/generate-sitemap.js && bash scripts/inject-env.sh"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.1",
