@@ -28,8 +28,17 @@
   <meta name="twitter:description" content="Read our latest blog post on digital marketing, web design, and growing your local business." />
   <meta name="twitter:image" content="https://www.brandiblemg.com/assets/Brandible.png" />
 
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://www.brandiblemg.com/blogs/post/" />
+  <!-- Canonical URL (will be updated dynamically) -->
+  <link rel="canonical" href="" id="canonical-url" />
+  <script>
+    // Set canonical to current page URL immediately (before post loads)
+    (function() {
+      const canonical = document.getElementById('canonical-url') || document.querySelector('link[rel="canonical"]');
+      if (canonical) {
+        canonical.setAttribute('href', window.location.href.split('#')[0]);
+      }
+    })();
+  </script>
 
   <!-- Performance & Styling -->
   <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />

@@ -99,6 +99,17 @@
   to = "/blogs/"
   status = 301
 
+# Redirect /blogs/post/ to /blogs/ (invalid without slug)
+[[redirects]]
+  from = "/blogs/post"
+  to = "/blogs/"
+  status = 301
+
+[[redirects]]
+  from = "/blogs/post/"
+  to = "/blogs/"
+  status = 301
+
 # Service subdirectories - ensure trailing slashes
 [[redirects]]
   from = "/services/web-design"
