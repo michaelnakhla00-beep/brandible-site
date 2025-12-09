@@ -189,7 +189,7 @@ function createPostCard(post) {
       </h2>
       ${post.excerpt ? `<p class="text-gray-600 mb-4 line-clamp-3">${post.excerpt}</p>` : ''}
       <a href="/blogs/post.html?slug=${post.slug}" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2" aria-label="Read More: ${post.title}">
-        Read More
+        Read More<span class="sr-only">: ${post.title}</span>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
