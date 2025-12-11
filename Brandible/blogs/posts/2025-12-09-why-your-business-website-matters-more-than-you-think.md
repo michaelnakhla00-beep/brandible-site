@@ -1,7 +1,7 @@
 ---
 title: Why Your Business Website Matters More Than You Think
 date: 2025-12-09T20:00:25.667Z
-author: Brandible Team
+author: The Brandible Team
 featured_image: /assets/blog-images/webblogcover.svg
 excerpt: A strong website builds trust, improves visibility, and guides your audience
 category: Web Design
