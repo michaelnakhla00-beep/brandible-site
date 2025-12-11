@@ -3,9 +3,7 @@ title: Why Your Business Website Matters More Than You Think
 date: 2025-12-09T20:00:25.667Z
 author: Brandible Team
 featured_image: /assets/blog-images/webblogcover.svg
-excerpt: A strong website builds trust, improves visibility, and guides
-  customers toward taking action. Learn why a clear, well-designed site is
-  essential for any business.
+excerpt: A strong website builds trust, improves visibility, and guides your audience
 category: Web Design
 ---
 A clear, modern site is the strongest asset your brand can have.
