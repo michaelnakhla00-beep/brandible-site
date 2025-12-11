@@ -139,11 +139,36 @@ async function loadBlogPost() {
     // Update page metadata
     if (frontmatter.title) {
       document.title = `${frontmatter.title} | Brandible Marketing Group`;
+      
+      // Update Open Graph title
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) {
+        ogTitle.setAttribute('content', frontmatter.title);
+      }
+      
+      // Update Twitter Card title
+      const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (twitterTitle) {
+        twitterTitle.setAttribute('content', frontmatter.title);
+      }
     }
+    
     if (frontmatter.excerpt) {
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute('content', frontmatter.excerpt);
+      }
+      
+      // Update Open Graph description
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc) {
+        ogDesc.setAttribute('content', frontmatter.excerpt);
+      }
+      
+      // Update Twitter Card description
+      const twitterDesc = document.querySelector('meta[name="twitter:description"]');
+      if (twitterDesc) {
+        twitterDesc.setAttribute('content', frontmatter.excerpt);
       }
     }
 
