@@ -203,8 +203,144 @@ function getSocialShareUrls(title, url) {
     twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    email: `mailto:?subject=${encodedTitle}&body=${encodedText}%20${encodedUrl}`
+    email: `mailto:?subject=${encodedTitle}&body=${encodedText}%20${encodedUrl}`,
+    messages: `sms:?body=${encodedText}%20${encodedUrl}`
   };
+}
+
+// Copy URL to clipboard
+function copyToClipboard(url) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      // Show feedback
+      const button = document.querySelector('.copy-link-btn');
+      if (button) {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        `;
+        button.classList.remove('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
+        button.classList.add('bg-green-50', 'text-green-600');
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.classList.remove('bg-green-50', 'text-green-600');
+          button.classList.add('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
+        }, 2000);
+      }
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      // Fallback for older browsers
+      fallbackCopyToClipboard(url);
+    });
+  } else {
+    // Fallback for older browsers
+    fallbackCopyToClipboard(url);
+  }
+}
+
+// Fallback copy method for older browsers
+function fallbackCopyToClipboard(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    const button = document.querySelector('.copy-link-btn');
+    if (button) {
+      const originalHTML = button.innerHTML;
+      button.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      `;
+      button.classList.remove('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
+      button.classList.add('bg-green-50', 'text-green-600');
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('bg-green-50', 'text-green-600');
+        button.classList.add('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
+      }, 2000);
+    }
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
+  }
+  document.body.removeChild(textArea);
+}
+
+// Load and render the 2 newest blog posts (excluding current post)
+async function loadRelatedPosts(currentSlug) {
+  try {
+    // Fetch posts index
+    const indexResponse = await fetch('/blogs/posts/index.json');
+    if (!indexResponse.ok) return '';
+    
+    const postsList = await indexResponse.json();
+    
+    // Load all posts and parse frontmatter
+    const posts = await Promise.all(
+      postsList.map(async (postFile) => {
+        try {
+          const response = await fetch(`/blogs/posts/${postFile}`);
+          if (!response.ok) return null;
+          
+          const markdown = await response.text();
+          const { frontmatter } = parseFrontmatter(markdown);
+          
+          // Generate slug from filename
+          const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
+          
+          // Skip current post
+          if (slug === currentSlug) return null;
+          
+          return {
+            slug,
+            title: frontmatter.title || 'Untitled',
+            date: frontmatter.date || '',
+            excerpt: frontmatter.excerpt || '',
+            category: frontmatter.category || ''
+          };
+        } catch (error) {
+          console.error(`Error loading post ${postFile}:`, error);
+          return null;
+        }
+      })
+    );
+    
+    // Filter out null posts and sort by date (newest first)
+    const validPosts = posts
+      .filter(p => p !== null)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 2); // Get only the 2 newest
+    
+    if (validPosts.length === 0) return '';
+    
+    // Generate HTML for related posts
+    return validPosts.map(post => `
+      <article class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition">
+        <h4 class="text-lg font-bold text-gray-900 mb-2">
+          <a href="/blogs/post.html?slug=${post.slug}" class="hover:text-blue-600">${post.title}</a>
+        </h4>
+        ${post.excerpt ? `<p class="text-gray-600 text-sm mb-3">${post.excerpt}</p>` : ''}
+        <a href="/blogs/post.html?slug=${post.slug}" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1" aria-label="Read More: ${post.title}">
+          Read More<span class="sr-only">: ${post.title}</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </article>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error loading related posts:', error);
+    return '';
+  }
 }
 
 // Add Article structured data
@@ -353,6 +489,16 @@ function renderPost(frontmatter, body, container) {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
               </a>
+              <a href="${shareUrls.messages}" class="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors" aria-label="Share via Messages">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+              </a>
+              <button type="button" data-copy-url="${postUrl.replace(/"/g, '&quot;')}" class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-600 transition-colors copy-link-btn" aria-label="Copy link to clipboard" title="Copy link">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -382,19 +528,9 @@ function renderPost(frontmatter, body, container) {
       <!-- Related Posts -->
       <section class="mt-16 pt-12 border-t border-gray-200">
         <h3 class="text-2xl font-bold text-gray-900 mb-6">More from Our Blog</h3>
-        <div class="grid md:grid-cols-2 gap-6">
-          <article class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition">
-            <h4 class="text-lg font-bold text-gray-900 mb-2">
-              <a href="/blogs/post.html?slug=welcome-to-the-brandible-marketing-group-blog-what-to-expect" class="hover:text-blue-600">Welcome to the Brandible Marketing Group Blog</a>
-            </h4>
-            <p class="text-gray-600 text-sm mb-3">Learn about our blog and what content you can expect from Brandible Marketing Group.</p>
-            <a href="/blogs/post.html?slug=welcome-to-the-brandible-marketing-group-blog-what-to-expect" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1" aria-label="Read More: Welcome to the Brandible Marketing Group Blog">
-              Read More<span class="sr-only">: Welcome to the Brandible Marketing Group Blog</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </a>
-          </article>
+        <div class="grid md:grid-cols-2 gap-6" id="related-posts-container">
+          <!-- Related posts will be loaded here -->
+          <div class="col-span-full text-center py-4 text-gray-500 text-sm">Loading related posts...</div>
         </div>
         <div class="mt-8 text-center">
           <a href="/blogs/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2">
@@ -407,6 +543,29 @@ function renderPost(frontmatter, body, container) {
       </section>
     </article>
   `;
+  
+  // Add event listener for copy button
+  const copyButton = container.querySelector('.copy-link-btn');
+  if (copyButton) {
+    copyButton.addEventListener('click', function() {
+      const urlToCopy = this.getAttribute('data-copy-url');
+      if (urlToCopy) {
+        copyToClipboard(urlToCopy);
+      }
+    });
+  }
+  
+  // Load and render related posts asynchronously
+  loadRelatedPosts(slug).then(relatedPostsHTML => {
+    const relatedPostsContainer = container.querySelector('#related-posts-container');
+    if (relatedPostsContainer && relatedPostsHTML) {
+      relatedPostsContainer.innerHTML = relatedPostsHTML;
+    } else if (relatedPostsContainer) {
+      relatedPostsContainer.innerHTML = `
+        <div class="col-span-full text-center py-4 text-gray-500 text-sm">No other posts available</div>
+      `;
+    }
+  });
 }
 
 // Get related services based on category and tags
