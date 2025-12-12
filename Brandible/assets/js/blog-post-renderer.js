@@ -140,16 +140,16 @@ async function loadBlogPost() {
     if (frontmatter.title) {
       document.title = `${frontmatter.title} | Brandible Marketing Group`;
       
-      // Update Open Graph title
+      // Update Open Graph title (include brand name for SEO)
       const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) {
-        ogTitle.setAttribute('content', frontmatter.title);
+        ogTitle.setAttribute('content', `${frontmatter.title} | Brandible Marketing Group`);
       }
       
-      // Update Twitter Card title
+      // Update Twitter Card title (include brand name for SEO)
       const twitterTitle = document.querySelector('meta[name="twitter:title"]');
       if (twitterTitle) {
-        twitterTitle.setAttribute('content', frontmatter.title);
+        twitterTitle.setAttribute('content', `${frontmatter.title} | Brandible Marketing Group`);
       }
     }
     
