@@ -198,10 +198,10 @@ function createPostCard(post) {
         ${post.category ? `<span class="px-2 py-1 ${categoryColor} rounded-full text-xs font-medium">${post.category}</span>` : ''}
       </div>
       <h2 class="text-2xl font-bold text-gray-900 mb-3">
-        <a href="/blogs/post.html?slug=${post.slug}" class="hover:text-blue-600 transition">${post.title}</a>
+        <a href="/blogs/${post.slug}/" class="hover:text-blue-600 transition">${post.title}</a>
       </h2>
       ${post.excerpt ? `<p class="text-gray-600 mb-4 line-clamp-3">${post.excerpt}</p>` : ''}
-      <a href="/blogs/post.html?slug=${post.slug}" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2" aria-label="Read More: ${post.title}">
+      <a href="/blogs/${post.slug}/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2" aria-label="Read More: ${post.title}">
         Read More<span class="sr-only">: ${post.title}</span>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

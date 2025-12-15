@@ -54,10 +54,14 @@ async function loadBlogPost() {
   const urlParams = new URLSearchParams(window.location.search);
   let slug = urlParams.get('slug');
   
-  // If no query param, try to get from path
+  // If no query param, try to get from path (e.g., /blogs/[slug]/)
   if (!slug) {
-    const pathParts = window.location.pathname.split('/');
-    slug = pathParts[pathParts.length - 2]; // Get second-to-last part (before trailing slash)
+    const pathParts = window.location.pathname.split('/').filter(p => p); // Remove empty strings
+    // If path is /blogs/[slug]/, the slug is the last part
+    // If path is /blogs/post.html, we don't have a slug
+    if (pathParts.length >= 2 && pathParts[0] === 'blogs' && pathParts[1] !== 'post.html') {
+      slug = pathParts[1]; // Get the slug part
+    }
   }
   
   if (!slug || slug === 'blogs' || slug === 'post.html') {
@@ -137,7 +141,8 @@ async function loadBlogPost() {
     }
 
     // Generate post URL for sharing (slug is already defined above)
-    const postUrl = `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`;
+    // Use the static HTML file format for better SEO and social sharing
+    const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
 
     // Update page metadata
     if (frontmatter.title) {
@@ -355,14 +360,14 @@ async function loadRelatedPosts(currentSlug) {
     
     if (validPosts.length === 0) return '';
     
-    // Generate HTML for related posts
+    // Generate HTML for related posts (use new URL format)
     return validPosts.map(post => `
       <article class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition">
         <h4 class="text-lg font-bold text-gray-900 mb-2">
-          <a href="/blogs/post.html?slug=${post.slug}" class="hover:text-blue-600">${post.title}</a>
+          <a href="/blogs/${post.slug}/" class="hover:text-blue-600">${post.title}</a>
         </h4>
         ${post.excerpt ? `<p class="text-gray-600 text-sm mb-3">${post.excerpt}</p>` : ''}
-        <a href="/blogs/post.html?slug=${post.slug}" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1" aria-label="Read More: ${post.title}">
+        <a href="/blogs/${post.slug}/" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1" aria-label="Read More: ${post.title}">
           Read More<span class="sr-only">: ${post.title}</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -387,7 +392,7 @@ function addArticleSchema(frontmatter, postFile) {
 
   // Generate slug from filename
   const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
-  const postUrl = `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`;
+  const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
   
   // Build Article schema
   const articleSchema = {
@@ -454,8 +459,14 @@ function renderPost(frontmatter, body, container) {
   
   // Generate post URL for sharing
   const urlParams = new URLSearchParams(window.location.search);
-  const slug = urlParams.get('slug') || window.location.pathname.split('/').slice(-2, -1)[0];
-  const postUrl = `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`;
+  let slug = urlParams.get('slug') || window.location.pathname.split('/').slice(-2, -1)[0];
+  // If slug is empty or invalid, try to extract from current path
+  if (!slug || slug === 'post.html' || slug === 'blogs') {
+    const pathParts = window.location.pathname.split('/').filter(p => p);
+    slug = pathParts[pathParts.length - 1] || slug;
+  }
+  // Use the static HTML file format for better SEO and social sharing
+  const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
   const shareUrls = getSocialShareUrls(frontmatter.title || 'Blog Post', postUrl);
   
   container.innerHTML = `

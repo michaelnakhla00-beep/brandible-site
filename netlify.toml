@@ -99,13 +99,11 @@
   to = "/blogs/"
   status = 301
 
-# Redirect /blogs/post?slug=* to /blogs/post.html?slug=* (canonicalize URL)
-# This MUST come first to ensure URLs with query parameters are canonicalized
-[[redirects]]
-  from = "/blogs/post"
-  to = "/blogs/post.html"
-  status = 301
-  force = false
+# Redirect old blog post URLs to new format for better SEO
+# Redirect /blogs/post.html?slug=* to /blogs/[slug]/ (new format with static HTML)
+# Note: Netlify doesn't support query parameter matching in redirects,
+# so we'll handle this via JavaScript in the generated HTML files
+# The old format will still work but will redirect to the new format
 
 # Redirect /blogs/post/ to /blogs/ (invalid without slug)
 [[redirects]]
@@ -188,6 +186,9 @@
   from = "/blogs/"
   to = "/blogs/index.html"
   status = 200
+
+# Note: Generated blog post HTML files at /blogs/[slug]/index.html
+# are automatically served by Netlify when visiting /blogs/[slug]/
 
 [[redirects]]
   from = "/admin/"
