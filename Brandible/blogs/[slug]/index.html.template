@@ -21,6 +21,7 @@
   <meta property="og:title" content="Blog Post — Brandible! Marketing Group" />
   <meta property="og:description" content="Read our latest blog post on digital marketing, web design, and growing your local business." />
   <meta property="og:image" content="https://www.brandiblemg.com/assets/Brandible.png" />
+  <meta property="og:url" content="https://www.brandiblemg.com/blogs/[slug]/" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />

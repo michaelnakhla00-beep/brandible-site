@@ -136,6 +136,9 @@ async function loadBlogPost() {
       renderPost(frontmatter, body, postContainer);
     }
 
+    // Generate post URL for sharing (slug is already defined above)
+    const postUrl = `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`;
+
     // Update page metadata
     if (frontmatter.title) {
       document.title = `${frontmatter.title} | Brandible Marketing Group`;
@@ -172,10 +175,41 @@ async function loadBlogPost() {
       }
     }
 
+    // Update Open Graph image with featured image
+    const ogImage = document.querySelector('meta[property="og:image"]');
+    if (ogImage) {
+      if (frontmatter.featured_image) {
+        // Convert relative path to full URL
+        const imageUrl = frontmatter.featured_image.startsWith('http') 
+          ? frontmatter.featured_image 
+          : `https://www.brandiblemg.com${frontmatter.featured_image}`;
+        ogImage.setAttribute('content', imageUrl);
+      }
+      // If no featured_image, keep the default logo (already set in template)
+    }
+
+    // Update Twitter Card image with featured image
+    const twitterImage = document.querySelector('meta[name="twitter:image"]');
+    if (twitterImage) {
+      if (frontmatter.featured_image) {
+        // Convert relative path to full URL
+        const imageUrl = frontmatter.featured_image.startsWith('http') 
+          ? frontmatter.featured_image 
+          : `https://www.brandiblemg.com${frontmatter.featured_image}`;
+        twitterImage.setAttribute('content', imageUrl);
+      }
+      // If no featured_image, keep the default logo (already set in template)
+    }
+
+    // Update Open Graph URL to the actual blog post URL
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl && slug) {
+      ogUrl.setAttribute('content', postUrl);
+    }
+
     // Update canonical URL to point to actual page URL (fixes canonical pointing to redirect issue)
     const canonicalLink = document.querySelector('link[rel="canonical"]');
     if (canonicalLink && slug) {
-      const postUrl = `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`;
       canonicalLink.setAttribute('href', postUrl);
     }
 
