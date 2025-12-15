@@ -123,6 +123,11 @@ try {
       // Replace meta tags in template
       let html = template;
       
+      // Fix asset paths: from /blogs/post.html we use ../assets/
+      // but from /blogs/[slug]/index.html we need ../../assets/
+      html = html.replace(/href="\.\.\/assets\//g, 'href="../../assets/');
+      html = html.replace(/src="\.\.\/assets\//g, 'src="../../assets/');
+      
       // Escape HTML entities
       const escapeHtml = (str) => {
         if (!str) return '';
