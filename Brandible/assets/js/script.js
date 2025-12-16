@@ -892,40 +892,48 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ===========================
  * Typing animation (hero text)
  * =========================== */
-document.querySelectorAll('.typed').forEach(el => {
-  const words = JSON.parse(el.dataset.words || '[]');
-  if (!words.length) return;
+(function initTypingAnimation() {
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTypingAnimation);
+    return;
+  }
 
-  let i = 0;
-  let txt = '';
-  let isDeleting = false;
-  const caret = el.nextElementSibling; // the blinking bar
+  document.querySelectorAll('.typed').forEach(el => {
+    const words = JSON.parse(el.dataset.words || '[]');
+    if (!words.length) return;
 
-  // Caret blinks via CSS, keep DOM clean
+    let i = 0;
+    let txt = '';
+    let isDeleting = false;
+    const caret = el.nextElementSibling; // the blinking bar
 
-  const type = () => {
-    const word = words[i % words.length];
-    txt = isDeleting
-      ? word.substring(0, txt.length - 1)
-      : word.substring(0, txt.length + 1);
+    // Caret blinks via CSS, keep DOM clean
 
-    el.textContent = txt;
+    const type = () => {
+      const word = words[i % words.length];
+      txt = isDeleting
+        ? word.substring(0, txt.length - 1)
+        : word.substring(0, txt.length + 1);
 
-    let speed = isDeleting ? 60 : 100;
-    if (!isDeleting && txt === word) {
-      speed = 1400; // shorter pause after full word
-      isDeleting = true;
-    } else if (isDeleting && txt === '') {
-      isDeleting = false;
-      i++;
-      speed = 400; // shorter pause before next word
-    }
+      el.textContent = txt;
 
-    setTimeout(type, speed);
-  };
+      let speed = isDeleting ? 60 : 100;
+      if (!isDeleting && txt === word) {
+        speed = 1400; // shorter pause after full word
+        isDeleting = true;
+      } else if (isDeleting && txt === '') {
+        isDeleting = false;
+        i++;
+        speed = 400; // shorter pause before next word
+      }
 
-  type();
-});
+      setTimeout(type, speed);
+    };
+
+    type();
+  });
+})();
 
 /* ===========================
  * Character counters for textareas
