@@ -165,6 +165,7 @@ try {
         `<meta property="og:description" content="${escapedDescription}" />`
       );
       
+      // Update og:image first - this is critical for Facebook
       html = html.replace(
         /<meta property="og:image" content="[^"]*" \/>/,
         `<meta property="og:image" content="${imageUrl}" />`
@@ -183,9 +184,10 @@ try {
         imageType = 'image/gif';
       }
       
-      // Check if og:image:secure_url already exists
+      // Insert og:image:secure_url right after og:image tag
+      // Match the og:image tag we just updated (use generic pattern to avoid regex escaping issues)
       if (!html.includes('og:image:secure_url')) {
-        // Insert after og:image tag
+        // Insert secure_url and type tags right after og:image
         html = html.replace(
           /(<meta property="og:image" content="[^"]*" \/>)/,
           `$1\n  <meta property="og:image:secure_url" content="${imageUrl}" />\n  <meta property="og:image:type" content="${imageType}" />`
@@ -197,10 +199,12 @@ try {
           `<meta property="og:image:secure_url" content="${imageUrl}" />`
         );
         // Update image type if it exists
-        html = html.replace(
-          /<meta property="og:image:type" content="[^"]*" \/>/,
-          `<meta property="og:image:type" content="${imageType}" />`
-        );
+        if (html.includes('og:image:type')) {
+          html = html.replace(
+            /<meta property="og:image:type" content="[^"]*" \/>/,
+            `<meta property="og:image:type" content="${imageType}" />`
+          );
+        }
       }
       
       html = html.replace(
