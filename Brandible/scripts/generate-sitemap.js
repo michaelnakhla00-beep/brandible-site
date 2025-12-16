@@ -40,7 +40,7 @@ try {
       const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
       
       return {
-        loc: `https://www.brandiblemg.com/blogs/post.html?slug=${slug}`,
+        loc: `https://www.brandiblemg.com/blogs/${slug}/`,
         priority: '0.7',
         changefreq: 'monthly',
         lastmod: lastmod
