@@ -170,6 +170,39 @@ try {
         `<meta property="og:image" content="${imageUrl}" />`
       );
       
+      // Add og:image:secure_url and other image meta tags for better iMessage support
+      // Detect image type from file extension
+      let imageType = 'image/jpeg'; // default
+      if (imageUrl.endsWith('.svg') || imageUrl.includes('.svg')) {
+        imageType = 'image/svg+xml';
+      } else if (imageUrl.endsWith('.png') || imageUrl.includes('.png')) {
+        imageType = 'image/png';
+      } else if (imageUrl.endsWith('.webp') || imageUrl.includes('.webp')) {
+        imageType = 'image/webp';
+      } else if (imageUrl.endsWith('.gif') || imageUrl.includes('.gif')) {
+        imageType = 'image/gif';
+      }
+      
+      // Check if og:image:secure_url already exists
+      if (!html.includes('og:image:secure_url')) {
+        // Insert after og:image tag
+        html = html.replace(
+          /(<meta property="og:image" content="[^"]*" \/>)/,
+          `$1\n  <meta property="og:image:secure_url" content="${imageUrl}" />\n  <meta property="og:image:type" content="${imageType}" />`
+        );
+      } else {
+        // Update existing og:image:secure_url
+        html = html.replace(
+          /<meta property="og:image:secure_url" content="[^"]*" \/>/,
+          `<meta property="og:image:secure_url" content="${imageUrl}" />`
+        );
+        // Update image type if it exists
+        html = html.replace(
+          /<meta property="og:image:type" content="[^"]*" \/>/,
+          `<meta property="og:image:type" content="${imageType}" />`
+        );
+      }
+      
       html = html.replace(
         /<meta property="og:url" content="[^"]*" \/>/,
         `<meta property="og:url" content="${postUrl}" />`

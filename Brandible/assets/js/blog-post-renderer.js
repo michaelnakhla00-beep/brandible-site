@@ -534,11 +534,11 @@ function renderPost(frontmatter, body, container) {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
               </a>
-              <a href="${shareUrls.messages}" class="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors" aria-label="Share via Messages">
+              <button type="button" data-share-url="${postUrl}" data-share-title="${frontmatter.title || 'Blog Post'}" class="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors messages-share-btn" aria-label="Share via Messages">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
-              </a>
+              </button>
               <button type="button" data-copy-url="${postUrl.replace(/"/g, '&quot;')}" class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-600 transition-colors copy-link-btn" aria-label="Copy link to clipboard" title="Copy link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -599,6 +599,34 @@ function renderPost(frontmatter, body, container) {
       }
     });
   }
+  
+  // Add event listener for Messages share button (use Web Share API)
+  const messagesButtons = container.querySelectorAll('.messages-share-btn');
+  messagesButtons.forEach(button => {
+    button.addEventListener('click', async function() {
+      const url = this.getAttribute('data-share-url');
+      const title = this.getAttribute('data-share-title');
+      
+      if (navigator.share) {
+        // Use Web Share API (works on mobile and modern browsers)
+        try {
+          await navigator.share({
+            title: title,
+            text: `${title} - Brandible Marketing Group`,
+            url: url
+          });
+        } catch (err) {
+          // User cancelled or error - fallback to sms:
+          if (err.name !== 'AbortError') {
+            window.location.href = `sms:?body=${encodeURIComponent(`${title} - Brandible Marketing Group`)}%20${encodeURIComponent(url)}`;
+          }
+        }
+      } else {
+        // Fallback to sms: protocol for older browsers
+        window.location.href = `sms:?body=${encodeURIComponent(`${title} - Brandible Marketing Group`)}%20${encodeURIComponent(url)}`;
+      }
+    });
+  });
   
   // Load and render related posts asynchronously
   loadRelatedPosts(slug).then(relatedPostsHTML => {
