@@ -899,7 +899,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  document.querySelectorAll('.typed').forEach(el => {
+  const startTyping = (el) => {
     const words = JSON.parse(el.dataset.words || '[]');
     if (!words.length) return;
 
@@ -932,6 +932,47 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     type();
+  };
+
+  document.querySelectorAll('.typed').forEach(el => {
+    // Check if parent has reveal class
+    const parent = el.closest('.reveal');
+    if (parent) {
+      // Wait for reveal-show class or check after reveal delay + transition
+      const revealDelay = parseInt(parent.getAttribute('data-reveal-delay') || '0', 10);
+      const transitionDelay = 500; // CSS transition duration
+      const totalDelay = revealDelay + transitionDelay + 100; // extra buffer
+
+      // Check if already revealed (for elements above fold)
+      if (parent.classList.contains('reveal-show')) {
+        startTyping(el);
+      } else {
+        // Watch for reveal-show class or use timeout as fallback
+        const observer = new MutationObserver((mutations) => {
+          if (parent.classList.contains('reveal-show')) {
+            observer.disconnect();
+            startTyping(el);
+          }
+        });
+
+        observer.observe(parent, {
+          attributes: true,
+          attributeFilter: ['class']
+        });
+
+        // Fallback timeout in case IntersectionObserver doesn't trigger
+        setTimeout(() => {
+          if (!parent.classList.contains('reveal-show')) {
+            observer.disconnect();
+            // Start anyway if still not revealed (might be above fold)
+            startTyping(el);
+          }
+        }, totalDelay);
+      }
+    } else {
+      // No reveal class, start immediately
+      startTyping(el);
+    }
   });
 })();
 
