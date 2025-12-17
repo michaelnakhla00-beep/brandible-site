@@ -430,14 +430,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showToast(msg, ok){
-      if (!toast) return;
+      if (!toast) {
+        console.error('Toast element not found');
+        return;
+      }
       toast.textContent = msg;
-      // Keep positioning classes and add styling
-      toast.className = 'absolute top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl shadow-lg font-semibold text-center';
+      // Keep positioning classes and add styling - ensure it's visible
+      toast.className = 'absolute top-0 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl shadow-2xl font-semibold text-center';
       toast.classList.remove('hidden');
-      // Simple fade in animation
+      // Reset any previous inline styles
+      toast.style.display = '';
       toast.style.opacity = '0';
       toast.style.transform = 'translate(-50%, -10px)';
+      // Force reflow
+      void toast.offsetWidth;
       setTimeout(() => {
         toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         toast.style.opacity = '1';
@@ -452,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
           toast.style.opacity = '';
           toast.style.transform = '';
           toast.style.transition = '';
+          toast.style.display = '';
         }, 300);
       }, 3200);
     }
@@ -727,7 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
           // Ignore localStorage errors
         }
         
-        showToast('✓ Thanks! Your consultation is booked successfully. Check your email for confirmation.', true);
         form.reset();
         
         // back to step 1
@@ -738,6 +744,8 @@ document.addEventListener('DOMContentLoaded', () => {
           selectedDate = null; selectedTime = null; 
           renderCalendar(); 
           timesWrap.innerHTML='';
+          // Show toast AFTER step1 is visible
+          showToast('✓ Thanks! Your consultation is booked successfully. Check your email for confirmation.', true);
         }, 180);
       } catch (err){
         console.error(err);
