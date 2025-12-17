@@ -443,16 +443,42 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Fetch booked slots from Supabase
     async function fetchBookedSlots() {
+      // Check if Supabase is configured
+      if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
+        // Supabase not configured, continue without booked slots
+        return;
+      }
+
       try {
-        const client = window.supabaseClient;
-        if (!client) {
-          ensureSupabase((c) => { window.supabaseClient = c; });
-          await new Promise(resolve => setTimeout(resolve, 100));
+        // Ensure Supabase client is initialized
+        if (!window.supabaseClient) {
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Supabase initialization timeout')), 2000);
+            ensureSupabase((c) => {
+              clearTimeout(timeout);
+              if (c) {
+                window.supabaseClient = c;
+                resolve();
+              } else {
+                reject(new Error('Failed to initialize Supabase'));
+              }
+            });
+          });
         }
-        const { data, error } = await window.supabaseClient
+
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 5000)
+        );
+
+        // Race the Supabase query against the timeout
+        const queryPromise = window.supabaseClient
           .from('leads')
           .select('date, time')
           .gte('date', formatDate(new Date()));
+
+        const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
         if (error) throw error;
         bookedSlots.clear();
         (data || []).forEach(({ date, time }) => {
@@ -460,7 +486,17 @@ document.addEventListener('DOMContentLoaded', () => {
           bookedSlots.set(key, true);
         });
       } catch (err) {
-        console.error('Error fetching booked slots:', err);
+        // Silently handle network errors - booking calendar will work without Supabase
+        // Only log non-network errors for debugging
+        const isNetworkError = err.name === 'TypeError' || 
+                               err.message?.includes('Failed to fetch') || 
+                               err.message?.includes('timeout') ||
+                               err.message?.includes('ERR_NAME_NOT_RESOLVED');
+        
+        if (!isNetworkError) {
+          console.warn('Supabase booking slots unavailable:', err.message);
+        }
+        // Continue without blocking booked slots - calendar will work normally
       }
     }
     
