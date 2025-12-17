@@ -435,23 +435,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       toast.textContent = msg;
-      // Keep positioning classes and add styling - ensure it's visible
-      toast.className = 'absolute top-0 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl shadow-2xl font-semibold text-center';
+      // Keep positioning classes and add styling - positioned at top of card
+      toast.className = 'absolute top-4 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-4rem)] max-w-md bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl font-semibold text-center';
       toast.classList.remove('hidden');
       // Reset any previous inline styles
-      toast.style.display = '';
+      toast.style.display = 'block';
       toast.style.opacity = '0';
-      toast.style.transform = 'translate(-50%, -10px)';
+      toast.style.transform = 'translate(-50%, -20px)';
+      toast.style.visibility = 'visible';
       // Force reflow
       void toast.offsetWidth;
       setTimeout(() => {
-        toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
         toast.style.opacity = '1';
         toast.style.transform = 'translate(-50%, 0)';
-      }, 10);
+      }, 50);
       setTimeout(() => { 
         toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%, -10px)';
+        toast.style.transform = 'translate(-50%, -20px)';
         setTimeout(() => { 
           toast.classList.add('hidden'); 
           // Reset inline styles
@@ -459,8 +460,9 @@ document.addEventListener('DOMContentLoaded', () => {
           toast.style.transform = '';
           toast.style.transition = '';
           toast.style.display = '';
-        }, 300);
-      }, 3200);
+          toast.style.visibility = '';
+        }, 400);
+      }, 3500);
     }
     
     // Check if slot is booked (using local storage for now - can be enhanced later)

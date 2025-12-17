@@ -231,6 +231,8 @@
           <!-- Book Your Call -->
           <div id="book-call" class="h-full reveal" data-reveal="fade-up">
             <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 h-full flex flex-col relative">
+              <!-- Toast notification appears here - always visible -->
+              <div id="bk-toast" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-4rem)] max-w-md"></div>
               <div class="flex-grow">
                 <div class="text-center mb-6">
                   <div class="w-16 h-16 bg-gradient-to-br from-brandblue to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -262,9 +264,6 @@
                     <div class="text-sm text-gray-700 mb-2 font-medium">Available times</div>
                     <div id="bk-times" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                   </div>
-                  
-                  <!-- Toast notification appears here -->
-                  <div id="bk-toast" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4"></div>
                 </div>
 
                 <!-- Two-step Booking: Step 2 (Form) -->
