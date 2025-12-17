@@ -277,11 +277,11 @@
                   <form id="bk-form" name="consultation-booking" method="POST"
                         data-netlify="true" netlify-honeypot="website"
                         class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-                    <input type="hidden" name="form-name" value="consultation-booking" />
+                    <input type="hidden" id="bk-form-name" name="form-name" value="consultation-booking" />
                     
                     <!-- Honeypot field (spam protection) -->
                     <p class="hidden">
-                      <label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+                      <label>Website <input id="bk-website" name="website" type="text" tabindex="-1" autocomplete="off"></label>
                     </p>
                     
                     <!-- Hidden fields for date and time -->
@@ -358,7 +358,7 @@
               <form id="contactForm" name="contact" method="POST"
                     data-netlify="true" netlify-honeypot="company"
                     class="space-y-5 flex-grow">
-                <input type="hidden" name="form-name" value="contact" />
+                <input type="hidden" id="contact-form-name" name="form-name" value="contact" />
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
