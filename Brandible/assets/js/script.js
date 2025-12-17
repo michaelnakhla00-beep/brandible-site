@@ -434,25 +434,31 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Toast element not found');
         return;
       }
+      console.log('Showing toast:', msg); // Debug log
       toast.textContent = msg;
-      // Position toast centered over the calendar box area
-      toast.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] w-[calc(100%-2rem)] max-w-md bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl font-semibold text-center';
+      // Position toast at top of calendar box area (more visible)
+      toast.className = 'absolute top-20 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-md bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl font-semibold text-center pointer-events-none';
       toast.classList.remove('hidden');
       // Reset any previous inline styles
       toast.style.display = 'block';
       toast.style.opacity = '0';
-      toast.style.transform = 'translate(-50%, -50%) scale(0.95)';
+      toast.style.transform = 'translate(-50%, -20px)';
       toast.style.visibility = 'visible';
+      toast.style.pointerEvents = 'none';
+      toast.style.position = 'absolute';
+      toast.style.zIndex = '100';
       // Force reflow
       void toast.offsetWidth;
+      console.log('Toast element:', toast, 'Visible:', !toast.classList.contains('hidden')); // Debug log
       setTimeout(() => {
         toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
         toast.style.opacity = '1';
-        toast.style.transform = 'translate(-50%, -50%) scale(1)';
+        toast.style.transform = 'translate(-50%, 0)';
+        console.log('Toast animation started'); // Debug log
       }, 50);
       setTimeout(() => { 
         toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%, -50%) scale(0.95)';
+        toast.style.transform = 'translate(-50%, -20px)';
         setTimeout(() => { 
           toast.classList.add('hidden'); 
           // Reset inline styles
@@ -461,6 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
           toast.style.transition = '';
           toast.style.display = '';
           toast.style.visibility = '';
+          toast.style.pointerEvents = '';
+          toast.style.position = '';
+          toast.style.zIndex = '';
         }, 400);
       }, 3500);
     }
@@ -743,11 +752,15 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(()=>{
           step2.classList.add('hidden');
           step1.classList.remove('hidden');
+          step1.classList.remove('opacity-0');
+          step1.style.opacity = '1';
           selectedDate = null; selectedTime = null; 
           renderCalendar(); 
           timesWrap.innerHTML='';
-          // Show toast AFTER step1 is visible
-          showToast('✓ Thanks! Your consultation is booked successfully. Check your email for confirmation.', true);
+          // Show toast AFTER step1 is visible - add small delay to ensure rendering
+          setTimeout(() => {
+            showToast('✓ Thanks! Your consultation is booked successfully. Check your email for confirmation.', true);
+          }, 100);
         }, 180);
       } catch (err){
         console.error(err);
