@@ -432,8 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(msg, ok){
       if (!toast) return;
       toast.textContent = msg;
-      // Custom styling for booking toast (positioned inside card)
-      toast.className = 'bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg font-semibold text-center';
+      // Keep positioning classes and add styling
+      toast.className = 'absolute top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl shadow-lg font-semibold text-center';
       toast.classList.remove('hidden');
       // Simple fade in animation
       toast.style.opacity = '0';
@@ -446,7 +446,13 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { 
         toast.style.opacity = '0';
         toast.style.transform = 'translate(-50%, -10px)';
-        setTimeout(() => { toast.classList.add('hidden'); }, 300);
+        setTimeout(() => { 
+          toast.classList.add('hidden'); 
+          // Reset inline styles
+          toast.style.opacity = '';
+          toast.style.transform = '';
+          toast.style.transition = '';
+        }, 300);
       }, 3200);
     }
     
