@@ -272,25 +272,38 @@
                       Change date or time
                     </button>
                   </div>
-                  <form id="bk-form" class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                  <form id="bk-form" name="consultation-booking" method="POST"
+                        data-netlify="true" netlify-honeypot="website"
+                        class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                    <input type="hidden" name="form-name" value="consultation-booking" />
+                    
+                    <!-- Honeypot field (spam protection) -->
+                    <p class="hidden">
+                      <label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+                    </p>
+                    
+                    <!-- Hidden fields for date and time -->
+                    <input type="hidden" id="bk-date" name="Date" />
+                    <input type="hidden" id="bk-time" name="Time" />
+                    
                     <div class="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label for="bk-name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
-                        <input id="bk-name" type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="Your full name" />
+                        <input id="bk-name" name="Name" type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="Your full name" />
                       </div>
                       <div>
                         <label for="bk-email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
-                        <input id="bk-email" type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="your@email.com" />
+                        <input id="bk-email" name="Email" type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="your@email.com" />
                       </div>
                     </div>
                     <div class="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label for="bk-phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
-                        <input id="bk-phone" type="tel" required pattern="[\d\s\-\(\)\+]{7,}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="(555) 123-4567" />
+                        <input id="bk-phone" name="Phone" type="tel" required pattern="[\d\s\-\(\)\+]{7,}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white" placeholder="(555) 123-4567" />
                       </div>
                       <div>
                         <label for="bk-service" class="block text-sm font-semibold text-gray-700 mb-2">Service Type *</label>
-                        <select id="bk-service" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white">
+                        <select id="bk-service" name="Service" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue bg-gray-50 focus:bg-white">
                           <option value="">Select a service</option>
                           <option>Web Design</option>
                           <option>SEO</option>
@@ -301,7 +314,7 @@
                     </div>
                     <div>
                       <label for="bk-message" class="block text-sm font-semibold text-gray-700 mb-2">Message *</label>
-                      <textarea id="bk-message" rows="4" required maxlength="1000" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue resize-none bg-gray-50 focus:bg-white" placeholder="Tell us about your business and goals..."></textarea>
+                      <textarea id="bk-message" name="Message" rows="4" required maxlength="1000" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue resize-none bg-gray-50 focus:bg-white" placeholder="Tell us about your business and goals..."></textarea>
                       <div class="mt-1 text-right">
                         <span id="bk-message-counter" class="text-xs text-gray-500">0 / 1000</span>
                       </div>

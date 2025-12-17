@@ -397,9 +397,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return d.toISOString().slice(0, 10);
     }
     
-    // Helper: format datetime for Supabase
+    // Helper: format date as YYYY-MM-DD (same as formatDate, keeping for compatibility)
     function toSupabaseDate(d) {
-      return d.toISOString().slice(0, 10);
+      return formatDate(d);
     }
 
     // Helper: check if date is in past
@@ -441,70 +441,21 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-show'); }, 3200);
     }
     
-    // Fetch booked slots from Supabase
-    async function fetchBookedSlots() {
-      // Check if Supabase is configured
-      if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
-        // Supabase not configured, continue without booked slots
-        return;
-      }
-
-      try {
-        // Ensure Supabase client is initialized
-        if (!window.supabaseClient) {
-          await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Supabase initialization timeout')), 2000);
-            ensureSupabase((c) => {
-              clearTimeout(timeout);
-              if (c) {
-                window.supabaseClient = c;
-                resolve();
-              } else {
-                reject(new Error('Failed to initialize Supabase'));
-              }
-            });
-          });
-        }
-
-        // Create a timeout promise
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), 5000)
-        );
-
-        // Race the Supabase query against the timeout
-        const queryPromise = window.supabaseClient
-          .from('leads')
-          .select('date, time')
-          .gte('date', formatDate(new Date()));
-
-        const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
-
-        if (error) throw error;
-        bookedSlots.clear();
-        (data || []).forEach(({ date, time }) => {
-          const key = `${date}-${time}`;
-          bookedSlots.set(key, true);
-        });
-      } catch (err) {
-        // Silently handle network errors - booking calendar will work without Supabase
-        // Only log non-network errors for debugging
-        const isNetworkError = err.name === 'TypeError' || 
-                               err.message?.includes('Failed to fetch') || 
-                               err.message?.includes('timeout') ||
-                               err.message?.includes('ERR_NAME_NOT_RESOLVED');
-        
-        if (!isNetworkError) {
-          console.warn('Supabase booking slots unavailable:', err.message);
-        }
-        // Continue without blocking booked slots - calendar will work normally
-      }
-    }
-    
-    // Check if slot is booked
+    // Check if slot is booked (using local storage for now - can be enhanced later)
     function isSlotBooked(date, time) {
       if (!date || !time) return false;
-      const key = `${toSupabaseDate(date)}-${time}`;
-      return bookedSlots.has(key);
+      // Check local storage for booked slots (optional feature)
+      try {
+        const stored = localStorage.getItem('bookedSlots');
+        if (stored) {
+          const slots = JSON.parse(stored);
+          const key = `${formatDate(date)}-${time}`;
+          return slots.includes(key);
+        }
+      } catch (e) {
+        // Ignore localStorage errors
+      }
+      return false;
     }
 
     function fmtMonth(d){
@@ -649,11 +600,33 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    // Set up Netlify form handling for booking form
+    if (form) {
+      // Make sure Netlify will parse it at build time
+      if (!form.getAttribute('name')) form.setAttribute('name', 'consultation-booking');
+      if (!form.querySelector('input[name="form-name"]')) {
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'form-name';
+        hidden.value = form.getAttribute('name') || 'consultation-booking';
+        form.prepend(hidden);
+      }
+      form.setAttribute('novalidate', 'novalidate');
+      form.setAttribute('data-netlify', 'true');
+    }
+
+    // Helper function for encoding form data for Netlify
+    const encode = (formData) => new URLSearchParams(formData).toString();
+
     renderCalendar();
 
     // Submit booking
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Validate honeypot
+      const honeypot = form?.querySelector('input[name="website"]');
+      if (honeypot && honeypot.value.trim() !== '') return;
       
       // Validate date/time selection
       if (!selectedDate || !selectedTime){ 
@@ -696,67 +669,69 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn && (submitBtn.disabled = true);
       spin?.classList.remove('hidden');
       
-      ensureSupabase(async (client) => {
-        try {
-          // Check for existing booking
-          const dateStr = toSupabaseDate(selectedDate);
-          const { data: existing, error: checkError } = await client
-            .from('leads')
-            .select('*')
-            .eq('date', dateStr)
-            .eq('time', selectedTime);
-            
-          if (checkError) throw checkError;
-          
-          if (existing && existing.length > 0) {
-            showToast('This time slot is already booked. Please choose another.', false);
-            submitBtn && (submitBtn.disabled = false);
-            spin?.classList.add('hidden');
-            return;
-          }
-          
-          // Insert booking
-          const payload = {
-            name,
-            email,
-            phone,
-            message,
-            service,
-            date: dateStr,
-            time: selectedTime
-          };
-          
-          const { error: insertError } = await client.from('leads').insert(payload);
-          if (insertError) throw insertError;
-          
-          // Success! Update booked slots and show toast
-          const key = `${dateStr}-${selectedTime}`;
-          bookedSlots.set(key, true);
-          
-          showToast('✓ Thanks! Your consultation is booked successfully.', true);
-          form.reset();
-          
-          // back to step 1
-          step2.classList.add('opacity-0','translate-y-1');
-          setTimeout(()=>{
-            step2.classList.add('hidden');
-            step1.classList.remove('hidden');
-            selectedDate = null; selectedTime = null; 
-            renderCalendar(); 
-            timesWrap.innerHTML='';
-          }, 180);
-        } catch (err){
-          console.error(err);
-          showToast('Sorry, something went wrong. Please try again.', false);
-        } finally {
-          submitBtn && (submitBtn.disabled = false);
-          spin?.classList.add('hidden');
+      try {
+        // Set the date and time hidden fields
+        const dateInput = document.getElementById('bk-date');
+        const timeInput = document.getElementById('bk-time');
+        const dateStr = formatDate(selectedDate);
+        
+        if (dateInput && timeInput) {
+          dateInput.value = dateStr;
+          timeInput.value = selectedTime;
         }
-      });
+
+        // Create FormData
+        const fd = new FormData(form);
+        
+        // Ensure form-name is included
+        if (!fd.get('form-name')) {
+          fd.set('form-name', form.getAttribute('name') || 'consultation-booking');
+        }
+
+        // Submit to Netlify
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: encode(fd),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit booking');
+        }
+
+        // Success! Store booked slot locally (optional)
+        const key = `${dateStr}-${selectedTime}`;
+        try {
+          const stored = localStorage.getItem('bookedSlots');
+          const slots = stored ? JSON.parse(stored) : [];
+          if (!slots.includes(key)) {
+            slots.push(key);
+            localStorage.setItem('bookedSlots', JSON.stringify(slots));
+          }
+        } catch (e) {
+          // Ignore localStorage errors
+        }
+        
+        showToast('✓ Thanks! Your consultation is booked successfully. Check your email for confirmation.', true);
+        form.reset();
+        
+        // back to step 1
+        step2.classList.add('opacity-0','translate-y-1');
+        setTimeout(()=>{
+          step2.classList.add('hidden');
+          step1.classList.remove('hidden');
+          selectedDate = null; selectedTime = null; 
+          renderCalendar(); 
+          timesWrap.innerHTML='';
+        }, 180);
+      } catch (err){
+        console.error(err);
+        showToast('Sorry, something went wrong. Please try again or email us directly.', false);
+      } finally {
+        submitBtn && (submitBtn.disabled = false);
+        spin?.classList.add('hidden');
+      }
     });
-    
-    // Fetch booked slots on page load
-    fetchBookedSlots().then(() => renderCalendar());
   })();
 
   /* ===========================
