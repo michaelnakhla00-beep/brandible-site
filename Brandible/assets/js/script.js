@@ -430,11 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showToast(msg, ok){
-      if (!toast) {
-        console.error('Toast element not found');
-        return;
-      }
-      console.log('Showing toast:', msg); // Debug log
+      if (!toast) return;
       toast.textContent = msg;
       // Position toast at top of calendar box area (more visible)
       toast.className = 'absolute top-20 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-md bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl font-semibold text-center pointer-events-none';
@@ -449,12 +445,10 @@ document.addEventListener('DOMContentLoaded', () => {
       toast.style.zIndex = '100';
       // Force reflow
       void toast.offsetWidth;
-      console.log('Toast element:', toast, 'Visible:', !toast.classList.contains('hidden')); // Debug log
       setTimeout(() => {
         toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
         toast.style.opacity = '1';
         toast.style.transform = 'translate(-50%, 0)';
-        console.log('Toast animation started'); // Debug log
       }, 50);
       setTimeout(() => { 
         toast.style.opacity = '0';
