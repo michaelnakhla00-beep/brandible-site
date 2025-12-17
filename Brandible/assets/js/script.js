@@ -435,24 +435,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       toast.textContent = msg;
-      // Keep positioning classes and add styling - positioned at top of card
-      toast.className = 'absolute top-4 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-4rem)] max-w-md bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl font-semibold text-center';
+      // Position toast centered over the calendar box area
+      toast.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] w-[calc(100%-2rem)] max-w-md bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl font-semibold text-center';
       toast.classList.remove('hidden');
       // Reset any previous inline styles
       toast.style.display = 'block';
       toast.style.opacity = '0';
-      toast.style.transform = 'translate(-50%, -20px)';
+      toast.style.transform = 'translate(-50%, -50%) scale(0.95)';
       toast.style.visibility = 'visible';
       // Force reflow
       void toast.offsetWidth;
       setTimeout(() => {
         toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
         toast.style.opacity = '1';
-        toast.style.transform = 'translate(-50%, 0)';
+        toast.style.transform = 'translate(-50%, -50%) scale(1)';
       }, 50);
       setTimeout(() => { 
         toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%, -20px)';
+        toast.style.transform = 'translate(-50%, -50%) scale(0.95)';
         setTimeout(() => { 
           toast.classList.add('hidden'); 
           // Reset inline styles
