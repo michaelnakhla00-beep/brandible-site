@@ -230,7 +230,7 @@
 
           <!-- Book Your Call -->
           <div id="book-call" class="h-full reveal" data-reveal="fade-up">
-            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 h-full flex flex-col">
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 h-full flex flex-col relative">
               <div class="flex-grow">
                 <div class="text-center mb-6">
                   <div class="w-16 h-16 bg-gradient-to-br from-brandblue to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -329,7 +329,7 @@
                   </form>
                 </div>
 
-                <div id="bk-toast" class="hidden"></div>
+                <div id="bk-toast" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md px-4"></div>
               </div>
 
               <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
@@ -557,7 +557,7 @@
       <h3 id="successTitle" class="text-2xl font-bold text-gray-900 mb-4">Message sent!</h3>
       <p class="text-gray-600 mb-6">Thanks for reaching out—We'll be in touch within 24 hours.</p>
       <div class="flex flex-col sm:flex-row gap-3">
-        <button onclick="closeModal()" class="px-6 py-2 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors">Close</button>
+        <button onclick="closeModal()" class="px-6 py-2 bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
         <button onclick="scrollToCalendly()" class="px-6 py-2 bg-gradient-to-r from-brandblue to-blue-600 text-white rounded-full hover:from-blue-600 hover:to-blue-700 transition-all">Schedule a call</button>
       </div>
     </div>

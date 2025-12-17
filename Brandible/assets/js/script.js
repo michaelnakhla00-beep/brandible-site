@@ -432,13 +432,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(msg, ok){
       if (!toast) return;
       toast.textContent = msg;
-      toast.className = 'toast-brandible';
+      // Custom styling for booking toast (positioned inside card)
+      toast.className = 'bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg font-semibold text-center';
       toast.classList.remove('hidden');
-      // retrigger animation
-      toast.classList.remove('toast-show');
-      void toast.offsetWidth; // force reflow
-      toast.classList.add('toast-show');
-      setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-show'); }, 3200);
+      // Simple fade in animation
+      toast.style.opacity = '0';
+      toast.style.transform = 'translate(-50%, -10px)';
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        toast.style.opacity = '1';
+        toast.style.transform = 'translate(-50%, 0)';
+      }, 10);
+      setTimeout(() => { 
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -10px)';
+        setTimeout(() => { toast.classList.add('hidden'); }, 300);
+      }, 3200);
     }
     
     // Check if slot is booked (using local storage for now - can be enhanced later)
