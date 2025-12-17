@@ -37,12 +37,7 @@
   <link rel="prefetch" href="/contact/" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
-  <script src="../assets/js/config.js"></script>
-  <script defer src="../assets/js/script.js"></script>
   <script defer src="../assets/js/lazy-all.js"></script>
-  
-  <!-- Google Analytics 4 -->
-  <script src="../assets/js/analytics.js"></script>
   
   <!-- Cookie Banner -->
   <script defer src="../assets/js/cookie-banner.js"></script>
@@ -589,18 +584,32 @@
     </div>
   </footer>
 
-  <!--Start of Tawk.to Script-->
-  <script type="text/javascript">
-  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-  (function(){
-  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-  s1.async=true;
-  s1.src='https://embed.tawk.to/6941bb22e40c3519895fc75f/1jckc5vnb';
-  s1.charset='UTF-8';
-  s1.setAttribute('crossorigin','*');
-  s0.parentNode.insertBefore(s1,s0);
-  })();
+  <!-- Scripts (defer to avoid blocking) -->
+  <script defer src="../assets/js/script.js"></script>
+  <script defer src="../assets/js/analytics.js"></script>
+
+  <!-- Tawk.to Chat Widget - Loads after page interaction or 3s delay -->
+  <script>
+    (function() {
+      let tawkLoaded = false;
+      function loadTawk() {
+        if (tawkLoaded) return;
+        tawkLoaded = true;
+        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+        (function(){
+          var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+          s1.async=true;
+          s1.src='https://embed.tawk.to/6941bb22e40c3519895fc75f/1jckc5vnb';
+          s1.charset='UTF-8';
+          s1.setAttribute('crossorigin','*');
+          s0.parentNode.insertBefore(s1,s0);
+        })();
+      }
+      
+      // Load on scroll (user is engaged) or after 3 seconds
+      window.addEventListener('scroll', loadTawk, { once: true, passive: true });
+      setTimeout(loadTawk, 3000);
+    })();
   </script>
-  <!--End of Tawk.to Script-->
 </body>
 </html>

@@ -265,106 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   /* ===========================
-   * Supabase init (global)
-   * =========================== */
-  // Supabase config loaded from config.js (generated during build from environment variables)
-  const SUPABASE_URL = window.SUPABASE_URL;
-  const SUPABASE_PUBLIC_KEY = window.SUPABASE_PUBLIC_KEY;
-
-  // Validate that config was loaded
-  if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
-    console.error('Supabase configuration is missing. Ensure SUPABASE_URL and SUPABASE_PUBLIC_KEY are set in Netlify environment variables.');
-  }
-
-  function ensureSupabase(callback){
-    if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
-      console.error('Cannot initialize Supabase: configuration missing');
-      return;
-    }
-    
-    if (window.supabase && window.supabase.createClient){
-      return callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY));
-    }
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    script.async = true;
-    script.onload = () => {
-      if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
-        console.error('Cannot initialize Supabase: configuration missing');
-        return;
-      }
-      callback(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY));
-    };
-    document.head.appendChild(script);
-  }
-
-  /* ===========================
-   * Homepage booking form (Supabase → leads)
-   * =========================== */
-  const bookingForm = document.getElementById('bookingFormHome');
-  if (bookingForm){
-    const nameEl    = document.getElementById('bf-name');
-    const emailEl   = document.getElementById('bf-email');
-    const msgEl     = document.getElementById('bf-message');
-    const serviceEl = document.getElementById('bf-service');
-    const btn       = document.getElementById('bf-submit');
-    const spin      = document.getElementById('bf-spinner');
-    const toast     = document.getElementById('bf-toast');
-
-    function showToast(text, ok){
-      if (!toast) return;
-      toast.textContent = text;
-      toast.className = 'toast-brandible';
-      toast.classList.remove('hidden');
-      // retrigger animation
-      toast.classList.remove('toast-show');
-      void toast.offsetWidth; // force reflow
-      toast.classList.add('toast-show');
-      setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-show'); }, 3200);
-    }
-
-    function setLoading(isLoading){
-      if (btn) btn.disabled = isLoading;
-      if (spin) spin.classList.toggle('hidden', !isLoading);
-    }
-
-    bookingForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = (nameEl?.value || '').trim();
-      const email = (emailEl?.value || '').trim();
-      const message = (msgEl?.value || '').trim();
-      const service = (serviceEl?.value || '').trim();
-
-      if (!name || !email || !message || !service){
-        showToast('Please complete all fields.', false);
-        return;
-      }
-      // simple email check
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-        showToast('Enter a valid email address.', false);
-        return;
-      }
-
-      setLoading(true);
-      ensureSupabase(async (client) => {
-        try {
-          const { error } = await client
-            .from('leads')
-            .insert({ name, email, message, service });
-          if (error) throw error;
-          bookingForm.reset();
-          showToast("Thanks for reaching out — we’ll get back to you shortly!", true);
-        } catch (err){
-          console.error(err);
-          showToast('Sorry, something went wrong. Please try again.', false);
-        } finally {
-          setLoading(false);
-        }
-      });
-    });
-  }
-
-  /* ===========================
    * Contact page two‑step booking (calendar → form)
    * =========================== */
   (function(){
@@ -395,11 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatDate(d) {
       if (!d) return '';
       return d.toISOString().slice(0, 10);
-    }
-    
-    // Helper: format date as YYYY-MM-DD (same as formatDate, keeping for compatibility)
-    function toSupabaseDate(d) {
-      return formatDate(d);
     }
 
     // Helper: check if date is in past
