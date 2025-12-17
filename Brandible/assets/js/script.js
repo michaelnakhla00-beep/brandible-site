@@ -893,12 +893,6 @@ document.addEventListener('DOMContentLoaded', () => {
  * Typing animation (hero text)
  * =========================== */
 (function initTypingAnimation() {
-  // Wait for DOM to be ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTypingAnimation);
-    return;
-  }
-
   const startTyping = (el) => {
     const words = JSON.parse(el.dataset.words || '[]');
     if (!words.length) return;
@@ -906,9 +900,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let i = 0;
     let txt = '';
     let isDeleting = false;
-    const caret = el.nextElementSibling; // the blinking bar
-
-    // Caret blinks via CSS, keep DOM clean
 
     const type = () => {
       const word = words[i % words.length];
@@ -934,46 +925,35 @@ document.addEventListener('DOMContentLoaded', () => {
     type();
   };
 
-  document.querySelectorAll('.typed').forEach(el => {
-    // Check if parent has reveal class
-    const parent = el.closest('.reveal');
-    if (parent) {
-      // Wait for reveal-show class or check after reveal delay + transition
-      const revealDelay = parseInt(parent.getAttribute('data-reveal-delay') || '0', 10);
-      const transitionDelay = 500; // CSS transition duration
-      const totalDelay = revealDelay + transitionDelay + 100; // extra buffer
-
-      // Check if already revealed (for elements above fold)
-      if (parent.classList.contains('reveal-show')) {
-        startTyping(el);
-      } else {
-        // Watch for reveal-show class or use timeout as fallback
-        const observer = new MutationObserver((mutations) => {
-          if (parent.classList.contains('reveal-show')) {
-            observer.disconnect();
-            startTyping(el);
-          }
-        });
-
-        observer.observe(parent, {
-          attributes: true,
-          attributeFilter: ['class']
-        });
-
-        // Fallback timeout in case IntersectionObserver doesn't trigger
+  const initTyped = () => {
+    document.querySelectorAll('.typed').forEach(el => {
+      const parent = el.closest('.reveal');
+      
+      if (parent) {
+        const revealDelay = parseInt(parent.getAttribute('data-reveal-delay') || '0', 10);
+        const transitionDuration = 600; // CSS transition duration (.6s)
+        // Wait for delay + transition + small buffer
+        const totalDelay = revealDelay + transitionDuration + 100;
+        
         setTimeout(() => {
-          if (!parent.classList.contains('reveal-show')) {
-            observer.disconnect();
-            // Start anyway if still not revealed (might be above fold)
-            startTyping(el);
-          }
+          startTyping(el);
         }, totalDelay);
+      } else {
+        // No reveal, start after short delay
+        setTimeout(() => {
+          startTyping(el);
+        }, 200);
       }
-    } else {
-      // No reveal class, start immediately
-      startTyping(el);
-    }
-  });
+    });
+  };
+
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTyped);
+  } else {
+    // DOM already ready, run immediately
+    initTyped();
+  }
 })();
 
 /* ===========================
