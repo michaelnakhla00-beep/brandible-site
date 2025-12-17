@@ -33,6 +33,13 @@
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/portfolio/" />
 
+  <!-- Resource Hints for Third-Party Domains -->
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://embed.tawk.to">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
+
   <!-- Performance & Styling -->
   <link rel="prefetch" href="/services/" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
@@ -214,7 +221,10 @@
     <nav class="container mx-auto px-6 py-4" aria-label="Primary">
       <div class="flex justify-between items-center">
         <a href="/" aria-label="Brandible home" class="flex items-center">
-          <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" />
+          <picture>
+            <source srcset="../assets/transparent.webp" type="image/webp">
+            <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+          </picture>
         </a>
 
         <!-- Desktop -->
@@ -601,9 +611,11 @@
     </div>
     <div class="relative">
       <div class="rounded-2xl overflow-hidden shadow-lg ring-1 ring-slate-200 bg-white">
-<img src="../assets/hubsuite.png" alt="Website performance scores showing 100/100 ratings for performance, SEO, mobile responsiveness, and security"
-  loading="lazy" decoding="async" width="800" height="600">      
-</div>
+        <picture>
+          <source srcset="../assets/hubsuite.webp" type="image/webp">
+          <img src="../assets/hubsuite.png" alt="Website performance scores showing 100/100 ratings for performance, SEO, mobile responsiveness, and security" loading="lazy" decoding="async" width="800" height="600" />
+        </picture>
+      </div>
       <div class="absolute -z-10 inset-0 blur-2xl opacity-30 -translate-y-6 -translate-x-4 bg-gradient-to-tr from-blue-200 via-cyan-200 to-indigo-200 rounded-3xl"></div>
     </div>
   </div>

@@ -32,6 +32,13 @@
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/about/" />
 
+  <!-- Resource Hints for Third-Party Domains -->
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://embed.tawk.to">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
+
   <!-- Performance & Styling -->
   <link rel="prefetch" href="/services/" />
   <link rel="prefetch" href="/contact/" />
@@ -107,7 +114,10 @@
     <nav class="container mx-auto px-6 py-4" aria-label="Primary">
       <div class="flex justify-between items-center">
         <a href="/" class="flex items-center" aria-label="Brandible home">
-          <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" />
+          <picture>
+            <source srcset="../assets/transparent.webp" type="image/webp">
+            <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+          </picture>
         </a>
         <!-- Desktop -->
         <div class="hidden md:flex items-center space-x-8 font-medium">

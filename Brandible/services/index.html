@@ -32,6 +32,13 @@
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/services/" />
 
+  <!-- Resource Hints for Third-Party Domains -->
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://embed.tawk.to">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
+
   <!-- Performance & Styling -->
   <link rel="prefetch" href="/contact/" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
@@ -77,7 +84,10 @@
     <nav class="container mx-auto px-6 py-4" aria-label="Primary">
       <div class="flex justify-between items-center">
         <a href="/" aria-label="Brandible home" class="flex items-center">
-          <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" />
+          <picture>
+            <source srcset="../assets/transparent.webp" type="image/webp">
+            <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+          </picture>
         </a>
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center space-x-8">
@@ -250,7 +260,10 @@
           <div class="lg:w-1/2 w-full bg-gray-100 overflow-hidden relative">
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
-              <img src="../assets/web.png" alt="Custom website mockup on devices" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" />
+              <picture>
+                <source srcset="../assets/web.webp" type="image/webp">
+                <img src="../assets/web.png" alt="Custom website mockup on devices" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+              </picture>
             </div>
           </div>
           <div class="lg:w-1/2 w-full p-8 lg:p-10 flex flex-col gap-6 text-center lg:text-left h-full relative z-10">
@@ -327,7 +340,10 @@
           <div class="lg:w-1/2 w-full bg-gray-100 overflow-hidden relative">
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
-              <img src="../assets/digital.png" alt="Digital marketing dashboard mockups" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" />
+              <picture>
+                <source srcset="../assets/digital.webp" type="image/webp">
+                <img src="../assets/digital.png" alt="Digital marketing dashboard mockups" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+              </picture>
             </div>
           </div>
           <div class="lg:w-1/2 w-full p-8 lg:p-10 flex flex-col gap-6 text-center lg:text-left h-full relative z-10">
@@ -398,7 +414,10 @@
           <div class="lg:w-1/2 w-full bg-gray-100 overflow-hidden relative">
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
-              <img src="../assets/branding.png" alt="Brand strategy workshop notes" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" />
+              <picture>
+                <source srcset="../assets/branding.webp" type="image/webp">
+                <img src="../assets/branding.png" alt="Brand strategy workshop notes" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+              </picture>
             </div>
           </div>
           <div class="lg:w-1/2 w-full p-8 lg:p-10 flex flex-col gap-6 text-center lg:text-left h-full relative z-10">
@@ -469,7 +488,10 @@
           <div class="lg:w-1/2 w-full bg-gray-100 overflow-hidden relative">
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
-              <img src="../assets/media.png" alt="Social media management mockups" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" />
+              <picture>
+                <source srcset="../assets/media.webp" type="image/webp">
+                <img src="../assets/media.png" alt="Social media management mockups" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+              </picture>
             </div>
           </div>
           <div class="lg:w-1/2 w-full p-8 lg:p-10 flex flex-col gap-6 text-center lg:text-left h-full relative z-10">
