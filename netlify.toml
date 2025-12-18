@@ -3,8 +3,11 @@
   command = "npm install && npm run build"
   publish = "Brandible"
 
-# Force HTTPS redirects - must be first to ensure all HTTP traffic is redirected
-# Redirect non-www HTTP to www HTTPS (canonical domain)
+# ============================================
+# DOMAIN CANONICALIZATION (301 redirects)
+# ============================================
+# Force all traffic to www HTTPS
+
 [[redirects]]
   from = "http://brandiblemg.com/*"
   to = "https://www.brandiblemg.com/:splat"
@@ -17,44 +20,16 @@
   status = 301
   force = true
 
-# Redirect non-www HTTPS to www HTTPS (canonical domain)
-# This must come before the catch-all to ensure proper domain canonicalization
 [[redirects]]
   from = "https://brandiblemg.com/*"
   to = "https://www.brandiblemg.com/:splat"
   status = 301
   force = true
 
-# Catch-all HTTP to HTTPS redirect (fallback)
-[[redirects]]
-  from = "http://*"
-  to = "https://:splat"
-  status = 301
-  force = true
+# ============================================
+# TRAILING SLASH HANDLING (301 redirects)
+# ============================================
 
-# Rewrite .html files to trailing slash versions (internal rewrite, no redirect)
-[[redirects]]
-  from = "/terms/"
-  to = "/terms.html"
-  status = 200
-
-[[redirects]]
-  from = "/privacy/"
-  to = "/privacy.html"
-  status = 200
-
-# Redirect .html extension to trailing slash version
-[[redirects]]
-  from = "/terms.html"
-  to = "/terms/"
-  status = 301
-
-[[redirects]]
-  from = "/privacy.html"
-  to = "/privacy/"
-  status = 301
-
-# Ensure trailing slashes for directory-based pages
 [[redirects]]
   from = "/about"
   to = "/about/"
@@ -90,24 +65,6 @@
   to = "/blogs/"
   status = 301
 
-# Redirect old blog post URLs to new format for better SEO
-# Redirect /blogs/post.html?slug=* to /blogs/[slug]/ (new format with static HTML)
-# Note: Netlify doesn't support query parameter matching in redirects,
-# so we'll handle this via JavaScript in the generated HTML files
-# The old format will still work but will redirect to the new format
-
-# Redirect /blogs/post/ to /blogs/ (invalid without slug)
-[[redirects]]
-  from = "/blogs/post"
-  to = "/blogs/"
-  status = 301
-
-[[redirects]]
-  from = "/blogs/post/"
-  to = "/blogs/"
-  status = 301
-
-# Service subdirectories - ensure trailing slashes
 [[redirects]]
   from = "/services/web-design"
   to = "/services/web-design/"
@@ -128,15 +85,44 @@
   to = "/services/media-management/"
   status = 301
 
-# Favicon rewrite - serve favicon.ico from assets directory
 [[redirects]]
-  from = "/favicon.ico"
-  to = "/assets/favicon.ico"
+  from = "/blogs/post"
+  to = "/blogs/"
+  status = 301
+
+[[redirects]]
+  from = "/blogs/post/"
+  to = "/blogs/"
+  status = 301
+
+# ============================================
+# HTML EXTENSION HANDLING
+# ============================================
+
+[[redirects]]
+  from = "/terms/"
+  to = "/terms.html"
   status = 200
 
-# Explicit rewrites to ensure URLs return 200 OK
-# This prevents Google from seeing redirect errors
-# Homepage rewrite - ensure root returns 200 OK
+[[redirects]]
+  from = "/privacy/"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms.html"
+  to = "/terms/"
+  status = 301
+
+[[redirects]]
+  from = "/privacy.html"
+  to = "/privacy/"
+  status = 301
+
+# ============================================
+# INTERNAL REWRITES (200 status - no redirect)
+# ============================================
+
 [[redirects]]
   from = "/"
   to = "/index.html"
@@ -161,6 +147,7 @@
   from = "/services/"
   to = "/services/index.html"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/faqs/"
@@ -178,15 +165,11 @@
   to = "/blogs/index.html"
   status = 200
 
-# Note: Generated blog post HTML files at /blogs/[slug]/index.html
-# are automatically served by Netlify when visiting /blogs/[slug]/
-
 [[redirects]]
   from = "/admin/"
   to = "/admin/index.html"
   status = 200
 
-# Explicit rewrites for service subdirectories
 [[redirects]]
   from = "/services/web-design/"
   to = "/services/web-design/index.html"
@@ -207,3 +190,7 @@
   to = "/services/media-management/index.html"
   status = 200
 
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/assets/favicon.ico"
+  status = 200
