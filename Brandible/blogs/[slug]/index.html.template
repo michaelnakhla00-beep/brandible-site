@@ -40,14 +40,14 @@
   <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
 
   <!-- Performance & Styling -->
-  <link rel="stylesheet" href="../../assets/css/tailwind.css" />
-  <link rel="stylesheet" href="../../assets/css/style.css" />
-  <script defer src="../../assets/js/lazy-all.js"></script>
+  <link rel="stylesheet" href="/assets/css/tailwind.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <script defer src="/assets/js/lazy-all.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-  <script defer src="../../assets/js/blog-post-renderer.js"></script>
+  <script defer src="/assets/js/blog-post-renderer.js"></script>
   
   <!-- Cookie Banner -->
-  <script defer src="../../assets/js/cookie-banner.js"></script>
+  <script defer src="/assets/js/cookie-banner.js"></script>
 
   <!-- Optional extras -->
   <meta name="robots" content="index, follow" />
@@ -92,8 +92,8 @@
       <div class="flex justify-between items-center">
         <a href="/" aria-label="Brandible home" class="flex items-center">
           <picture>
-            <source srcset="../../assets/transparent.webp" type="image/webp">
-            <img src="../../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+            <source srcset="/assets/transparent.webp" type="image/webp">
+            <img src="/assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
           </picture>
         </a>
         <!-- Desktop Menu -->
@@ -262,8 +262,8 @@
   </footer>
 
   <!-- Scripts (defer to avoid blocking) -->
-  <script defer src="../../assets/js/script.js"></script>
-  <script defer src="../../assets/js/analytics.js"></script>
+  <script defer src="/assets/js/script.js"></script>
+  <script defer src="/assets/js/analytics.js"></script>
 
   <!-- Tawk.to Chat Widget - Loads after page interaction or 3s delay -->
   <script>
