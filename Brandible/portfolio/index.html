@@ -81,7 +81,7 @@
     "name": "Brandible Marketing Group Portfolio",
     "description": "Portfolio of successful websites, branding, social media campaigns, and digital ads for New Jersey businesses.",
     "url": "https://www.brandiblemg.com/portfolio/",
-    "numberOfItems": 9,
+    "numberOfItems": 10,
     "itemListElement": [
       {
         "@type": "ListItem",
@@ -201,6 +201,20 @@
           "name": "Golden Star Diner",
           "description": "Multi-page diner site with full menu, map, hours, and branded visuals.",
           "url": "https://goldenstardiner.netlify.app",
+          "creator": {
+            "@type": "Organization",
+            "name": "Brandible Marketing Group"
+          }
+        }
+      },
+      {
+        "@type": "ListItem",
+        "position": 10,
+        "item": {
+          "@type": "CreativeWork",
+          "name": "The Modern Cut - (Concept)",
+          "description": "Premium barbershop concept site with services, team profiles, booking system, and client testimonials.",
+          "url": "https://themoderncut.netlify.app/",
           "creator": {
             "@type": "Organization",
             "name": "Brandible Marketing Group"
@@ -577,6 +591,34 @@
             </div>
           </article>
 
+          <!-- The Modern Cut: Demo Site -->
+          <article class="work-card group rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-md transition animate-in" data-tags="demo web">
+            <div class="aspect-[16/10] overflow-hidden bg-gray-100">
+              <img loading="lazy" decoding="async" referrerpolicy="no-referrer"
+                   onerror="this.onerror=null;this.src='/assets/Brandible.png';this.alt='Preview unavailable';"
+                   src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                   alt="The Modern Cut barbershop website mockup"
+                   class="w-full h-full object-cover group-hover:scale-105 transition duration-300"/>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xl font-semibold text-gray-900">The Modern Cut - (Concept)</h3>
+                <div class="flex gap-2">
+                  <span class="text-xs px-2 py-1 rounded-full bg-purple-50 text-purple-700">Demo Site</span>
+                  <span class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700">Website</span>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-4">Premium barbershop concept site with services, team profiles, booking system, and client testimonials.</p>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Concept & Design</span>
+                <div class="flex gap-2">
+                  <a href="https://themoderncut.netlify.app/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 font-medium">Website</a>
+                  <button class="text-gray-700 hover:text-blue-700 font-medium" data-case="moderncut">Case study</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
         </div>
 
         <!-- See all button -->
@@ -880,6 +922,22 @@ eastcoast: {
           </ul>
         `,
         link: 'https://crossandblack.netlify.app'
+      },
+      moderncut: {
+        title: 'The Modern Cut – (Concept)',
+        sub: 'Premium Barbershop Concept • Services • Booking • Team Profiles',
+        body: `
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Conceptual website design for a premium barbershop targeting the modern gentleman.</li>
+            <li>Complete service showcase with pricing for Signature Haircuts, Beard Trims, Hot Towel Shaves, and Full Service Combos.</li>
+            <li>Interactive booking system with service selection, preferred barber choice, date/time picker, and contact form.</li>
+            <li>Team profiles highlighting barber expertise and specialties to build client trust.</li>
+            <li>Client testimonials section, location details, hours, and contact information for easy access.</li>
+            <li>Clean, modern aesthetic emphasizing precision, timeless style, and premium grooming experience.</li>
+            <li>Fully responsive design optimized for all devices with smooth navigation and clear calls-to-action.</li>
+          </ul>
+        `,
+        link: 'https://themoderncut.netlify.app/'
       },
     };
 
