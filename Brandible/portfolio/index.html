@@ -81,7 +81,7 @@
     "name": "Brandible Marketing Group Portfolio",
     "description": "Portfolio of successful websites, branding, social media campaigns, and digital ads for New Jersey businesses.",
     "url": "https://www.brandiblemg.com/portfolio/",
-    "numberOfItems": 10,
+    "numberOfItems": 11,
     "itemListElement": [
       {
         "@type": "ListItem",
@@ -210,6 +210,20 @@
       {
         "@type": "ListItem",
         "position": 10,
+        "item": {
+          "@type": "CreativeWork",
+          "name": "Modern Cleaners - (Concept)",
+          "description": "Professional cleaning service concept site with service packages, membership program, and client testimonials.",
+          "url": "https://moderncleaners.netlify.app/",
+          "creator": {
+            "@type": "Organization",
+            "name": "Brandible Marketing Group"
+          }
+        }
+      },
+      {
+        "@type": "ListItem",
+        "position": 11,
         "item": {
           "@type": "CreativeWork",
           "name": "The Modern Cut - (Concept)",
@@ -591,6 +605,34 @@
             </div>
           </article>
 
+          <!-- Modern Cleaners: Demo Site -->
+          <article class="work-card group rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-md transition animate-in" data-tags="demo web">
+            <div class="aspect-[16/10] overflow-hidden bg-gray-100">
+              <img loading="lazy" decoding="async" referrerpolicy="no-referrer"
+                   onerror="this.onerror=null;this.src='/assets/Brandible.png';this.alt='Preview unavailable';"
+                   src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                   alt="Modern Cleaners website mockup"
+                   class="w-full h-full object-cover group-hover:scale-105 transition duration-300"/>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xl font-semibold text-gray-900">Modern Cleaners - (Concept)</h3>
+                <div class="flex gap-2">
+                  <span class="text-xs px-2 py-1 rounded-full bg-purple-50 text-purple-700">Demo Site</span>
+                  <span class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700">Website</span>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-4">Professional cleaning service concept site with service packages, membership program, and client testimonials.</p>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Concept & Design</span>
+                <div class="flex gap-2">
+                  <a href="https://moderncleaners.netlify.app/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 font-medium">Website</a>
+                  <button class="text-gray-700 hover:text-blue-700 font-medium" data-case="moderncleaners">Case study</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
           <!-- The Modern Cut: Demo Site -->
           <article class="work-card group rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-md transition animate-in" data-tags="demo web">
             <div class="aspect-[16/10] overflow-hidden bg-gray-100">
@@ -922,6 +964,22 @@ eastcoast: {
           </ul>
         `,
         link: 'https://crossandblack.netlify.app'
+      },
+      moderncleaners: {
+        title: 'Modern Cleaners – (Concept)',
+        sub: 'Professional Cleaning Service Concept • Service Packages • Membership Program',
+        body: `
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Conceptual website design for a professional cleaning service targeting residential and commercial clients.</li>
+            <li>Comprehensive service packages including Essential Clean (35 points), Comprehensive Clean (45 points), Premium Clean (60 points), Move-In/Out, Post-Construction, and Office cleaning.</li>
+            <li>Exclusive membership program with savings, priority booking, and quality guarantee features.</li>
+            <li>Transparent up-front pricing with service checklists and starting prices for each package.</li>
+            <li>Client testimonials section, about us section, FAQ page, and contact information for lead generation.</li>
+            <li>Professional design emphasizing cleanliness, reliability, and eco-friendly practices with clear value propositions.</li>
+            <li>Fully responsive design with flexible scheduling options, booking system, and promotional code integration for new clients.</li>
+          </ul>
+        `,
+        link: 'https://moderncleaners.netlify.app/'
       },
       moderncut: {
         title: 'The Modern Cut – (Concept)',
