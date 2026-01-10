@@ -127,6 +127,7 @@ try {
       // but from /blogs/[slug]/index.html we need ../../assets/
       html = html.replace(/href="\.\.\/assets\//g, 'href="../../assets/');
       html = html.replace(/src="\.\.\/assets\//g, 'src="../../assets/');
+      html = html.replace(/srcset="\.\.\/assets\//g, 'srcset="../../assets/');
       
       // Escape HTML entities
       const escapeHtml = (str) => {
