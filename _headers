@@ -5,6 +5,7 @@
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), clipboard-read=(), clipboard-write=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), midi=(), otp-credentials=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), shared-autofill=(), speaker-selection=(), storage-access=(), sync-xhr=(), unoptimized-images=(), unsandboxed-iframe=(), vertical-scroll=(), web-share=(), window-management=(), xr-spatial-tracking=()
   Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://identity.netlify.com https://embed.tawk.to; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.netlify.com https://app.netlify.com https://embed.tawk.to; frame-src 'self' https://*.calendly.com https://embed.tawk.to; trusted-types default; require-trusted-types-for 'script'; upgrade-insecure-requests;
 
 # Cache static assets for 1 year (31536000 seconds)

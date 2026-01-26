@@ -18,15 +18,25 @@
   <meta name="msapplication-TileImage" content="/assets/favicon.ico" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-  <!-- Resource Hints for Third-Party Domains -->
+  <!-- Resource Hints for Third-Party Domains (Optimized) -->
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://embed.tawk.to">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
 
-  <!-- Preload LCP image for better performance -->
+  <!-- Critical Resource Prioritization -->
+  <!-- Preload LCP image (above-the-fold logo) -->
   <link rel="preload" as="image" href="/assets/transparent.webp" fetchpriority="high" />
+  
+  <!-- Preload critical CSS (inline critical CSS would be even better, but this helps) -->
+  <link rel="preload" as="style" href="assets/css/tailwind.css" />
+  <link rel="preload" as="style" href="assets/css/style.css" />
+
+  <!-- Prefetch likely next pages (user intent prediction) -->
+  <link rel="prefetch" href="/services/" />
+  <link rel="prefetch" href="/contact/" />
+  <link rel="prefetch" href="/portfolio/" />
 
   <!-- Open Graph (social preview) -->
   <meta property="og:site_name" content="Brandible Marketing Group" />
@@ -45,10 +55,6 @@
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/" />
-
-  <!-- Performance & Styling -->
-  <link rel="prefetch" href="/services/" />
-  <link rel="prefetch" href="/contact/" />
   <link rel="stylesheet" href="assets/css/tailwind.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
   
@@ -201,8 +207,18 @@
       <div class="flex justify-between items-center">
         <a href="/" aria-label="Brandible home" class="flex items-center">
           <picture>
-            <source srcset="assets/transparent.webp" type="image/webp">
-            <img src="assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+            <source srcset="assets/transparent.webp 1x, assets/transparent.webp 2x" type="image/webp">
+            <img src="assets/transparent.png" 
+                 srcset="assets/transparent.png 1x, assets/transparent.png 2x"
+                 sizes="120px"
+                 alt="Brandible Marketing Group" 
+                 class="h-16" 
+                 width="120" 
+                 height="64" 
+                 style="aspect-ratio: auto;" 
+                 loading="eager" 
+                 fetchpriority="high" 
+                 decoding="async" />
           </picture>
         </a>
 

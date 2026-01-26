@@ -33,15 +33,18 @@
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/portfolio/" />
 
-  <!-- Resource Hints for Third-Party Domains -->
+  <!-- Resource Hints for Third-Party Domains (Optimized) -->
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://embed.tawk.to">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
 
-  <!-- Performance & Styling -->
+  <!-- Resource Prioritization -->
+  <link rel="preload" as="style" href="../assets/css/tailwind.css" />
+  <link rel="preload" as="style" href="../assets/css/style.css" />
   <link rel="prefetch" href="/services/" />
+  <link rel="prefetch" href="/contact/" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <script defer src="../assets/js/lazy-all.js"></script>
@@ -264,8 +267,18 @@
       <div class="flex justify-between items-center">
         <a href="/" aria-label="Brandible home" class="flex items-center">
           <picture>
-            <source srcset="../assets/transparent.webp" type="image/webp">
-            <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+            <source srcset="../assets/transparent.webp 1x, ../assets/transparent.webp 2x" type="image/webp">
+            <img src="../assets/transparent.png" 
+                 srcset="../assets/transparent.png 1x, ../assets/transparent.png 2x"
+                 sizes="120px"
+                 alt="Brandible Marketing Group" 
+                 class="h-16" 
+                 width="120" 
+                 height="64" 
+                 style="aspect-ratio: auto;" 
+                 loading="eager" 
+                 fetchpriority="high" 
+                 decoding="async" />
           </picture>
         </a>
 
@@ -738,8 +751,15 @@
     <div class="relative">
       <div class="rounded-2xl overflow-hidden shadow-lg ring-1 ring-slate-200 bg-white">
         <picture>
-          <source srcset="../assets/hubsuite.webp" type="image/webp">
-          <img src="../assets/hubsuite.png" alt="Website performance scores showing 100/100 ratings for performance, SEO, mobile responsiveness, and security" loading="lazy" decoding="async" width="800" height="600" />
+          <source srcset="../assets/hubsuite.webp 400w, ../assets/hubsuite.webp 800w" type="image/webp" sizes="(max-width: 768px) 100vw, 50vw">
+          <img src="../assets/hubsuite.png" 
+               srcset="../assets/hubsuite.png 400w, ../assets/hubsuite.png 800w"
+               sizes="(max-width: 768px) 100vw, 50vw"
+               alt="Website performance scores showing 100/100 ratings for performance, SEO, mobile responsiveness, and security" 
+               loading="lazy" 
+               decoding="async" 
+               width="800" 
+               height="600" />
         </picture>
       </div>
       <div class="absolute -z-10 inset-0 blur-2xl opacity-30 -translate-y-6 -translate-x-4 bg-gradient-to-tr from-blue-200 via-cyan-200 to-indigo-200 rounded-3xl"></div>

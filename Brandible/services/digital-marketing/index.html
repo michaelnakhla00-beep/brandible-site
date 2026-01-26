@@ -148,8 +148,18 @@
       <div class="flex justify-between items-center">
         <a href="/" aria-label="Brandible home" class="flex items-center">
           <picture>
-            <source srcset="../../assets/transparent.webp" type="image/webp">
-            <img src="../../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+            <source srcset="../../assets/transparent.webp 1x, ../../assets/transparent.webp 2x" type="image/webp">
+            <img src="../../assets/transparent.png" 
+                 srcset="../../assets/transparent.png 1x, ../../assets/transparent.png 2x"
+                 sizes="120px"
+                 alt="Brandible Marketing Group" 
+                 class="h-16" 
+                 width="120" 
+                 height="64" 
+                 style="aspect-ratio: auto;" 
+                 loading="eager" 
+                 fetchpriority="high" 
+                 decoding="async" />
           </picture>
         </a>
         <!-- Desktop Menu -->

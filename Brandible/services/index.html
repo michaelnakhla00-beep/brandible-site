@@ -32,15 +32,18 @@
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/services/" />
 
-  <!-- Resource Hints for Third-Party Domains -->
+  <!-- Resource Hints for Third-Party Domains (Optimized) -->
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://embed.tawk.to">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
 
-  <!-- Performance & Styling -->
+  <!-- Resource Prioritization -->
+  <link rel="preload" as="style" href="../assets/css/tailwind.css" />
+  <link rel="preload" as="style" href="../assets/css/style.css" />
   <link rel="prefetch" href="/contact/" />
+  <link rel="prefetch" href="/portfolio/" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <script defer src="../assets/js/lazy-all.js"></script>
@@ -85,8 +88,18 @@
       <div class="flex justify-between items-center">
         <a href="/" aria-label="Brandible home" class="flex items-center">
           <picture>
-            <source srcset="../assets/transparent.webp" type="image/webp">
-            <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+            <source srcset="../assets/transparent.webp 1x, ../assets/transparent.webp 2x" type="image/webp">
+            <img src="../assets/transparent.png" 
+                 srcset="../assets/transparent.png 1x, ../assets/transparent.png 2x"
+                 sizes="120px"
+                 alt="Brandible Marketing Group" 
+                 class="h-16" 
+                 width="120" 
+                 height="64" 
+                 style="aspect-ratio: auto;" 
+                 loading="eager" 
+                 fetchpriority="high" 
+                 decoding="async" />
           </picture>
         </a>
         <!-- Desktop Menu -->
@@ -261,8 +274,16 @@
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
               <picture>
-                <source srcset="../assets/web.webp" type="image/webp">
-                <img src="../assets/web.png" alt="Custom website mockup on devices" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+                <source srcset="../assets/web.webp 600w, ../assets/web.webp 1200w" type="image/webp" sizes="(max-width: 1024px) 100vw, 50vw">
+                <img src="../assets/web.png" 
+                     srcset="../assets/web.png 600w, ../assets/web.png 1200w"
+                     sizes="(max-width: 1024px) 100vw, 50vw"
+                     alt="Custom website mockup on devices" 
+                     class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+                     width="1200" 
+                     height="900" 
+                     loading="lazy" 
+                     decoding="async" />
               </picture>
             </div>
           </div>
@@ -341,8 +362,16 @@
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
               <picture>
-                <source srcset="../assets/digital.webp" type="image/webp">
-                <img src="../assets/digital.png" alt="Digital marketing dashboard mockups" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+                <source srcset="../assets/digital.webp 600w, ../assets/digital.webp 1200w" type="image/webp" sizes="(max-width: 1024px) 100vw, 50vw">
+                <img src="../assets/digital.png" 
+                     srcset="../assets/digital.png 600w, ../assets/digital.png 1200w"
+                     sizes="(max-width: 1024px) 100vw, 50vw"
+                     alt="Digital marketing dashboard mockups" 
+                     class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+                     width="1200" 
+                     height="900" 
+                     loading="lazy" 
+                     decoding="async" />
               </picture>
             </div>
           </div>
@@ -415,8 +444,16 @@
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
               <picture>
-                <source srcset="../assets/branding.webp" type="image/webp">
-                <img src="../assets/branding.png" alt="Brand strategy workshop notes" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+                <source srcset="../assets/branding.webp 600w, ../assets/branding.webp 1200w" type="image/webp" sizes="(max-width: 1024px) 100vw, 50vw">
+                <img src="../assets/branding.png" 
+                     srcset="../assets/branding.png 600w, ../assets/branding.png 1200w"
+                     sizes="(max-width: 1024px) 100vw, 50vw"
+                     alt="Brand strategy workshop notes" 
+                     class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+                     width="1200" 
+                     height="900" 
+                     loading="lazy" 
+                     decoding="async" />
               </picture>
             </div>
           </div>
@@ -489,8 +526,16 @@
             <div class="aspect-[4/3] overflow-hidden relative">
               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent z-10"></div>
               <picture>
-                <source srcset="../assets/media.webp" type="image/webp">
-                <img src="../assets/media.png" alt="Social media management mockups" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" width="1200" height="900" loading="lazy" decoding="async" />
+                <source srcset="../assets/media.webp 600w, ../assets/media.webp 1200w" type="image/webp" sizes="(max-width: 1024px) 100vw, 50vw">
+                <img src="../assets/media.png" 
+                     srcset="../assets/media.png 600w, ../assets/media.png 1200w"
+                     sizes="(max-width: 1024px) 100vw, 50vw"
+                     alt="Social media management mockups" 
+                     class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+                     width="1200" 
+                     height="900" 
+                     loading="lazy" 
+                     decoding="async" />
               </picture>
             </div>
           </div>

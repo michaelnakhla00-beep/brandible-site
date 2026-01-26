@@ -1,8 +1,10 @@
-// Tawk.to Chat Widget - Loads after page interaction or 3s delay
+// Tawk.to Chat Widget - Optimized loading strategy
 // Externalized from inline scripts for CSP compliance
+// Uses requestIdleCallback for better performance
 (function() {
   'use strict';
   let tawkLoaded = false;
+  
   function loadTawk() {
     if (tawkLoaded) return;
     tawkLoaded = true;
@@ -17,7 +19,20 @@
     })();
   }
   
-  // Load on scroll (user is engaged) or after 3 seconds
+  // Optimized loading strategy: prioritize user engagement
+  // 1. Load on scroll (user is actively engaging)
   window.addEventListener('scroll', loadTawk, { once: true, passive: true });
-  setTimeout(loadTawk, 3000);
+  
+  // 2. Load on click/interaction (user is definitely engaged)
+  ['click', 'touchstart', 'keydown'].forEach(event => {
+    window.addEventListener(event, loadTawk, { once: true, passive: true });
+  });
+  
+  // 3. Use requestIdleCallback if available (load when browser is idle)
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadTawk, { timeout: 5000 });
+  } else {
+    // Fallback: load after 5 seconds (increased from 3s for better initial load)
+    setTimeout(loadTawk, 5000);
+  }
 })();

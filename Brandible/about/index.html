@@ -32,16 +32,19 @@
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/about/" />
 
-  <!-- Resource Hints for Third-Party Domains -->
+  <!-- Resource Hints for Third-Party Domains (Optimized) -->
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://embed.tawk.to">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://embed.tawk.to" crossorigin>
 
-  <!-- Performance & Styling -->
+  <!-- Resource Prioritization -->
+  <link rel="preload" as="style" href="../assets/css/tailwind.css" />
+  <link rel="preload" as="style" href="../assets/css/style.css" />
   <link rel="prefetch" href="/services/" />
   <link rel="prefetch" href="/contact/" />
+  <link rel="prefetch" href="/portfolio/" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <script defer src="../assets/js/lazy-all.js"></script>
@@ -114,8 +117,18 @@
       <div class="flex justify-between items-center">
         <a href="/" class="flex items-center" aria-label="Brandible home">
           <picture>
-            <source srcset="../assets/transparent.webp" type="image/webp">
-            <img src="../assets/transparent.png" alt="Brandible Marketing Group" class="h-16" width="120" height="64" style="aspect-ratio: auto;" loading="eager" fetchpriority="high" decoding="async" />
+            <source srcset="../assets/transparent.webp 1x, ../assets/transparent.webp 2x" type="image/webp">
+            <img src="../assets/transparent.png" 
+                 srcset="../assets/transparent.png 1x, ../assets/transparent.png 2x"
+                 sizes="120px"
+                 alt="Brandible Marketing Group" 
+                 class="h-16" 
+                 width="120" 
+                 height="64" 
+                 style="aspect-ratio: auto;" 
+                 loading="eager" 
+                 fetchpriority="high" 
+                 decoding="async" />
           </picture>
         </a>
         <!-- Desktop -->
