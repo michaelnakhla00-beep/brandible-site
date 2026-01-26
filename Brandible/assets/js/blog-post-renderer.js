@@ -419,8 +419,17 @@ function addArticleSchema(frontmatter, postFile) {
       "@type": "WebPage",
       "@id": postUrl
     },
-    "url": postUrl
+    "url": postUrl,
+    "inLanguage": "en-US"
   };
+  
+  // Estimate word count from body if available
+  if (body) {
+    const wordCount = body.split(/\s+/).length;
+    if (wordCount > 0) {
+      articleSchema.wordCount = wordCount;
+    }
+  }
 
   // Add category if present
   if (frontmatter.category) {

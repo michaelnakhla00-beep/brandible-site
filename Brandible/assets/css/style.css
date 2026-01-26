@@ -18,12 +18,16 @@
 /* ---------- Font optimization ---------- */
 /* Note: Currently using system fonts (via Tailwind), which render immediately.
    If loading custom fonts in the future, use font-display: swap to ensure text
-   remains visible during font load. Example:
-   @font-face {
-     font-family: 'CustomFont';
-     src: url('font.woff2') format('woff2');
-     font-display: swap; /* or optional for above-the-fold content */
-   } */
+   remains visible during font load. */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap; /* Ensures text remains visible during font load */
+}
+/* Apply font-display: swap to any future custom fonts */
+@font-face {
+  font-family: 'CustomFont';
+  font-display: swap;
+}
 
 /* ---------- Global polish ---------- */
 html{ scroll-behavior:smooth; }
