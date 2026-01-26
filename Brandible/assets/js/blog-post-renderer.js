@@ -148,6 +148,13 @@ async function loadBlogPost() {
     if (frontmatter.title) {
       document.title = `${frontmatter.title} | Brandible Marketing Group`;
       
+      // Update static H1 tag for SEO crawlers (visible in HTML before JS executes)
+      const staticH1 = document.getElementById('blog-post-title');
+      if (staticH1) {
+        staticH1.textContent = frontmatter.title;
+        staticH1.classList.remove('sr-only'); // Make it visible
+      }
+      
       // Update Open Graph title (include brand name for SEO)
       const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) {
@@ -514,7 +521,6 @@ function renderPost(frontmatter, body, container) {
           ${frontmatter.category ? `<span class="px-2 py-1 ${categoryColor} rounded-full text-xs font-medium">${frontmatter.category}</span>` : ''}
           ${frontmatter.author ? `<span>By ${frontmatter.author}</span>` : ''}
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">${frontmatter.title || 'Untitled'}</h1>
         ${frontmatter.excerpt ? `<p class="text-xl text-gray-600 mb-6">${frontmatter.excerpt}</p>` : ''}
         
         <!-- Social Share Buttons -->
