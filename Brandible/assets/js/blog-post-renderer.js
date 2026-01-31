@@ -226,7 +226,7 @@ async function loadBlogPost() {
     }
 
     // Add Article structured data
-    addArticleSchema(frontmatter, postFile);
+    addArticleSchema(frontmatter, postFile, body);
 
   } catch (error) {
     console.error('Error loading blog post:', error);
@@ -389,7 +389,7 @@ async function loadRelatedPosts(currentSlug) {
 }
 
 // Add Article structured data
-function addArticleSchema(frontmatter, postFile) {
+function addArticleSchema(frontmatter, postFile, body) {
   // Remove existing Article schema if present
   const existingSchema = document.querySelector('script[data-schema="article"]');
   if (existingSchema) {
