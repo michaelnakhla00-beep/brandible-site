@@ -125,9 +125,8 @@ try {
       
       // Fix asset paths: from /blogs/post.html we use ../assets/
       // but from /blogs/[slug]/index.html we need ../../assets/
-      html = html.replace(/href="\.\.\/assets\//g, 'href="../../assets/');
-      html = html.replace(/src="\.\.\/assets\//g, 'src="../../assets/');
-      html = html.replace(/srcset="\.\.\/assets\//g, 'srcset="../../assets/');
+      // Replace every occurrence (e.g. both URLs in srcset) so logo and all assets load
+      html = html.replace(/\.\.\/assets\//g, '../../assets/');
       
       // Escape HTML entities
       const escapeHtml = (str) => {
