@@ -2,7 +2,7 @@
 title: "Welcome to the Brandible Marketing Group Blog: What to Expect"
 date: 2025-12-04T17:00:00.000Z
 author: The Brandible Team
-featured_image: /assets/blog-images/welcomeblogcover.svg
+featured_image: /assets/blog-images/welcomeblogcover.webp
 excerpt: Welcome to the Brandible blog. We share actionable marketing tips, web design and branding insights, and real-world advice to help your business grow. Here's what to expect from us.
 category: Marketing
 ---

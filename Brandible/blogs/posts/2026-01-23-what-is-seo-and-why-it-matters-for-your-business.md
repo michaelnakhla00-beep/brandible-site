@@ -2,7 +2,7 @@
 title: What Is SEO and Why It Matters for Your Business
 date: 2026-01-23T20:00:15.552Z
 author: The Brandible Team
-featured_image: /assets/blog-images/blog-covers.svg
+featured_image: /assets/blog-images/blog-covers.webp
 excerpt: SEO helps customers find you, trust you, and choose you. Learn what search engine optimization is, why it matters for your business, and how to build a stronger online presence over time.
 category: SEO
 ---

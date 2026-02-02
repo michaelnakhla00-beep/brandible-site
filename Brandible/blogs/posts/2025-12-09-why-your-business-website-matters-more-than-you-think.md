@@ -2,7 +2,7 @@
 title: Why Your Business Website Matters More Than You Think
 date: 2025-12-09T20:00:25.667Z
 author: The Brandible Team
-featured_image: /assets/blog-images/webblogcover.svg
+featured_image: /assets/blog-images/webblogcover.webp
 excerpt: Your website is the heart of your brand. It builds trust, improves visibility, and guides visitors to act. Learn why a clear, modern site matters and how it can grow your business.
 category: Web Design
 ---
