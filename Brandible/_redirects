@@ -1,0 +1,4 @@
+# Domain canonicalization: send HTTP and non-www directly to https://www in one step
+# Processed before netlify.toml; may avoid redirect chain (http -> https apex -> https www)
+http://brandiblemg.com/*    https://www.brandiblemg.com/:splat    301!
+http://www.brandiblemg.com/* https://www.brandiblemg.com/:splat    301!
