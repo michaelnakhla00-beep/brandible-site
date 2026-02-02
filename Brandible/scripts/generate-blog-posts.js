@@ -140,7 +140,11 @@ try {
       };
       
       const escapedTitle = escapeHtml(titleWithBrand);
+      const escapedTitleForH1 = escapeHtml(title);
       const escapedDescription = escapeHtml(description);
+      
+      // Update H1 for SEO (crawlers see this without JavaScript)
+      html = html.replace(/\{\{BLOG_POST_TITLE\}\}/g, escapedTitleForH1);
       
       // Update title
       html = html.replace(
