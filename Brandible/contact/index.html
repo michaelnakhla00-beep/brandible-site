@@ -423,6 +423,28 @@
                 </div>
 
                 <div>
+                  <label for="companyWebsite" class="block text-sm font-semibold text-gray-700 mb-2">Company Name / Website</label>
+                  <input type="text" id="companyWebsite" name="Company Name/Website" maxlength="200" autocomplete="organization"
+                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue transition-all bg-gray-50 focus:bg-white"
+                         placeholder="NA if you don't have a website">
+                </div>
+
+                <div>
+                  <label for="howFoundUs" class="block text-sm font-semibold text-gray-700 mb-2">How did you find out about us?</label>
+                  <select id="howFoundUs" name="How did you find out about us"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue transition-all bg-gray-50 focus:bg-white">
+                    <option value="">Select an option...</option>
+                    <option value="Referral">Referral</option>
+                    <option value="Website">Website</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Google Search">Google Search</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
                   <label for="userMessage" class="block text-sm font-semibold text-gray-700 mb-2">Message *</label>
                   <textarea id="userMessage" name="Message" rows="4" required maxlength="1200" autocomplete="on" spellcheck="true"
                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brandblue/20 focus:border-brandblue transition-all resize-none bg-gray-50 focus:bg-white"
