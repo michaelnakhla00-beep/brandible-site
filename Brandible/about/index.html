@@ -351,40 +351,59 @@
       <div class="absolute inset-0 opacity-5 pointer-events-none">
         <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgb(99 102 241) 1px, transparent 0); background-size: 40px 40px;"></div>
       </div>
-      <div class="max-w-5xl mx-auto px-6 relative z-10">
-        <div class="text-center mb-14">
+      <div class="max-w-6xl mx-auto px-6 relative z-10">
+        <div class="text-center mb-12">
           <p class="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3 reveal" data-reveal="fade-up">The People Behind Brandible</p>
           <h2 id="team-heading" class="text-4xl md:text-5xl font-bold text-gray-900 mb-4 reveal" data-reveal="fade-up" data-reveal-delay="100">Meet The Team</h2>
           <p class="text-lg text-gray-600 max-w-2xl mx-auto reveal" data-reveal="fade-up" data-reveal-delay="200">We’re a small, hands-on crew with Rutgers Business School roots—here to make your marketing clear, credible, and built for growth.</p>
+          <p class="text-sm text-gray-500 mt-3 max-w-xl mx-auto reveal" data-reveal="fade-up" data-reveal-delay="250"><span class="hidden md:inline">Hover</span><span class="md:hidden">Tap</span> a card to flip and read each bio.</p>
         </div>
 
-        <!-- Founder & CEO — featured row -->
-        <div class="flex flex-col items-center text-center mb-12 md:mb-14 reveal" data-reveal="fade-up" data-reveal-delay="150">
-          <div class="mb-6">
-            <img src="../assets/team/mike-nakhla.svg" alt="Mike Nakhla, Founder and CEO" width="176" height="176" class="w-40 h-40 md:w-44 md:h-44 rounded-full object-cover ring-4 ring-white shadow-xl ring-offset-4 ring-offset-gray-50" loading="lazy" decoding="async" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8" role="list">
+          <!-- Mike Nakhla -->
+          <div class="reveal" data-reveal="fade-up" data-reveal-delay="150" role="listitem">
+            <article class="team-flip h-full cursor-pointer" tabindex="0" aria-label="Mike Nakhla, Founder and CEO. Hover or focus to read bio.">
+              <div class="team-flip-inner">
+                <div class="team-flip-face team-flip-front">
+                  <img src="../assets/team/mike-nakhla.svg" alt="" width="160" height="160" class="w-36 h-36 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full object-cover ring-4 ring-blue-100 shadow-md" loading="lazy" decoding="async" role="presentation" />
+                  <h3 class="text-lg lg:text-xl font-bold text-gray-900 text-center">Mike Nakhla</h3>
+                  <p class="text-blue-600 font-semibold text-sm text-center">Founder &amp; CEO</p>
+                </div>
+                <div class="team-flip-face team-flip-back">
+                  <p class="text-sm text-gray-700 leading-relaxed text-left">Mike started Brandible after seeing too many great local businesses get lost online. He leads strategy and delivery with a focus on websites and systems that turn attention into calls and bookings. A Rutgers Business School graduate, he blends operational know-how with a bias for clarity—so clients always know what they’re getting and why it matters.</p>
+                </div>
+              </div>
+            </article>
           </div>
-          <h3 class="text-2xl md:text-3xl font-bold text-gray-900">Mike Nakhla</h3>
-          <p class="text-blue-600 font-semibold mt-1 mb-4">Founder &amp; CEO</p>
-          <p class="text-gray-600 leading-relaxed max-w-2xl text-lg">Mike started Brandible after seeing too many great local businesses get lost online. He leads strategy and delivery with a focus on websites and systems that turn attention into calls and bookings. A Rutgers Business School graduate, he blends operational know-how with a bias for clarity—so clients always know what they’re getting and why it matters.</p>
-        </div>
-
-        <!-- Co-Founder & CFO | CRO — two columns -->
-        <div class="grid md:grid-cols-2 gap-10 md:gap-12">
-          <div class="flex flex-col items-center text-center reveal" data-reveal="fade-up" data-reveal-delay="200">
-            <div class="mb-5">
-              <img src="../assets/team/nansi-strandzheva.svg" alt="Nansi Strandzheva, Co-Founder and CFO" width="144" height="144" class="w-36 h-36 rounded-full object-cover ring-4 ring-white shadow-lg ring-offset-4 ring-offset-gray-50" loading="lazy" decoding="async" />
-            </div>
-            <h3 class="text-xl md:text-2xl font-bold text-gray-900">Nansi Strandzheva</h3>
-            <p class="text-blue-600 font-semibold mt-1 mb-3">Co-Founder &amp; CFO</p>
-            <p class="text-gray-600 leading-relaxed">Nansi keeps Brandible financially sound and client-friendly—from transparent proposals to sustainable growth. Her Rutgers Business School background shows up in how she structures packages and reporting so you can plan with confidence. She’s the steady hand behind the scenes making sure we scale responsibly while you get real value.</p>
+          <!-- Nansi Strandzheva -->
+          <div class="reveal" data-reveal="fade-up" data-reveal-delay="200" role="listitem">
+            <article class="team-flip h-full cursor-pointer" tabindex="0" aria-label="Nansi Strandzheva, Co-Founder and CFO. Hover or focus to read bio.">
+              <div class="team-flip-inner">
+                <div class="team-flip-face team-flip-front">
+                  <img src="../assets/team/nansi-strandzheva.svg" alt="" width="160" height="160" class="w-36 h-36 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full object-cover ring-4 ring-purple-100 shadow-md" loading="lazy" decoding="async" role="presentation" />
+                  <h3 class="text-lg lg:text-xl font-bold text-gray-900 text-center">Nansi Strandzheva</h3>
+                  <p class="text-blue-600 font-semibold text-sm text-center">Co-Founder &amp; CFO</p>
+                </div>
+                <div class="team-flip-face team-flip-back">
+                  <p class="text-sm text-gray-700 leading-relaxed text-left">Nansi keeps Brandible financially sound and client-friendly—from transparent proposals to sustainable growth. Her Rutgers Business School background shows up in how she structures packages and reporting so you can plan with confidence. She’s the steady hand behind the scenes making sure we scale responsibly while you get real value.</p>
+                </div>
+              </div>
+            </article>
           </div>
-          <div class="flex flex-col items-center text-center reveal" data-reveal="fade-up" data-reveal-delay="250">
-            <div class="mb-5">
-              <img src="../assets/team/mark-nakhla.svg" alt="Mark Nakhla, CRO and Client Acquisitions" width="144" height="144" class="w-36 h-36 rounded-full object-cover ring-4 ring-white shadow-lg ring-offset-4 ring-offset-gray-50" loading="lazy" decoding="async" />
-            </div>
-            <h3 class="text-xl md:text-2xl font-bold text-gray-900">Mark Nakhla</h3>
-            <p class="text-blue-600 font-semibold mt-1 mb-3">CRO &amp; Client Acquisitions</p>
-            <p class="text-gray-600 leading-relaxed">Mark is your first conversation when you’re ready to explore working together—asking the right questions, mapping fit, and making sure expectations line up before a project kicks off. Trained at Rutgers Business School, he combines relationship-building with a sharp eye for revenue opportunities, so new partnerships start clear and stay aligned as you grow.</p>
+          <!-- Mark Nakhla -->
+          <div class="reveal" data-reveal="fade-up" data-reveal-delay="250" role="listitem">
+            <article class="team-flip h-full cursor-pointer" tabindex="0" aria-label="Mark Nakhla, CRO and Client Acquisitions. Hover or focus to read bio.">
+              <div class="team-flip-inner">
+                <div class="team-flip-face team-flip-front">
+                  <img src="../assets/team/mark-nakhla.svg" alt="" width="160" height="160" class="w-36 h-36 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full object-cover ring-4 ring-pink-100 shadow-md" loading="lazy" decoding="async" role="presentation" />
+                  <h3 class="text-lg lg:text-xl font-bold text-gray-900 text-center">Mark Nakhla</h3>
+                  <p class="text-blue-600 font-semibold text-sm text-center">CRO &amp; Client Acquisitions</p>
+                </div>
+                <div class="team-flip-face team-flip-back">
+                  <p class="text-sm text-gray-700 leading-relaxed text-left">Mark is your first conversation when you’re ready to explore working together—asking the right questions, mapping fit, and making sure expectations line up before a project kicks off. Trained at Rutgers Business School, he combines relationship-building with a sharp eye for revenue opportunities, so new partnerships start clear and stay aligned as you grow.</p>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
       </div>

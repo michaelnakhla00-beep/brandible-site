@@ -313,6 +313,85 @@ body.modal-open{ overflow:hidden; }
 .reveal[data-reveal-delay="400"]{ transition-delay:.4s; }
 .reveal[data-reveal-delay="500"]{ transition-delay:.5s; }
 
+/* ===== About: Meet the Team — 3D flip cards ===== */
+.team-flip {
+  perspective: 1100px;
+  outline: none;
+}
+.team-flip:focus-visible {
+  outline: 2px solid var(--brand-yellow);
+  outline-offset: 4px;
+  border-radius: 1rem;
+}
+.team-flip-inner {
+  position: relative;
+  width: 100%;
+  min-height: 22rem;
+  transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.team-flip:hover .team-flip-inner,
+.team-flip:focus-within .team-flip-inner {
+  transform: rotateY(180deg);
+}
+.team-flip-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.team-flip-front {
+  transform: rotateY(0deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1.25rem;
+  background: #fff;
+  border: 1px solid rgb(229 231 235);
+  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.06);
+}
+.team-flip-back {
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: linear-gradient(145deg, rgb(248 250 252), rgb(239 246 255));
+  border: 1px solid rgb(229 231 235);
+  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.06);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (prefers-reduced-motion: reduce) {
+  .team-flip-inner {
+    transition: none;
+    transform: none !important;
+  }
+  .team-flip:hover .team-flip-inner,
+  .team-flip:focus-within .team-flip-inner {
+    transform: none !important;
+  }
+  .team-flip-face {
+    position: relative;
+    inset: auto;
+    transform: none !important;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+  }
+  .team-flip-back {
+    margin-top: 0.75rem;
+    min-height: auto;
+  }
+  .team-flip-inner {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 /* Micro-interactions */
 @media (hover:hover){
   a, button { transition: transform .12s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease; }
