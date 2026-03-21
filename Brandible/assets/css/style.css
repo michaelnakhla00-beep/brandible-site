@@ -389,9 +389,19 @@ body.modal-open{ overflow:hidden; }
   margin: 0;
   text-align: left;
 }
+.team-square-back .team-bio-kicker {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #172b4d;
+  margin: 0 0 0.65rem;
+  line-height: 1.4;
+}
 @media (min-width: 768px) {
   .team-square-back p {
     font-size: 0.875rem;
+  }
+  .team-square-back .team-bio-kicker {
+    font-size: 0.75rem;
   }
 }
 /* Name + title (always visible, below square) */
@@ -415,6 +425,18 @@ body.modal-open{ overflow:hidden; }
   text-transform: uppercase;
   color: #5e6c84;
   line-height: 1.4;
+}
+/* Long titles (e.g. CRO + Client Management): sentence case, readable wrap */
+.team-flip-role--long {
+  text-transform: none;
+  letter-spacing: 0.04em;
+  font-size: 0.625rem;
+  line-height: 1.45;
+}
+@media (min-width: 768px) {
+  .team-flip-role--long {
+    font-size: 0.6875rem;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .team-square-flip-inner {
