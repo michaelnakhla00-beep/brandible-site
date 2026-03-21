@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title">
+  <title id="title">Nansi Strandzhiva portrait placeholder</title>
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c084fc"/>
+      <stop offset="100%" style="stop-color:#818cf8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="160" cy="160" r="160" fill="url(#g2)"/>
+  <text x="160" y="195" text-anchor="middle" fill="#fff" font-size="88" font-family="system-ui, -apple-system, sans-serif" font-weight="700">NS</text>
+</svg>
