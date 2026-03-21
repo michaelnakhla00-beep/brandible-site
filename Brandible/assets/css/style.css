@@ -254,6 +254,9 @@ body.modal-open{ overflow:hidden; }
 /* ===== Scroll reveal (slide-up + fade) ===== */
 .reveal{ opacity:0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
 .reveal-show{ opacity:1; transform: translateY(0); }
+/* Opacity-only: never use transform (needed for 3D children e.g. About team flip cards) */
+.reveal[data-reveal="fade"]{ transform: none; }
+.reveal-show[data-reveal="fade"]{ transform: none; }
 
 /* ===== Mobile menu animation helpers ===== */
 .menu-closed{ opacity:0; transform: translateY(-8px); pointer-events:none; }
@@ -314,6 +317,7 @@ body.modal-open{ overflow:hidden; }
 .reveal[data-reveal-delay="500"]{ transition-delay:.5s; }
 
 /* ===== About: Meet the Team — square photo flips to bio; name/title below ===== */
+/* IMPORTANT: Do not wrap .team-square-flip in a parent with CSS transform (e.g. .reveal[data-reveal="fade-up"]) — it flattens preserve-3d and the bio stacks below. Use data-reveal="fade" on the wrapper instead. */
 .team-member {
   display: flex;
   flex-direction: column;
@@ -348,7 +352,7 @@ body.modal-open{ overflow:hidden; }
   -webkit-backface-visibility: hidden;
 }
 .team-square-front {
-  transform: rotateY(0deg);
+  transform: rotateY(0deg) translateZ(1px);
   background: #e2e8f0;
   overflow: hidden;
 }
@@ -360,7 +364,7 @@ body.modal-open{ overflow:hidden; }
   display: block;
 }
 .team-square-back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(1px);
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   display: flex;
