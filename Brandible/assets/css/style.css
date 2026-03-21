@@ -353,7 +353,8 @@ body.modal-open{ overflow:hidden; }
 }
 .team-square-front {
   transform: rotateY(0deg) translateZ(1px);
-  background: #e2e8f0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
   overflow: hidden;
 }
 .team-square-front img {
@@ -365,8 +366,8 @@ body.modal-open{ overflow:hidden; }
 }
 .team-square-back {
   transform: rotateY(180deg) translateZ(1px);
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;

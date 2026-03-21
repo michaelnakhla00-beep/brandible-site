@@ -2,10 +2,10 @@
 
 Add **square** portraits (1:1 ratio works best). The flip card fills the image with `object-fit: cover`.
 
-| Person | Preferred files |
-|--------|-----------------|
-| Mike Nakhla | `mike-nakhla.jpg` and optional `mike-nakhla.webp` |
-| Nansi Strandzheva | `nansi-strandzheva.jpg` and optional `nansi-strandzheva.webp` |
-| Mark Nakhla | `mark-nakhla.jpg` and optional `mark-nakhla.webp` |
+| Person | Current file (in `/assets/`) |
+|--------|------------------------------|
+| Mike Nakhla | `mikecard.png` |
+| Nansi Strandzheva | `nansicard.png` |
+| Mark Nakhla | `team/mark-nakhla.jpg` + optional `.webp`, or `.svg` fallback via `onerror` |
 
-If `.jpg` is missing, the page falls back to the existing `.svg` placeholders.
+Square (1:1) images work best; the flip card uses `object-fit: cover`.
