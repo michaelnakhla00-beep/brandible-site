@@ -1,11 +1,11 @@
-# Team photos (About page)
+# Team card images (About page)
 
-Add **square** portraits (1:1 ratio works best). The flip card fills the image with `object-fit: cover`.
+WebP portraits used on `/about/#team`:
 
-| Person | Current file (in `/assets/`) |
-|--------|------------------------------|
-| Mike N. | `mikecard.png` |
-| Nansi S. | `nansicard.png` |
-| Mark N. | `markcard.png` |
+| File | Person |
+|------|--------|
+| `mikecard.webp` | Mike N. |
+| `nansicard.webp` | Nansi S. |
+| `markcard.webp` | Mark N. |
 
-Square (1:1) images work best; the flip card uses `object-fit: cover`.
+Paths in HTML: `../assets/team/<filename>.webp` (from `about/index.html`).
