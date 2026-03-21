@@ -313,7 +313,7 @@ body.modal-open{ overflow:hidden; }
 .reveal[data-reveal-delay="400"]{ transition-delay:.4s; }
 .reveal[data-reveal-delay="500"]{ transition-delay:.5s; }
 
-/* ===== About: Meet the Team — 3D flip cards ===== */
+/* ===== About: Meet the Team — 3D flip cards (editorial / leadership layout) ===== */
 .team-flip {
   perspective: 1100px;
   outline: none;
@@ -321,14 +321,19 @@ body.modal-open{ overflow:hidden; }
 .team-flip:focus-visible {
   outline: 2px solid var(--brand-yellow);
   outline-offset: 4px;
-  border-radius: 1rem;
+  border-radius: 2px;
 }
 .team-flip-inner {
   position: relative;
   width: 100%;
-  min-height: 22rem;
+  min-height: clamp(28rem, 78vw, 36rem);
   transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
   transform-style: preserve-3d;
+}
+@media (min-width: 768px) {
+  .team-flip-inner {
+    min-height: 32rem;
+  }
 }
 .team-flip:hover .team-flip-inner,
 .team-flip:focus-within .team-flip-inner {
@@ -337,7 +342,7 @@ body.modal-open{ overflow:hidden; }
 .team-flip-face {
   position: absolute;
   inset: 0;
-  border-radius: 1rem;
+  border-radius: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -345,30 +350,87 @@ body.modal-open{ overflow:hidden; }
   transform: rotateY(0deg);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 1.5rem 1.25rem;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
   background: #fff;
-  border: 1px solid rgb(229 231 235);
-  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.06);
+  border: none;
+  box-shadow: none;
+}
+/* Square portrait block — solid color behind image (reference style) */
+.team-flip-photo {
+  width: 100%;
+  flex: 0 0 auto;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+.team-flip-photo--mustard {
+  background-color: #f2d03f;
+}
+.team-flip-photo--mint {
+  background-color: #5eead4;
+}
+.team-flip-photo--peach {
+  background-color: #fdba8c;
+}
+.team-flip-portrait {
+  height: 92%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+}
+.team-flip-meta {
+  flex: 1 1 auto;
+  padding: 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+.team-flip-name {
+  font-size: clamp(1.125rem, 2.5vw, 1.375rem);
+  font-weight: 700;
+  color: #172b4d;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+}
+.team-flip-role {
+  margin: 0.5rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5e6c84;
+  line-height: 1.4;
 }
 .team-flip-back {
   transform: rotateY(180deg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem;
-  background: linear-gradient(145deg, rgb(248 250 252), rgb(239 246 255));
-  border: 1px solid rgb(229 231 235);
-  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.06);
+  padding: 1.5rem 1.25rem;
+  background: #f8fafc;
+  border: 1px solid rgb(226 232 240);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+.team-flip-back p {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: #334155;
+  margin: 0;
 }
 @media (prefers-reduced-motion: reduce) {
   .team-flip-inner {
     transition: none;
     transform: none !important;
+    min-height: 0;
   }
   .team-flip:hover .team-flip-inner,
   .team-flip:focus-within .team-flip-inner {
@@ -386,7 +448,6 @@ body.modal-open{ overflow:hidden; }
     min-height: auto;
   }
   .team-flip-inner {
-    min-height: 0;
     display: flex;
     flex-direction: column;
   }
