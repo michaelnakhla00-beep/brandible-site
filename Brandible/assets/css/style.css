@@ -340,8 +340,15 @@ body.modal-open{ overflow:hidden; }
   transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
-.team-square-flip:hover .team-square-flip-inner,
-.team-square-flip:focus-within .team-square-flip-inner {
+/* Desktop / fine pointer: hover + keyboard tab */
+@media (hover: hover) and (pointer: fine) {
+  .team-square-flip:hover .team-square-flip-inner,
+  .team-square-flip:focus-within .team-square-flip-inner {
+    transform: rotateY(180deg);
+  }
+}
+/* Touch / no hover: toggled via JS (.is-flipped) — tap to flip like desktop hover */
+.team-square-flip.is-flipped .team-square-flip-inner {
   transform: rotateY(180deg);
 }
 .team-square-face {
@@ -415,7 +422,8 @@ body.modal-open{ overflow:hidden; }
     transform: none !important;
   }
   .team-square-flip:hover .team-square-flip-inner,
-  .team-square-flip:focus-within .team-square-flip-inner {
+  .team-square-flip:focus-within .team-square-flip-inner,
+  .team-square-flip.is-flipped .team-square-flip-inner {
     transform: none !important;
   }
   .team-member {

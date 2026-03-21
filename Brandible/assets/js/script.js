@@ -689,6 +689,46 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   /* ===========================
+   * About page: team cards — tap to flip on touch / no-hover devices
+   * =========================== */
+  (function () {
+    const cards = document.querySelectorAll('.team-square-flip');
+    if (!cards.length) return;
+
+    const mqTouch = window.matchMedia('(hover: none), (pointer: coarse)');
+
+    function clearAllFlipped() {
+      document.querySelectorAll('.team-square-flip.is-flipped').forEach((c) => {
+        c.classList.remove('is-flipped');
+        c.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    cards.forEach((card) => {
+      card.addEventListener('click', (e) => {
+        if (!mqTouch.matches) return;
+        e.preventDefault();
+        const open = card.classList.toggle('is-flipped');
+        card.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (!mqTouch.matches) return;
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        const open = card.classList.toggle('is-flipped');
+        card.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+
+    if (mqTouch.addEventListener) {
+      mqTouch.addEventListener('change', clearAllFlipped);
+    } else if (mqTouch.addListener) {
+      mqTouch.addListener(clearAllFlipped);
+    }
+  })();
+
+  /* ===========================
    * Count-up on reveal
    * =========================== */
   (function(){
