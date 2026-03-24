@@ -41,15 +41,19 @@
       }
 
       if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("login", function () {
-          window.location.reload();
+        // Never reload on every "login" event — Identity can re-emit for an existing session and causes a reload loop (flashing).
+        var loginHandlerBound = false;
+        window.netlifyIdentity.on("init", function (user) {
+          if (!user && !loginHandlerBound) {
+            loginHandlerBound = true;
+            window.netlifyIdentity.on("login", function () {
+              window.location.href = "/admin/";
+            });
+          }
+          loadDecapCMSOnce();
         });
         window.netlifyIdentity.on("logout", function () {
           window.location.reload();
-        });
-        // init can fire more than once (session recovery, etc.); only ever load Decap once
-        window.netlifyIdentity.on("init", function () {
-          loadDecapCMSOnce();
         });
         window.netlifyIdentity.init();
       } else {
