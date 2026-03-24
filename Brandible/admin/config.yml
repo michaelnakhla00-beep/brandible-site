@@ -34,10 +34,10 @@ collections:
     view_groups:
       - label: Visible on site
         field: draft
-        pattern: false
+        pattern: "false"
       - label: Hidden on site
         field: draft
-        pattern: true
+        pattern: "true"
     fields:
       - label: "Hide from live site"
         name: "draft"
