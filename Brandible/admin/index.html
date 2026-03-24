@@ -21,7 +21,6 @@
   <div data-netlify-identity-menu></div>
   <script>
     (function () {
-      // Netlify Identity Site URL usually matches the primary host (www). Apex can yield invalid / missing JWTs.
       if (location.hostname === "brandiblemg.com") {
         location.replace(
           "https://www.brandiblemg.com" +
@@ -32,9 +31,12 @@
         return;
       }
 
-      function loadDecapCMS() {
+      var decapInjected = false;
+      function loadDecapCMSOnce() {
+        if (decapInjected) return;
+        decapInjected = true;
         var s = document.createElement("script");
-        s.src = "https://unpkg.com/decap-cms@3.4.0/dist/decap-cms.js";
+        s.src = "https://unpkg.com/decap-cms@3.5.0/dist/decap-cms.js";
         document.body.appendChild(s);
       }
 
@@ -45,12 +47,13 @@
         window.netlifyIdentity.on("logout", function () {
           window.location.reload();
         });
+        // init can fire more than once (session recovery, etc.); only ever load Decap once
         window.netlifyIdentity.on("init", function () {
-          loadDecapCMS();
+          loadDecapCMSOnce();
         });
         window.netlifyIdentity.init();
       } else {
-        loadDecapCMS();
+        loadDecapCMSOnce();
       }
     })();
   </script>
