@@ -1,11 +1,8 @@
+# Git Gateway commits to main directly. Editorial workflow (PRs) calls api.github.com and
+# returns 401 with Identity-only auth — use GitHub OAuth backend if you need real draft/PR flow.
 backend:
   name: git-gateway
   branch: main # Branch to update (optional, defaults to master)
-  # Single commit per published post when using editorial workflow (GitHub + Git Gateway)
-  squash_merges: true
-
-# Save draft = commit to a PR branch; Publish = merge to main (requires GitHub-backed Git Gateway)
-publish_mode: editorial_workflow
 
 # Media storage - configure if you want to upload images
 media_folder: "Brandible/assets/blog-images" # Media files will be stored here
@@ -30,20 +27,19 @@ collections:
       - date
       - category
       - draft
-    # Tabs for posts already on main: visible vs hidden (optional “unpublish” flag)
     view_groups:
-      - label: Visible on site
+      - label: Published
         field: draft
         pattern: "false"
-      - label: Hidden on site
+      - label: Drafts
         field: draft
         pattern: "true"
     fields:
-      - label: "Hide from live site"
+      - label: "Draft (not on blog until turned off)"
         name: "draft"
         widget: "boolean"
-        default: false
-        hint: "Leave off for normal posts. Use the toolbar Save / Publish for workflow. Turn on only if the post is on main but should stay off the public site."
+        default: true
+        hint: "On = work in progress (hidden on the website). Turn off and Save when ready to go live."
       - {label: "Title", name: "title", widget: "string", required: true}
       - label: "URL slug"
         name: "slug"
