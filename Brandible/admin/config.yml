@@ -1,6 +1,11 @@
 backend:
   name: git-gateway
   branch: main # Branch to update (optional, defaults to master)
+  # Single commit per published post when using editorial workflow (GitHub + Git Gateway)
+  squash_merges: true
+
+# Save draft = commit to a PR branch; Publish = merge to main (requires GitHub-backed Git Gateway)
+publish_mode: editorial_workflow
 
 # Media storage - configure if you want to upload images
 media_folder: "Brandible/assets/blog-images" # Media files will be stored here
@@ -25,19 +30,20 @@ collections:
       - date
       - category
       - draft
-    view_filters:
-      - label: Published
+    # Tabs for posts already on main: visible vs hidden (optional “unpublish” flag)
+    view_groups:
+      - label: Visible on site
         field: draft
         pattern: false
-      - label: Drafts
+      - label: Hidden on site
         field: draft
         pattern: true
     fields:
-      - label: "Draft"
+      - label: "Hide from live site"
         name: "draft"
         widget: "boolean"
         default: false
-        hint: "Draft posts are hidden on the site and skipped when generating share/SEO HTML."
+        hint: "Leave off for normal posts. Use the toolbar Save / Publish for workflow. Turn on only if the post is on main but should stay off the public site."
       - {label: "Title", name: "title", widget: "string", required: true}
       - label: "URL slug"
         name: "slug"
