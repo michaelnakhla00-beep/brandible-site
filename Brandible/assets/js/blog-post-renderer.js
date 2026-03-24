@@ -30,12 +30,26 @@ function parseFrontmatter(content) {
       if (value.startsWith('[') && value.endsWith(']')) {
         value = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''));
       }
-      
+
+      if (value === 'true') value = true;
+      else if (value === 'false') value = false;
+
       frontmatter[key] = value;
     }
   });
   
   return { frontmatter, body };
+}
+
+function isDraftPost(frontmatter) {
+  return frontmatter.draft === true;
+}
+
+function socialImageUrl(frontmatter) {
+  const raw = frontmatter.og_image || frontmatter.featured_image;
+  if (!raw) return null;
+  if (raw.startsWith('http')) return raw;
+  return `https://www.brandiblemg.com${raw.startsWith('/') ? raw : `/${raw}`}`;
 }
 
 // Format date
@@ -130,6 +144,11 @@ async function loadBlogPost() {
     const markdown = await response.text();
     const { frontmatter, body } = parseFrontmatter(markdown);
 
+    if (isDraftPost(frontmatter)) {
+      postContainer.innerHTML = '<p class="text-red-500">This post is not available.</p>';
+      return;
+    }
+
     // Load marked.js if not already loaded
     if (typeof marked === 'undefined') {
       const script = document.createElement('script');
@@ -144,73 +163,62 @@ async function loadBlogPost() {
     // Use the static HTML file format for better SEO and social sharing
     const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
 
+    const seoTitle = frontmatter.meta_title || frontmatter.title;
+    const seoDescription =
+      frontmatter.meta_description ||
+      frontmatter.excerpt ||
+      (frontmatter.title ? `Read our latest blog post: ${frontmatter.title}` : '');
+
     // Update page metadata
-    if (frontmatter.title) {
-      document.title = `${frontmatter.title} | Brandible Marketing Group`;
-      
+    if (seoTitle) {
+      document.title = `${seoTitle} | Brandible Marketing Group`;
+
       // Update static H1 tag for SEO crawlers (visible in HTML before JS executes)
       const staticH1 = document.getElementById('blog-post-title');
       if (staticH1) {
-        staticH1.textContent = frontmatter.title;
+        staticH1.textContent = frontmatter.title || seoTitle;
         staticH1.classList.remove('sr-only'); // Make it visible
       }
-      
+
       // Update Open Graph title (include brand name for SEO)
       const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) {
-        ogTitle.setAttribute('content', `${frontmatter.title} | Brandible Marketing Group`);
+        ogTitle.setAttribute('content', `${seoTitle} | Brandible Marketing Group`);
       }
-      
+
       // Update Twitter Card title (include brand name for SEO)
       const twitterTitle = document.querySelector('meta[name="twitter:title"]');
       if (twitterTitle) {
-        twitterTitle.setAttribute('content', `${frontmatter.title} | Brandible Marketing Group`);
+        twitterTitle.setAttribute('content', `${seoTitle} | Brandible Marketing Group`);
       }
     }
-    
-    if (frontmatter.excerpt) {
+
+    if (seoDescription) {
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
-        metaDesc.setAttribute('content', frontmatter.excerpt);
+        metaDesc.setAttribute('content', seoDescription);
       }
-      
-      // Update Open Graph description
+
       const ogDesc = document.querySelector('meta[property="og:description"]');
       if (ogDesc) {
-        ogDesc.setAttribute('content', frontmatter.excerpt);
+        ogDesc.setAttribute('content', seoDescription);
       }
-      
-      // Update Twitter Card description
+
       const twitterDesc = document.querySelector('meta[name="twitter:description"]');
       if (twitterDesc) {
-        twitterDesc.setAttribute('content', frontmatter.excerpt);
+        twitterDesc.setAttribute('content', seoDescription);
       }
     }
 
-    // Update Open Graph image with featured image
+    const shareImageUrl = socialImageUrl(frontmatter);
     const ogImage = document.querySelector('meta[property="og:image"]');
-    if (ogImage) {
-      if (frontmatter.featured_image) {
-        // Convert relative path to full URL
-        const imageUrl = frontmatter.featured_image.startsWith('http') 
-          ? frontmatter.featured_image 
-          : `https://www.brandiblemg.com${frontmatter.featured_image}`;
-        ogImage.setAttribute('content', imageUrl);
-      }
-      // If no featured_image, keep the default logo (already set in template)
+    if (ogImage && shareImageUrl) {
+      ogImage.setAttribute('content', shareImageUrl);
     }
 
-    // Update Twitter Card image with featured image
     const twitterImage = document.querySelector('meta[name="twitter:image"]');
-    if (twitterImage) {
-      if (frontmatter.featured_image) {
-        // Convert relative path to full URL
-        const imageUrl = frontmatter.featured_image.startsWith('http') 
-          ? frontmatter.featured_image 
-          : `https://www.brandiblemg.com${frontmatter.featured_image}`;
-        twitterImage.setAttribute('content', imageUrl);
-      }
-      // If no featured_image, keep the default logo (already set in template)
+    if (twitterImage && shareImageUrl) {
+      twitterImage.setAttribute('content', shareImageUrl);
     }
 
     // Update Open Graph URL to the actual blog post URL
@@ -337,10 +345,12 @@ async function loadRelatedPosts(currentSlug) {
           
           const markdown = await response.text();
           const { frontmatter } = parseFrontmatter(markdown);
-          
+
+          if (isDraftPost(frontmatter)) return null;
+
           // Generate slug from filename
           const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
-          
+
           // Skip current post
           if (slug === currentSlug) return null;
           
@@ -401,12 +411,19 @@ function addArticleSchema(frontmatter, postFile, body) {
   const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
   
   // Build Article schema
+  const schemaImage = socialImageUrl(frontmatter) || "https://www.brandiblemg.com/assets/Brandible.png";
+  const schemaDescription =
+    frontmatter.meta_description ||
+    frontmatter.excerpt ||
+    frontmatter.title ||
+    "";
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": frontmatter.title || "Blog Post",
-    "description": frontmatter.excerpt || frontmatter.title || "",
-    "image": frontmatter.featured_image ? `https://www.brandiblemg.com${frontmatter.featured_image}` : "https://www.brandiblemg.com/assets/Brandible.png",
+    "description": schemaDescription,
+    "image": schemaImage,
     "datePublished": frontmatter.date || new Date().toISOString(),
     "dateModified": frontmatter.date || new Date().toISOString(),
     "author": {
@@ -511,7 +528,7 @@ function renderPost(frontmatter, body, container) {
     <article class="max-w-4xl mx-auto">
       ${frontmatter.featured_image ? `
         <div class="mb-8">
-          <img src="${frontmatter.featured_image.startsWith('http') ? frontmatter.featured_image : (frontmatter.featured_image.startsWith('/') ? `https://www.brandiblemg.com${frontmatter.featured_image}` : frontmatter.featured_image)}" alt="${frontmatter.title ? `Featured image for ${frontmatter.title}` : 'Blog post featured image'}" class="w-full h-64 md:h-96 object-cover rounded-lg" loading="lazy" decoding="async" />
+          <img src="${frontmatter.featured_image.startsWith('http') ? frontmatter.featured_image : (frontmatter.featured_image.startsWith('/') ? `https://www.brandiblemg.com${frontmatter.featured_image}` : frontmatter.featured_image)}" alt="${(frontmatter.featured_image_alt || (frontmatter.title ? `Featured image for ${frontmatter.title}` : 'Blog post featured image')).replace(/"/g, '&quot;')}" class="w-full h-64 md:h-96 object-cover rounded-lg" loading="lazy" decoding="async" />
         </div>
       ` : ''}
       

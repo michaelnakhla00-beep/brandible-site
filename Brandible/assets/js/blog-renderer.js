@@ -30,7 +30,10 @@ function parseFrontmatter(content) {
       if (value.startsWith('[') && value.endsWith(']')) {
         value = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''));
       }
-      
+
+      if (value === 'true') value = true;
+      else if (value === 'false') value = false;
+
       frontmatter[key] = value;
     }
   });
@@ -44,6 +47,10 @@ function generateSlug(title) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+}
+
+function isDraftPost(frontmatter) {
+  return frontmatter.draft === true;
 }
 
 // Format date
@@ -111,6 +118,8 @@ async function loadBlogPosts() {
           // Format: YYYY-MM-DD-slug.md -> slug
           const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
           
+          if (isDraftPost(frontmatter)) return null;
+
           return {
             slug,
             title: frontmatter.title || 'Untitled',
@@ -119,6 +128,7 @@ async function loadBlogPosts() {
             category: frontmatter.category || '',
             excerpt: frontmatter.excerpt || '',
             featured_image: frontmatter.featured_image || '',
+            featured_image_alt: frontmatter.featured_image_alt || '',
             tags: frontmatter.tags || [],
             body: body
           };
@@ -186,8 +196,9 @@ function createPostCard(post) {
   
   const categoryColor = categoryColors[post.category] || 'bg-gray-100 text-gray-700';
   
+  const imgAlt = post.featured_image_alt || (post.title ? `Featured image for ${post.title}` : 'Blog post featured image');
   const featuredImage = post.featured_image 
-    ? `<img src="${post.featured_image}" alt="${post.title ? `Featured image for ${post.title}` : 'Blog post featured image'}" class="w-full h-48 object-cover" loading="lazy" decoding="async" width="800" height="192" />`
+    ? `<img src="${post.featured_image}" alt="${imgAlt.replace(/"/g, '&quot;')}" class="w-full h-48 object-cover" loading="lazy" decoding="async" width="800" height="192" />`
     : `<div class="h-48 bg-gradient-to-br from-blue-400 to-indigo-500"></div>`;
   
   article.innerHTML = `

@@ -5,6 +5,38 @@ const path = require('path');
 const postsDir = path.join(__dirname, '../blogs/posts');
 const sitemapPath = path.join(__dirname, '../sitemap.xml');
 
+function parseFrontmatter(content) {
+  const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
+  const match = content.match(frontmatterRegex);
+  if (!match) {
+    return { frontmatter: {}, body: content };
+  }
+  const frontmatterText = match[1];
+  const frontmatter = {};
+  frontmatterText.split('\n').forEach(line => {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex > 0) {
+      const key = line.substring(0, colonIndex).trim();
+      let value = line.substring(colonIndex + 1).trim();
+      if ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      if (value.startsWith('[') && value.endsWith(']')) {
+        value = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''));
+      }
+      if (value === 'true') value = true;
+      else if (value === 'false') value = false;
+      frontmatter[key] = value;
+    }
+  });
+  return { frontmatter, body: match[2] };
+}
+
+function isDraftPost(frontmatter) {
+  return frontmatter.draft === true;
+}
+
 // Base sitemap entries
 const baseUrls = [
   { loc: 'https://www.brandiblemg.com/', priority: '1.0', changefreq: 'weekly', lastmod: '2025-12-04' },
@@ -30,22 +62,26 @@ try {
   if (fs.existsSync(indexPath)) {
     const postsIndex = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
     
-    // Generate blog post URLs
-    blogPosts = postsIndex.map(postFile => {
-      // Extract date from filename (format: YYYY-MM-DD-slug.md)
-      const dateMatch = postFile.match(/^(\d{4}-\d{2}-\d{2})-/);
-      const lastmod = dateMatch ? dateMatch[1] : '2025-12-04';
-      
-      // Generate slug from filename
-      const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
-      
-      return {
-        loc: `https://www.brandiblemg.com/blogs/${slug}/`,
-        priority: '0.7',
-        changefreq: 'monthly',
-        lastmod: lastmod
-      };
-    });
+    blogPosts = postsIndex
+      .map(postFile => {
+        const mdPath = path.join(postsDir, postFile);
+        if (!fs.existsSync(mdPath)) return null;
+        const content = fs.readFileSync(mdPath, 'utf8');
+        const { frontmatter } = parseFrontmatter(content);
+        if (isDraftPost(frontmatter)) return null;
+
+        const dateMatch = postFile.match(/^(\d{4}-\d{2}-\d{2})-/);
+        const lastmod = dateMatch ? dateMatch[1] : '2025-12-04';
+        const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
+
+        return {
+          loc: `https://www.brandiblemg.com/blogs/${slug}/`,
+          priority: '0.7',
+          changefreq: 'monthly',
+          lastmod: lastmod
+        };
+      })
+      .filter(Boolean);
   }
 } catch (error) {
   console.warn('Warning: Could not read blog posts index:', error.message);

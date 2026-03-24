@@ -35,7 +35,10 @@ function parseFrontmatter(content) {
       if (value.startsWith('[') && value.endsWith(']')) {
         value = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''));
       }
-      
+
+      if (value === 'true') value = true;
+      else if (value === 'false') value = false;
+
       frontmatter[key] = value;
     }
   });
@@ -59,6 +62,10 @@ function formatDate(dateString) {
   }
 }
 
+function isDraftPost(frontmatter) {
+  return frontmatter.draft === true;
+}
+
 // Get category color class
 function getCategoryColor(category) {
   const categoryColors = {
@@ -72,15 +79,15 @@ function getCategoryColor(category) {
   return categoryColors[category] || 'bg-gray-100 text-gray-700';
 }
 
-// Generate full image URL
-function getImageUrl(featuredImage) {
-  if (!featuredImage) {
+// Generate full image URL (paths from CMS are usually absolute on site, e.g. /assets/...)
+function getImageUrl(imagePath) {
+  if (!imagePath) {
     return 'https://www.brandiblemg.com/assets/Brandible.png';
   }
-  if (featuredImage.startsWith('http')) {
-    return featuredImage;
+  if (imagePath.startsWith('http')) {
+    return imagePath;
   }
-  return `https://www.brandiblemg.com${featuredImage}`;
+  return `https://www.brandiblemg.com${imagePath.startsWith('/') ? imagePath : `/${imagePath}`}`;
 }
 
 // Read the post.html template
@@ -112,13 +119,33 @@ try {
         console.log(`⚠️  Skipping ${mdFile} - no title found`);
         return;
       }
-      
+
       const slug = generateSlug(mdFile);
+      const slugDir = path.join(outputDir, slug);
+      const outputPath = path.join(slugDir, 'index.html');
+
+      if (isDraftPost(frontmatter)) {
+        if (fs.existsSync(outputPath)) {
+          fs.unlinkSync(outputPath);
+          try {
+            fs.rmdirSync(slugDir);
+          } catch (e) {
+            /* directory not empty or other */
+          }
+        }
+        console.log(`⏭️  Skipped (draft): ${mdFile}`);
+        return;
+      }
+
       const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
-      const imageUrl = getImageUrl(frontmatter.featured_image);
+      const imageUrl = getImageUrl(frontmatter.og_image || frontmatter.featured_image);
       const title = frontmatter.title;
-      const titleWithBrand = `${title} | Brandible Marketing Group`;
-      const description = frontmatter.excerpt || `Read our latest blog post: ${title}`;
+      const seoHeadline = frontmatter.meta_title || title;
+      const titleWithBrand = `${seoHeadline} | Brandible Marketing Group`;
+      const description =
+        frontmatter.meta_description ||
+        frontmatter.excerpt ||
+        `Read our latest blog post: ${title}`;
       
       // Replace meta tags in template
       let html = template;
@@ -271,14 +298,10 @@ try {
         `<script type="application/ld+json">\n  ${JSON.stringify(breadcrumbSchema, null, 2)}\n  </script>`
       );
       
-      // Create output directory for this slug if it doesn't exist
-      const slugDir = path.join(outputDir, slug);
       if (!fs.existsSync(slugDir)) {
         fs.mkdirSync(slugDir, { recursive: true });
       }
-      
-      // Write the generated HTML file
-      const outputPath = path.join(slugDir, 'index.html');
+
       fs.writeFileSync(outputPath, html, 'utf8');
       
       generatedCount++;

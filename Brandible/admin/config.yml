@@ -6,8 +6,10 @@ backend:
 media_folder: "Brandible/assets/blog-images" # Media files will be stored here
 public_folder: "/assets/blog-images" # Public path to media files
 
-# Site URL for previews
+# Site URL for previews and links
 site_url: https://www.brandiblemg.com
+display_url: https://www.brandiblemg.com
+logo_url: https://www.brandiblemg.com/assets/Brandible.png
 
 # Collections - easy to add more later
 collections:
@@ -17,11 +19,38 @@ collections:
     folder: "Brandible/blogs/posts" # Where files are stored
     create: true # Allow creating new files
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}" # Filename pattern
+    summary: "{{title}} — {{date}}"
+    sortable_fields:
+      - title
+      - date
+      - category
+      - draft
+    view_filters:
+      - label: Published
+        field: draft
+        pattern: false
+      - label: Drafts
+        field: draft
+        pattern: true
     fields:
+      - label: "Draft"
+        name: "draft"
+        widget: "boolean"
+        default: false
+        hint: "Draft posts are hidden on the site and skipped when generating share/SEO HTML."
       - {label: "Title", name: "title", widget: "string", required: true}
+      - label: "URL slug"
+        name: "slug"
+        widget: "string"
+        required: false
+        hint: "Short segment for the post URL (lowercase, hyphens). Leave blank to generate from the title."
       - {label: "Publish Date", name: "date", widget: "datetime", required: true}
       - {label: "Author", name: "author", widget: "string", required: true, default: "Brandible Team"}
+      - {label: "SEO title", name: "meta_title", widget: "string", required: false, hint: "Optional. Overrides <title> and Open Graph title (brand suffix added on the site)."}
+      - {label: "SEO description", name: "meta_description", widget: "text", required: false, hint: "Optional. Overrides meta description and social descriptions if set."}
+      - {label: "Social share image", name: "og_image", widget: "image", required: false, hint: "Optional. Overrides featured image for Open Graph / Twitter cards."}
       - {label: "Featured Image", name: "featured_image", widget: "image", required: false}
+      - {label: "Featured image alt text", name: "featured_image_alt", widget: "string", required: false, hint: "Describe the image for accessibility and SEO."}
       - {label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "Short description for blog listing"}
       - {label: "Tags", name: "tags", widget: "list", required: false}
       - {label: "Category", name: "category", widget: "select", options: ["Marketing", "Web Design", "SEO", "Social Media", "Business Tips", "Case Studies"], required: false}
