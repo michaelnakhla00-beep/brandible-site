@@ -1,11 +1,14 @@
-# Git Gateway commits to main directly. Editorial workflow (PRs) calls api.github.com and
-# returns 401 with Identity-only auth — use GitHub OAuth backend if you need real draft/PR flow.
+# GitHub backend + Netlify OAuth (not Git Gateway / Netlify Identity).
+# 1) GitHub → Settings → Developer settings → OAuth Apps → New: callback URL https://api.netlify.com/auth/done
+# 2) Netlify → Project configuration → Access & security → OAuth → GitHub → paste Client ID + Secret
+# 3) CMS users click “Login with GitHub”; they need push access to the repo below.
 backend:
-  name: git-gateway
-  branch: main # Branch to update (optional, defaults to master)
-  # Absolute URLs avoid Decap resolving /.netlify/git relative to the wrong origin (→ api.github.com + 401).
-  gateway_url: https://www.brandiblemg.com/.netlify/git
-  identity_url: https://www.brandiblemg.com/.netlify/identity
+  name: github
+  repo: brandiblemg/brandible-site
+  branch: main
+  auth_scope: repo
+  base_url: https://api.netlify.com
+  # Default auth path is "auth" (→ https://api.netlify.com/auth?...). Do not use "oauth".
 
 # Media storage - configure if you want to upload images
 media_folder: "Brandible/assets/blog-images" # Media files will be stored here

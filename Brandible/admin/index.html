@@ -4,36 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content Manager | Brandible Marketing Group</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <style>
-    [data-netlify-identity-menu] {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 99999;
-      font-family: system-ui, -apple-system, sans-serif;
-      font-size: 14px;
-    }
-  </style>
 </head>
 <body>
-  <!-- Login / account — must be logged in for Git Gateway saves -->
-  <div data-netlify-identity-menu></div>
   <script>
     (function () {
-      // Stale decap-cms localStorage (e.g. after editorial workflow) can leave a backend that hits api.github.com without a GitHub token → 401.
-      try {
-        var mig = "brandible-decap-git-migration-v2";
-        if (!localStorage.getItem(mig)) {
-          Object.keys(localStorage).forEach(function (k) {
-            if (k.indexOf("decap-cms") === 0 || k.indexOf("netlify-cms") === 0) {
-              localStorage.removeItem(k);
-            }
-          });
-          localStorage.setItem(mig, "1");
-        }
-      } catch (e) {}
-
       if (location.hostname === "brandiblemg.com") {
         location.replace(
           "https://www.brandiblemg.com" +
@@ -43,35 +17,21 @@
         );
         return;
       }
-
-      var decapInjected = false;
-      function loadDecapCMSOnce() {
-        if (decapInjected) return;
-        decapInjected = true;
-        var s = document.createElement("script");
-        s.src = "https://unpkg.com/decap-cms@3.5.0/dist/decap-cms.js";
-        document.body.appendChild(s);
-      }
-
-      if (window.netlifyIdentity) {
-        // Never reload on every "login" event — Identity can re-emit for an existing session and causes a reload loop (flashing).
-        var loginHandlerBound = false;
-        window.netlifyIdentity.on("init", function (user) {
-          if (!user && !loginHandlerBound) {
-            loginHandlerBound = true;
-            window.netlifyIdentity.on("login", function () {
-              window.location.href = "/admin/";
-            });
-          }
-          loadDecapCMSOnce();
-        });
-        window.netlifyIdentity.on("logout", function () {
-          window.location.reload();
-        });
-        window.netlifyIdentity.init();
-      } else {
-        loadDecapCMSOnce();
-      }
+      // One-time clear when switching from Git Gateway / Identity so old CMS state does not break login.
+      try {
+        var m = "brandible-cms-github-backend-v1";
+        if (!localStorage.getItem(m)) {
+          Object.keys(localStorage).forEach(function (k) {
+            if (k.indexOf("decap-cms") === 0 || k.indexOf("netlify-cms") === 0) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(m, "1");
+        }
+      } catch (e) {}
+      var s = document.createElement("script");
+      s.src = "https://unpkg.com/decap-cms@3.5.0/dist/decap-cms.js";
+      document.body.appendChild(s);
     })();
   </script>
 </body>
