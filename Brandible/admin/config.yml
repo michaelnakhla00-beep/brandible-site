@@ -3,6 +3,9 @@
 backend:
   name: git-gateway
   branch: main # Branch to update (optional, defaults to master)
+  # Absolute URLs avoid Decap resolving /.netlify/git relative to the wrong origin (→ api.github.com + 401).
+  gateway_url: https://www.brandiblemg.com/.netlify/git
+  identity_url: https://www.brandiblemg.com/.netlify/identity
 
 # Media storage - configure if you want to upload images
 media_folder: "Brandible/assets/blog-images" # Media files will be stored here

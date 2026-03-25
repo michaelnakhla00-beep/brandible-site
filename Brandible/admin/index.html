@@ -21,6 +21,19 @@
   <div data-netlify-identity-menu></div>
   <script>
     (function () {
+      // Stale decap-cms localStorage (e.g. after editorial workflow) can leave a backend that hits api.github.com without a GitHub token → 401.
+      try {
+        var mig = "brandible-decap-git-migration-v2";
+        if (!localStorage.getItem(mig)) {
+          Object.keys(localStorage).forEach(function (k) {
+            if (k.indexOf("decap-cms") === 0 || k.indexOf("netlify-cms") === 0) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(mig, "1");
+        }
+      } catch (e) {}
+
       if (location.hostname === "brandiblemg.com") {
         location.replace(
           "https://www.brandiblemg.com" +
