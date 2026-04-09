@@ -8,6 +8,8 @@ backend:
   branch: main
   auth_scope: repo
   base_url: https://api.netlify.com
+  # Replaced during Netlify build with SITE_ID (UUID). Hostname alone often yields api.netlify.com/auth "Not Found".
+  site_domain: www.brandiblemg.com
   # Default auth path is "auth" (→ https://api.netlify.com/auth?...). Do not use "oauth".
 
 # Media storage - configure if you want to upload images
