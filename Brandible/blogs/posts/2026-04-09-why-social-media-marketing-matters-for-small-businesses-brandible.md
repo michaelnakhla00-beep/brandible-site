@@ -130,4 +130,4 @@ Whether you are starting from nothing or trying to improve what you already have
 
 If you are ready to take your social media seriously, we are ready to help
 
-Visit **[brandiblemg.com](www.brandiblemg.com)** to get started or reach out and let’s talk through your next move
+Visit **[brandiblemg.com](https://www.brandiblemg.com/services/media-management/)** to get started or reach out and let’s talk through your next move
