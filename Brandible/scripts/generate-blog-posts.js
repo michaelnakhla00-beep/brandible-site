@@ -66,6 +66,266 @@ function isDraftPost(frontmatter) {
   return frontmatter.draft === true;
 }
 
+function toIso8601Date(value) {
+  if (!value) return new Date().toISOString();
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
+
+function countWords(markdownBody) {
+  if (!markdownBody || !String(markdownBody).trim()) return undefined;
+  const n = String(markdownBody).trim().split(/\s+/).length;
+  return n > 0 ? n : undefined;
+}
+
+function escapeHtmlEntity(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/** Related service URLs for topic clusters — keep in sync with getRelatedServices() in blog-post-renderer.js */
+const CATEGORY_SERVICE = {
+  Marketing: {
+    name: 'Digital Marketing',
+    url: '/services/digital-marketing/',
+    description: 'Data-driven SEO, ads, and growth strategy for local businesses.'
+  },
+  'Web Design': {
+    name: 'Web Design & Development',
+    url: '/services/web-design/',
+    description: 'Fast, conversion-focused websites that build trust with visitors.'
+  },
+  SEO: {
+    name: 'Digital Marketing & SEO',
+    url: '/services/digital-marketing/',
+    description: 'Search visibility, content structure, and measurable growth.'
+  },
+  'Social Media': {
+    name: 'Media Management',
+    url: '/services/media-management/',
+    description: 'Social content, creative, and channel management.'
+  },
+  'Business Tips': {
+    name: 'Our Services',
+    url: '/services/',
+    description: 'Full-service marketing support for established local brands.'
+  },
+  'Case Studies': {
+    name: 'Portfolio',
+    url: '/portfolio/',
+    description: 'Real client work and results from the Brandible team.'
+  },
+  Branding: {
+    name: 'Branding & Identity',
+    url: '/services/branding/',
+    description: 'Logos, visual systems, and brand strategy.'
+  }
+};
+
+const CATEGORY_EXTRA_SERVICE = {
+  SEO: {
+    name: 'Web Design & Development',
+    url: '/services/web-design/',
+    description: 'Technical SEO and site structure start with a solid website foundation.'
+  },
+  'Web Design': {
+    name: 'Digital Marketing',
+    url: '/services/digital-marketing/',
+    description: 'Drive traffic to your site with search and paid campaigns.'
+  },
+  Marketing: {
+    name: 'Branding & Identity',
+    url: '/services/branding/',
+    description: 'Align your look and message across every channel.'
+  }
+};
+
+const TAG_TO_SERVICE = [
+  ['website', CATEGORY_SERVICE['Web Design']],
+  ['web design', CATEGORY_SERVICE['Web Design']],
+  ['development', CATEGORY_SERVICE['Web Design']],
+  ['seo', CATEGORY_SERVICE.SEO],
+  ['marketing', CATEGORY_SERVICE.Marketing],
+  ['advertising', CATEGORY_SERVICE.Marketing],
+  ['social media', CATEGORY_SERVICE['Social Media']],
+  ['branding', CATEGORY_SERVICE.Branding],
+  ['brand', CATEGORY_SERVICE.Branding]
+];
+
+const DEFAULT_SERVICE_FALLBACKS = [
+  CATEGORY_SERVICE['Web Design'],
+  CATEGORY_SERVICE.SEO,
+  CATEGORY_SERVICE.Branding
+];
+
+function collectRelatedServiceEntries(frontmatter, max = 3) {
+  const entries = [];
+  const seen = new Set();
+
+  function push(svc) {
+    if (!svc || !svc.url || seen.has(svc.url)) return;
+    seen.add(svc.url);
+    entries.push(svc);
+  }
+
+  const cat = frontmatter.category;
+  if (cat && CATEGORY_SERVICE[cat]) {
+    push(CATEGORY_SERVICE[cat]);
+  }
+  if (cat && CATEGORY_EXTRA_SERVICE[cat]) {
+    push(CATEGORY_EXTRA_SERVICE[cat]);
+  }
+
+  if (frontmatter.tags && Array.isArray(frontmatter.tags)) {
+    for (const tag of frontmatter.tags) {
+      const lower = String(tag).toLowerCase();
+      for (const [key, svc] of TAG_TO_SERVICE) {
+        if (lower.includes(key)) {
+          push(svc);
+          if (entries.length >= max) return entries.slice(0, max);
+        }
+      }
+    }
+  }
+
+  for (const svc of DEFAULT_SERVICE_FALLBACKS) {
+    push(svc);
+    if (entries.length >= max) break;
+  }
+
+  return entries.slice(0, max);
+}
+
+function buildStaticTopicClusterHtml(frontmatter, slug, publishedPosts) {
+  const services = collectRelatedServiceEntries(frontmatter, 3);
+  const primary = services[0];
+  const excerpt =
+    frontmatter.excerpt ||
+    frontmatter.meta_description ||
+    '';
+
+  const others = publishedPosts.filter((p) => p.slug !== slug).slice(0, 3);
+
+  const intro = excerpt
+    ? `<p class="text-gray-700 mb-4"><strong class="text-gray-900">In this article:</strong> ${escapeHtmlEntity(excerpt)}</p>`
+    : '';
+
+  const primaryLink = primary
+    ? ` If you want help with the topics above, start with our <a href="${primary.url}" class="text-blue-600 font-medium hover:underline">${escapeHtmlEntity(primary.name)}</a> services or <a href="/contact/" class="text-blue-600 font-medium hover:underline">book a free call</a>.`
+    : '';
+
+  const serviceCards = services
+    .map(
+      (s) => `
+    <a href="${s.url}" class="block p-5 bg-white rounded-lg border border-gray-200 shadow-sm hover:border-blue-200 hover:shadow-md transition-all">
+      <h3 class="text-base font-bold text-gray-900 mb-1">${escapeHtmlEntity(s.name)}</h3>
+      <p class="text-gray-600 text-sm mb-2">${escapeHtmlEntity(s.description)}</p>
+      <span class="text-blue-600 text-sm font-medium inline-flex items-center gap-1">Learn more <span aria-hidden="true">→</span></span>
+    </a>`
+    )
+    .join('');
+
+  const postLinks =
+    others.length > 0
+      ? `
+    <div class="border-t border-gray-200 pt-5 mt-5">
+      <h3 class="text-sm font-semibold text-gray-900 mb-3">More on the blog</h3>
+      <ul class="space-y-2 list-disc list-inside text-blue-600">
+        ${others
+          .map(
+            (p) =>
+              `<li><a href="/blogs/${escapeHtmlEntity(p.slug)}/" class="hover:underline">${escapeHtmlEntity(p.title)}</a></li>`
+          )
+          .join('')}
+      </ul>
+    </div>`
+      : '';
+
+  return `        <section class="mb-10 rounded-xl border border-gray-200 bg-gray-50 p-6 md:p-8" data-static-internal-links="true" aria-label="Related services and posts">
+          <h2 class="text-xl font-bold text-gray-900 mb-2">Keep exploring</h2>
+          ${intro}
+          <p class="text-gray-700 text-sm mb-6">Connect this topic to how Brandible helps New Jersey businesses grow.${primaryLink}</p>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-2">
+            ${serviceCards}
+          </div>
+          ${postLinks}
+        </section>
+`;
+}
+
+function buildPublishedPostIndex(postsDir, mdFiles) {
+  const list = [];
+  for (const mdFile of mdFiles) {
+    const filePath = path.join(postsDir, mdFile);
+    const content = fs.readFileSync(filePath, 'utf8');
+    const { frontmatter } = parseFrontmatter(content);
+    if (!frontmatter.title || isDraftPost(frontmatter)) continue;
+    list.push({ slug: generateSlug(mdFile), title: frontmatter.title });
+  }
+  return list;
+}
+
+function buildBlogPostingSchema(frontmatter, body, postUrl, title, description, imageUrl) {
+  const datePublished = toIso8601Date(frontmatter.date);
+  const dateModified = toIso8601Date(
+    frontmatter.updated || frontmatter.updated_at || frontmatter.date_modified || frontmatter.date
+  );
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description,
+    image: [imageUrl],
+    datePublished,
+    dateModified,
+    author: {
+      '@type': 'Organization',
+      name: frontmatter.author || 'Brandible Marketing Group',
+      url: 'https://www.brandiblemg.com/'
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Brandible Marketing Group',
+      url: 'https://www.brandiblemg.com/',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.brandiblemg.com/assets/Brandible.png'
+      }
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl
+    },
+    url: postUrl,
+    inLanguage: 'en-US',
+    isPartOf: {
+      '@type': 'Blog',
+      '@id': 'https://www.brandiblemg.com/blogs/#blog',
+      name: 'Brandible Marketing Group Blog',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Brandible Marketing Group',
+        url: 'https://www.brandiblemg.com/'
+      }
+    }
+  };
+
+  const wc = countWords(body);
+  if (wc) schema.wordCount = wc;
+  if (frontmatter.category) schema.articleSection = frontmatter.category;
+  if (frontmatter.tags && Array.isArray(frontmatter.tags) && frontmatter.tags.length > 0) {
+    schema.keywords = frontmatter.tags.join(', ');
+  }
+
+  return schema;
+}
+
 // Get category color class
 function getCategoryColor(category) {
   const categoryColors = {
@@ -105,7 +365,9 @@ try {
     console.log('⚠️  No blog posts found');
     process.exit(0);
   }
-  
+
+  const publishedPosts = buildPublishedPostIndex(postsDir, mdFiles);
+
   let generatedCount = 0;
   
   // Process each markdown file
@@ -113,7 +375,7 @@ try {
     try {
       const filePath = path.join(postsDir, mdFile);
       const content = fs.readFileSync(filePath, 'utf8');
-      const { frontmatter } = parseFrontmatter(content);
+      const { frontmatter, body } = parseFrontmatter(content);
       
       if (!frontmatter.title) {
         console.log(`⚠️  Skipping ${mdFile} - no title found`);
@@ -259,10 +521,10 @@ try {
         `<meta name="twitter:image" content="${imageUrl}" />`
       );
       
-      // Update canonical URL
+      // Update canonical URL (single preferred URL; no runtime window.location override)
       html = html.replace(
-        /<link rel="canonical" href="[^"]*" id="canonical-url" \/>/,
-        `<link rel="canonical" href="${postUrl}" id="canonical-url" />`
+        /<link rel="canonical" href="[^"]*" \/>/,
+        `<link rel="canonical" href="${postUrl}" />`
       );
       
       // Update breadcrumb structured data
@@ -297,7 +559,32 @@ try {
         breadcrumbRegex,
         `<script type="application/ld+json">\n  ${JSON.stringify(breadcrumbSchema, null, 2)}\n  </script>`
       );
-      
+
+      const blogPostingSchema = buildBlogPostingSchema(
+        frontmatter,
+        body,
+        postUrl,
+        title,
+        description,
+        imageUrl
+      );
+      const blogPostingScript = `<script type="application/ld+json" data-schema="blog-posting">\n  ${JSON.stringify(blogPostingSchema, null, 2)}\n  </script>`;
+      if (!html.includes('<!-- INJECT_BLOG_POSTING_SCHEMA -->')) {
+        console.warn(`⚠️  BlogPosting placeholder missing in template for ${mdFile}`);
+      } else {
+        html = html.replace('  <!-- INJECT_BLOG_POSTING_SCHEMA -->\n', `  ${blogPostingScript}\n`);
+      }
+
+      const topicClusterHtml = buildStaticTopicClusterHtml(frontmatter, slug, publishedPosts);
+      if (!html.includes('<!-- INJECT_STATIC_TOPIC_CLUSTER -->')) {
+        console.warn(`⚠️  Topic cluster placeholder missing for ${mdFile}`);
+      } else {
+        html = html.replace(
+          '        <!-- INJECT_STATIC_TOPIC_CLUSTER -->\n',
+          `${topicClusterHtml}\n`
+        );
+      }
+
       if (!fs.existsSync(slugDir)) {
         fs.mkdirSync(slugDir, { recursive: true });
       }

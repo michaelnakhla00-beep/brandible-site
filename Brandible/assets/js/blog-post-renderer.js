@@ -221,13 +221,12 @@ async function loadBlogPost() {
       twitterImage.setAttribute('content', shareImageUrl);
     }
 
-    // Update Open Graph URL to the actual blog post URL
+    // Preferred absolute URL (HTTPS, www, trailing slash) — never mirror query params or alternate hosts
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl && slug) {
       ogUrl.setAttribute('content', postUrl);
     }
 
-    // Update canonical URL to point to actual page URL (fixes canonical pointing to redirect issue)
     const canonicalLink = document.querySelector('link[rel="canonical"]');
     if (canonicalLink && slug) {
       canonicalLink.setAttribute('href', postUrl);
@@ -398,56 +397,74 @@ async function loadRelatedPosts(currentSlug) {
   }
 }
 
-// Add Article structured data
+// Add BlogPosting structured data (only when static HTML did not already include it)
 function addArticleSchema(frontmatter, postFile, body) {
-  // Remove existing Article schema if present
+  if (document.querySelector('script[type="application/ld+json"][data-schema="blog-posting"]')) {
+    return;
+  }
+
   const existingSchema = document.querySelector('script[data-schema="article"]');
   if (existingSchema) {
     existingSchema.remove();
   }
 
-  // Generate slug from filename
   const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
   const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
-  
-  // Build Article schema
-  const schemaImage = socialImageUrl(frontmatter) || "https://www.brandiblemg.com/assets/Brandible.png";
+
+  const schemaImage = socialImageUrl(frontmatter) || 'https://www.brandiblemg.com/assets/Brandible.png';
   const schemaDescription =
     frontmatter.meta_description ||
     frontmatter.excerpt ||
     frontmatter.title ||
-    "";
+    '';
+
+  const datePublished = frontmatter.date
+    ? new Date(frontmatter.date).toISOString()
+    : new Date().toISOString();
+  const dateModified = frontmatter.updated || frontmatter.updated_at || frontmatter.date_modified || frontmatter.date
+    ? new Date(frontmatter.updated || frontmatter.updated_at || frontmatter.date_modified || frontmatter.date).toISOString()
+    : datePublished;
 
   const articleSchema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": frontmatter.title || "Blog Post",
-    "description": schemaDescription,
-    "image": schemaImage,
-    "datePublished": frontmatter.date || new Date().toISOString(),
-    "dateModified": frontmatter.date || new Date().toISOString(),
-    "author": {
-      "@type": "Organization",
-      "name": frontmatter.author || "Brandible Marketing Group",
-      "url": "https://www.brandiblemg.com"
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: frontmatter.title || 'Blog Post',
+    description: schemaDescription,
+    image: [schemaImage],
+    datePublished,
+    dateModified,
+    author: {
+      '@type': 'Organization',
+      name: frontmatter.author || 'Brandible Marketing Group',
+      url: 'https://www.brandiblemg.com/'
     },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Brandible Marketing Group",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://www.brandiblemg.com/assets/Brandible.png"
+    publisher: {
+      '@type': 'Organization',
+      name: 'Brandible Marketing Group',
+      url: 'https://www.brandiblemg.com/',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.brandiblemg.com/assets/Brandible.png'
       }
     },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": postUrl
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl
     },
-    "url": postUrl,
-    "inLanguage": "en-US"
+    url: postUrl,
+    inLanguage: 'en-US',
+    isPartOf: {
+      '@type': 'Blog',
+      '@id': 'https://www.brandiblemg.com/blogs/#blog',
+      name: 'Brandible Marketing Group Blog',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Brandible Marketing Group',
+        url: 'https://www.brandiblemg.com/'
+      }
+    }
   };
-  
-  // Estimate word count from body if available
+
   if (body) {
     const wordCount = body.split(/\s+/).length;
     if (wordCount > 0) {
@@ -455,20 +472,17 @@ function addArticleSchema(frontmatter, postFile, body) {
     }
   }
 
-  // Add category if present
   if (frontmatter.category) {
     articleSchema.articleSection = frontmatter.category;
   }
 
-  // Add keywords/tags if present
   if (frontmatter.tags && frontmatter.tags.length > 0) {
-    articleSchema.keywords = frontmatter.tags.join(", ");
+    articleSchema.keywords = frontmatter.tags.join(', ');
   }
 
-  // Inject schema into page
   const script = document.createElement('script');
   script.type = 'application/ld+json';
-  script.setAttribute('data-schema', 'article');
+  script.setAttribute('data-schema', 'blog-posting');
   script.textContent = JSON.stringify(articleSchema);
   document.head.appendChild(script);
 }
@@ -485,6 +499,7 @@ function renderPost(frontmatter, body, container) {
   };
   
   const categoryColor = categoryColors[frontmatter.category] || 'bg-gray-100 text-gray-700';
+  const hadStaticCluster = !!document.querySelector('[data-static-internal-links="true"]');
   
   // Convert markdown to HTML
   const htmlBody = marked.parse(body);
@@ -588,10 +603,11 @@ function renderPost(frontmatter, body, container) {
         </footer>
       ` : ''}
       
+      ${hadStaticCluster ? '' : `
       <!-- Related Services -->
       <div class="mt-12 pt-8 border-t border-gray-200">
         <h3 class="text-2xl font-bold text-gray-900 mb-6">Related Services</h3>
-        <div class="grid md:grid-cols-2 gap-4">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           ${getRelatedServices(frontmatter.category, frontmatter.tags)}
         </div>
       </div>
@@ -600,7 +616,6 @@ function renderPost(frontmatter, body, container) {
       <section class="mt-16 pt-12 border-t border-gray-200">
         <h3 class="text-2xl font-bold text-gray-900 mb-6">More from Our Blog</h3>
         <div class="grid md:grid-cols-2 gap-6" id="related-posts-container">
-          <!-- Related posts will be loaded here -->
           <div class="col-span-full text-center py-4 text-gray-500 text-sm">Loading related posts...</div>
         </div>
         <div class="mt-8 text-center">
@@ -612,6 +627,7 @@ function renderPost(frontmatter, body, container) {
           </a>
         </div>
       </section>
+      `}
     </article>
   `;
   
@@ -654,93 +670,134 @@ function renderPost(frontmatter, body, container) {
     });
   });
   
-  // Load and render related posts asynchronously
-  loadRelatedPosts(slug).then(relatedPostsHTML => {
-    const relatedPostsContainer = container.querySelector('#related-posts-container');
-    if (relatedPostsContainer && relatedPostsHTML) {
-      relatedPostsContainer.innerHTML = relatedPostsHTML;
-    } else if (relatedPostsContainer) {
-      relatedPostsContainer.innerHTML = `
+  if (!hadStaticCluster) {
+    loadRelatedPosts(slug).then(relatedPostsHTML => {
+      const relatedPostsContainer = container.querySelector('#related-posts-container');
+      if (relatedPostsContainer && relatedPostsHTML) {
+        relatedPostsContainer.innerHTML = relatedPostsHTML;
+      } else if (relatedPostsContainer) {
+        relatedPostsContainer.innerHTML = `
         <div class="col-span-full text-center py-4 text-gray-500 text-sm">No other posts available</div>
       `;
-    }
-  });
-}
-
-// Get related services based on category and tags
-function getRelatedServices(category, tags) {
-  const serviceMap = {
-    'Marketing': '/services/digital-marketing/',
-    'Web Design': '/services/web-design/',
-    'SEO': '/services/digital-marketing/',
-    'Social Media': '/services/media-management/',
-    'Business Tips': '/services/',
-    'Case Studies': '/portfolio/'
-  };
-
-  const tagMap = {
-    'website': '/services/web-design/',
-    'web design': '/services/web-design/',
-    'development': '/services/web-design/',
-    'seo': '/services/digital-marketing/',
-    'marketing': '/services/digital-marketing/',
-    'advertising': '/services/digital-marketing/',
-    'social media': '/services/media-management/',
-    'branding': '/services/branding/',
-    'brand': '/services/branding/'
-  };
-
-  let relatedServices = [];
-  
-  // Add service based on category
-  if (category && serviceMap[category]) {
-    const serviceName = category === 'Web Design' ? 'Web Design & Development' : 
-                       category === 'Marketing' ? 'Digital Marketing' :
-                       category === 'Social Media' ? 'Media Management' : category;
-    relatedServices.push({
-      name: serviceName,
-      url: serviceMap[category],
-      description: category === 'Web Design' ? 'Custom websites built to convert' :
-                   category === 'Marketing' ? 'Data-driven marketing strategies' :
-                   category === 'Social Media' ? 'Social media management & content' : 'Professional services'
-    });
-  }
-
-  // Add services based on tags
-  if (tags && Array.isArray(tags)) {
-    tags.forEach(tag => {
-      const lowerTag = tag.toLowerCase();
-      for (const [key, url] of Object.entries(tagMap)) {
-        if (lowerTag.includes(key) && !relatedServices.find(s => s.url === url)) {
-          const serviceName = key === 'website' || key === 'web design' || key === 'development' ? 'Web Design & Development' :
-                            key === 'seo' || key === 'marketing' || key === 'advertising' ? 'Digital Marketing' :
-                            key === 'social media' ? 'Media Management' :
-                            key === 'branding' || key === 'brand' ? 'Branding & Identity' : '';
-          if (serviceName) {
-            relatedServices.push({
-              name: serviceName,
-              url: url,
-              description: key === 'website' || key === 'web design' ? 'Custom websites built to convert' :
-                          key === 'seo' || key === 'marketing' ? 'Data-driven marketing strategies' :
-                          key === 'social media' ? 'Social media management & content' :
-                          key === 'branding' ? 'Complete brand identity design' : 'Professional services'
-            });
-          }
-        }
       }
     });
   }
+}
 
-  // Default to main services page if no matches
-  if (relatedServices.length === 0) {
-    relatedServices = [
-      { name: 'Web Design & Development', url: '/services/web-design/', description: 'Custom websites built to convert' },
-      { name: 'Digital Marketing', url: '/services/digital-marketing/', description: 'Data-driven marketing strategies' }
-    ];
+/** Topic → service links — keep aligned with collectRelatedServiceEntries in generate-blog-posts.js */
+function collectRelatedServicesEntries(category, tags, max = 3) {
+  const CATEGORY_SERVICE = {
+    Marketing: {
+      name: 'Digital Marketing',
+      url: '/services/digital-marketing/',
+      description: 'Data-driven SEO, ads, and growth strategy for local businesses.'
+    },
+    'Web Design': {
+      name: 'Web Design & Development',
+      url: '/services/web-design/',
+      description: 'Fast, conversion-focused websites that build trust with visitors.'
+    },
+    SEO: {
+      name: 'Digital Marketing & SEO',
+      url: '/services/digital-marketing/',
+      description: 'Search visibility, content structure, and measurable growth.'
+    },
+    'Social Media': {
+      name: 'Media Management',
+      url: '/services/media-management/',
+      description: 'Social content, creative, and channel management.'
+    },
+    'Business Tips': {
+      name: 'Our Services',
+      url: '/services/',
+      description: 'Full-service marketing support for established local brands.'
+    },
+    'Case Studies': {
+      name: 'Portfolio',
+      url: '/portfolio/',
+      description: 'Real client work and results from the Brandible team.'
+    },
+    Branding: {
+      name: 'Branding & Identity',
+      url: '/services/branding/',
+      description: 'Logos, visual systems, and brand strategy.'
+    }
+  };
+
+  const CATEGORY_EXTRA_SERVICE = {
+    SEO: {
+      name: 'Web Design & Development',
+      url: '/services/web-design/',
+      description: 'Technical SEO and site structure start with a solid website foundation.'
+    },
+    'Web Design': {
+      name: 'Digital Marketing',
+      url: '/services/digital-marketing/',
+      description: 'Drive traffic to your site with search and paid campaigns.'
+    },
+    Marketing: {
+      name: 'Branding & Identity',
+      url: '/services/branding/',
+      description: 'Align your look and message across every channel.'
+    }
+  };
+
+  const TAG_TO_SERVICE = [
+    ['website', CATEGORY_SERVICE['Web Design']],
+    ['web design', CATEGORY_SERVICE['Web Design']],
+    ['development', CATEGORY_SERVICE['Web Design']],
+    ['seo', CATEGORY_SERVICE.SEO],
+    ['marketing', CATEGORY_SERVICE.Marketing],
+    ['advertising', CATEGORY_SERVICE.Marketing],
+    ['social media', CATEGORY_SERVICE['Social Media']],
+    ['branding', CATEGORY_SERVICE.Branding],
+    ['brand', CATEGORY_SERVICE.Branding]
+  ];
+
+  const DEFAULT_SERVICE_FALLBACKS = [
+    CATEGORY_SERVICE['Web Design'],
+    CATEGORY_SERVICE.SEO,
+    CATEGORY_SERVICE.Branding
+  ];
+
+  const entries = [];
+  const seen = new Set();
+
+  function push(svc) {
+    if (!svc || !svc.url || seen.has(svc.url)) return;
+    seen.add(svc.url);
+    entries.push(svc);
   }
 
-  // Limit to 2 services
-  relatedServices = relatedServices.slice(0, 2);
+  if (category && CATEGORY_SERVICE[category]) {
+    push(CATEGORY_SERVICE[category]);
+  }
+  if (category && CATEGORY_EXTRA_SERVICE[category]) {
+    push(CATEGORY_EXTRA_SERVICE[category]);
+  }
+
+  if (tags && Array.isArray(tags)) {
+    for (const tag of tags) {
+      const lower = String(tag).toLowerCase();
+      for (const [key, svc] of TAG_TO_SERVICE) {
+        if (lower.includes(key)) {
+          push(svc);
+          if (entries.length >= max) return entries.slice(0, max);
+        }
+      }
+    }
+  }
+
+  for (const svc of DEFAULT_SERVICE_FALLBACKS) {
+    push(svc);
+    if (entries.length >= max) break;
+  }
+
+  return entries.slice(0, max);
+}
+
+function getRelatedServices(category, tags) {
+  const relatedServices = collectRelatedServicesEntries(category, tags, 3);
 
   return relatedServices.map(service => `
     <a href="${service.url}" class="block p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition-all hover:border-blue-200">
