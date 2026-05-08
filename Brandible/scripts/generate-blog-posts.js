@@ -202,60 +202,7 @@ function collectRelatedServiceEntries(frontmatter, max = 3) {
 }
 
 function buildStaticTopicClusterHtml(frontmatter, slug, publishedPosts) {
-  const services = collectRelatedServiceEntries(frontmatter, 3);
-  const primary = services[0];
-  const excerpt =
-    frontmatter.excerpt ||
-    frontmatter.meta_description ||
-    '';
-
-  const others = publishedPosts.filter((p) => p.slug !== slug).slice(0, 3);
-
-  const intro = excerpt
-    ? `<p class="text-gray-700 mb-4"><strong class="text-gray-900">In this article:</strong> ${escapeHtmlEntity(excerpt)}</p>`
-    : '';
-
-  const primaryLink = primary
-    ? ` If you want help with the topics above, start with our <a href="${primary.url}" class="text-blue-600 font-medium hover:underline">${escapeHtmlEntity(primary.name)}</a> services or <a href="/contact/" class="text-blue-600 font-medium hover:underline">book a free call</a>.`
-    : '';
-
-  const serviceCards = services
-    .map(
-      (s) => `
-    <a href="${s.url}" class="block p-5 bg-white rounded-lg border border-gray-200 shadow-sm hover:border-blue-200 hover:shadow-md transition-all">
-      <h3 class="text-base font-bold text-gray-900 mb-1">${escapeHtmlEntity(s.name)}</h3>
-      <p class="text-gray-600 text-sm mb-2">${escapeHtmlEntity(s.description)}</p>
-      <span class="text-blue-600 text-sm font-medium inline-flex items-center gap-1">Learn more <span aria-hidden="true">→</span></span>
-    </a>`
-    )
-    .join('');
-
-  const postLinks =
-    others.length > 0
-      ? `
-    <div class="border-t border-gray-200 pt-5 mt-5">
-      <h3 class="text-sm font-semibold text-gray-900 mb-3">More on the blog</h3>
-      <ul class="space-y-2 list-disc list-inside text-blue-600">
-        ${others
-          .map(
-            (p) =>
-              `<li><a href="/blogs/${escapeHtmlEntity(p.slug)}/" class="hover:underline">${escapeHtmlEntity(p.title)}</a></li>`
-          )
-          .join('')}
-      </ul>
-    </div>`
-      : '';
-
-  return `        <section class="mb-10 rounded-xl border border-gray-200 bg-gray-50 p-6 md:p-8" data-static-internal-links="true" aria-label="Related services and posts">
-          <h2 class="text-xl font-bold text-gray-900 mb-2">Keep exploring</h2>
-          ${intro}
-          <p class="text-gray-700 text-sm mb-6">Connect this topic to how Brandible helps New Jersey businesses grow.${primaryLink}</p>
-          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-2">
-            ${serviceCards}
-          </div>
-          ${postLinks}
-        </section>
-`;
+  return '';
 }
 
 function buildPublishedPostIndex(postsDir, mdFiles) {
