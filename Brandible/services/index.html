@@ -44,6 +44,9 @@
   <link rel="prefetch" href="/portfolio/" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
   <script defer src="../assets/js/lazy-all.js"></script>
   
   <!-- Cookie Banner -->
@@ -574,62 +577,66 @@
       </div>
     </section>
 
-    <section id="cta" class="bg-gradient-to-br from-purple-400 via-pink-300 to-indigo-400 py-24 relative overflow-hidden">
-      <!-- Subtle texture overlay -->
-      <div class="absolute inset-0 opacity-10">
-        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 30px 30px;"></div>
-      </div>
-      
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Ready to Transform Your Business?</h2>
-        <p class="text-xl md:text-2xl text-white/95 mb-6 max-w-2xl mx-auto">Get a custom strategy that drives real results — no cookie-cutter solutions.</p>
-        
-        <!-- Benefit Points with Icons -->
-        <div class="flex flex-wrap justify-center items-center gap-6 mb-10 text-white/90">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span class="text-sm font-medium">No obligation</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span class="text-sm font-medium">Free consultation</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span class="text-sm font-medium">Same-day response</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span class="text-sm font-medium">Custom solutions</span>
-          </div>
-        </div>
-        
-        <!-- Multiple CTAs -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-          <a href="/contact/#book-call" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-yellow-300">
+    <section id="cta" class="bg-gray-50 py-16 lg:py-24 border-t border-gray-200">
+      <div class="services-cta-inner mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-sm font-semibold text-yellow-600 uppercase tracking-widest mb-4">— Let's Grow Together</p>
+        <h2 class="services-cta-headline text-4xl md:text-5xl lg:text-[3.25rem] leading-tight text-gray-900 mb-6">
+          Let's Build Something That<br />
+          <em class="text-yellow-500 not-italic">Actually</em> Works.
+        </h2>
+        <p class="text-lg text-gray-600 leading-relaxed mb-8 mx-auto">
+          Whether you need a website, more local visibility, a stronger brand, or help managing your online presence —<br />
+          we create custom solutions that drive real results for your business.
+        </p>
+
+        <ul class="flex flex-wrap justify-center gap-x-6 gap-y-3 mb-10 text-sm text-gray-700">
+          <li class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-400 text-gray-900 flex-shrink-0" aria-hidden="true">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </span>
+            No long-term contracts
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-400 text-gray-900 flex-shrink-0" aria-hidden="true">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </span>
+            Free consultation
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-400 text-gray-900 flex-shrink-0" aria-hidden="true">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </span>
+            Local business focused
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-400 text-gray-900 flex-shrink-0" aria-hidden="true">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </span>
+            Custom solutions
+          </li>
+        </ul>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <a href="/contact/#book-call" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-8 py-4 rounded-xl font-bold text-base shadow-md hover:shadow-lg hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-yellow-300">
             Book Your Free Consultation
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-            </svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
           </a>
-          <a href="/portfolio/" class="inline-flex items-center justify-center gap-2 bg-white/20 backdrop-blur-sm text-white border-2 border-white/30 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/30 hover:border-white/50 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/50">
+          <a href="/portfolio/" class="inline-flex items-center justify-center gap-2 bg-white text-gray-900 border-2 border-gray-900 px-8 py-4 rounded-xl font-semibold text-base hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-300">
             View Our Work
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-            </svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
           </a>
         </div>
-        
-        <p class="text-sm text-white/80">Start your journey today — let's build something amazing together.</p>
+
+        <div class="border-t border-gray-200 pt-8">
+          <p class="text-sm text-gray-500 mb-5">Trusted by local businesses throughout New Jersey</p>
+          <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-3 text-gray-400">
+            <span class="text-xs font-bold tracking-wider uppercase">Jet Rose</span>
+            <span class="text-xs font-bold tracking-wider uppercase">Cross &amp; Black</span>
+            <span class="text-xs font-bold tracking-wider uppercase">The Doorstep Detailer</span>
+            <span class="text-xs font-bold tracking-wider uppercase">Vision Impex</span>
+            <span class="text-xs font-bold tracking-wider uppercase">Unite Transport</span>
+          </div>
+        </div>
       </div>
     </section>
   </main>

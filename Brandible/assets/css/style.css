@@ -571,3 +571,12 @@ body.modal-open{ overflow:hidden; }
   border-top: 1px solid rgb(229 231 235); /* gray-200 */
   margin: 3em 0;
 }
+
+/* Services page — bottom CTA */
+.services-cta-headline {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+.services-cta-inner {
+  max-width: calc(48rem * 1.35);
+}
