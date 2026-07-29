@@ -9,8 +9,8 @@
   <!-- <meta name="google-site-verification" content="PASTE_VERIFICATION_CODE_HERE" /> -->
 
   <!-- Page Title + Description -->
-  <title>Brandible Marketing Group | Digital Marketing Agency in NJ</title>
-  <meta name="description" content="Leading NJ marketing agency. We help local businesses grow with professional websites, social media, SEO, and digital advertising. Top-rated. Free consultation." />
+  <title>Brandible Marketing Group | Websites, Branding &amp; Growth for NJ Businesses</title>
+  <meta name="description" content="Brandible builds high-performing websites, brands, and growth systems for ambitious local businesses in New Jersey. See our work and start a project." />
   <meta name="author" content="Brandible! Marketing Group" />
 
   <!-- Favicon -->
@@ -22,49 +22,49 @@
 
   <!-- Resource Hints for Third-Party Domains (Optimized) -->
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
 
-  <!-- Critical Resource Prioritization -->
-  <!-- Preload LCP image (above-the-fold logo) -->
-  <link rel="preload" as="image" href="/assets/transparent.webp" fetchpriority="high" />
-  
-  <!-- Preload critical CSS (inline critical CSS would be even better, but this helps) -->
+  <!-- Fonts: League Spartan (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=League+Spartan:wght@800;900&display=swap" rel="stylesheet">
+
+  <!-- Preload critical CSS -->
   <link rel="preload" as="style" href="assets/css/tailwind.css" />
   <link rel="preload" as="style" href="assets/css/style.css" />
 
   <!-- Prefetch likely next pages (user intent prediction) -->
-  <link rel="prefetch" href="/services/" />
-  <link rel="prefetch" href="/contact/" />
   <link rel="prefetch" href="/portfolio/" />
+  <link rel="prefetch" href="/contact/" />
+  <link rel="prefetch" href="/services/" />
 
   <!-- Open Graph (social preview) -->
   <meta property="og:site_name" content="Brandible Marketing Group" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Brandible Marketing Group | Digital Marketing Agency in NJ" />
-  <meta property="og:description" content="Brandible Marketing Group is one of the leading marketing groups in NJ, providing professional websites, social media marketing, and SEO strategies for local businesses. Top-rated marketing agency in New Jersey." />
+  <meta property="og:title" content="Brandible Marketing Group | Websites, Branding &amp; Growth for NJ Businesses" />
+  <meta property="og:description" content="Brandible builds high-performing websites, brands, and growth systems for ambitious local businesses in New Jersey. See our work and start a project." />
   <meta property="og:image" content="https://www.brandiblemg.com/assets/Brandible.png" />
   <meta property="og:url" content="https://www.brandiblemg.com/" />
   <meta property="og:locale" content="en_US" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Brandible Marketing Group | Digital Marketing Agency in NJ" />
-  <meta name="twitter:description" content="Brandible Marketing Group is one of the leading marketing groups in NJ, providing professional websites, social media marketing, and SEO strategies for local businesses. Top-rated marketing agency in New Jersey." />
+  <meta name="twitter:title" content="Brandible Marketing Group | Websites, Branding &amp; Growth for NJ Businesses" />
+  <meta name="twitter:description" content="Brandible builds high-performing websites, brands, and growth systems for ambitious local businesses in New Jersey. See our work and start a project." />
   <meta name="twitter:image" content="https://www.brandiblemg.com/assets/Brandible.png" />
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.brandiblemg.com/" />
   <link rel="stylesheet" href="assets/css/tailwind.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
-  
+
   <!-- Cookie Banner -->
   <script defer src="assets/js/cookie-banner.js"></script>
 
   <!-- Optional extras -->
   <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#004AAD" />
-  
+  <meta name="theme-color" content="#0A1633" />
+
   <!-- Structured Data -->
   <script type="application/ld+json">
   {
@@ -138,7 +138,7 @@
       "@type": "State",
       "name": "New Jersey"
     },
-    "description": "Brandible Marketing Group is one of the leading marketing groups in NJ, specializing in website design, social media marketing, SEO, and digital advertising for local businesses throughout New Jersey."
+    "description": "Brandible Marketing Group builds high-performing websites, brands, and growth systems for local businesses throughout New Jersey — web design, branding, SEO, and digital advertising."
   }
   </script>
   <script type="application/ld+json">
@@ -257,38 +257,26 @@
   </script>
 </head>
 
-<body class="bg-gray-50">
+<body class="v2">
   <!-- Skip link (visible on focus only) -->
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:bg-white focus:text-blue-700 focus:ring-2 focus:ring-yellow-400 rounded px-3 py-2">Skip to content</a>
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:bg-white focus:text-blue-700 focus:ring-2 focus:ring-brand-orange rounded px-3 py-2 z-[60]">Skip to content</a>
 
   <!-- Header / Navigation -->
-  <header class="fixed top-0 w-full bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b z-50">
+  <header class="fixed top-0 w-full nav-v2 z-50">
     <nav class="container mx-auto px-6 py-4" aria-label="Primary">
       <div class="flex justify-between items-center">
-        <a href="/" aria-label="Brandible home" class="flex items-center">
-          <picture>
-            <source srcset="assets/transparent.webp 1x, assets/transparent.webp 2x" type="image/webp">
-            <img src="assets/transparent.png" 
-                 srcset="assets/transparent.png 1x, assets/transparent.png 2x"
-                 sizes="120px"
-                 alt="Brandible Marketing Group" 
-                 class="h-16" 
-                 width="120" 
-                 height="64" 
-                 style="aspect-ratio: auto;" 
-                 loading="eager" 
-                 fetchpriority="high" 
-                 decoding="async" />
-          </picture>
+        <a href="/" aria-label="Brandible Marketing Group home" class="flex items-center">
+          <span class="wordmark text-white text-2xl">Brand<span class="wm-i">i</span>ble<span class="wm-bang">!</span></span>
+          <span class="sr-only">Marketing Group</span>
         </a>
 
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center space-x-8">
-          <a href="/" aria-current="page" class="text-blue-700 hover:text-blue-600 font-medium transition duration-300">Home</a>
+          <a href="/" aria-current="page" class="nav-link transition duration-300">Home</a>
           <div class="relative group">
-            <a href="/about/" class="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition duration-300" aria-haspopup="true">
+            <a href="/about/" class="nav-link flex items-center gap-1 transition duration-300" aria-haspopup="true">
               <span>About</span>
-              <svg class="w-4 h-4 text-gray-500 transition-transform duration-200 group-hover:-rotate-180 group-focus-within:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+              <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 group-hover:-rotate-180 group-focus-within:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
             </a>
             <div id="desktop-about-menu" class="absolute left-0 top-full hidden pt-3 z-20 group-hover:block group-focus-within:block">
               <div class="w-64 rounded-md bg-white shadow-lg ring-1 ring-black/5">
@@ -301,9 +289,9 @@
             </div>
           </div>
           <div class="relative group">
-            <a href="/services/" class="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition duration-300" aria-haspopup="true">
+            <a href="/services/" class="nav-link flex items-center gap-1 transition duration-300" aria-haspopup="true">
               <span>Services</span>
-              <svg class="w-4 h-4 text-gray-500 transition-transform duration-200 group-hover:-rotate-180 group-focus-within:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+              <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 group-hover:-rotate-180 group-focus-within:-rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
             </a>
             <div id="desktop-services-menu" class="absolute left-0 top-full hidden pt-3 z-20 group-hover:block group-focus-within:block">
               <div class="w-64 rounded-md bg-white shadow-lg ring-1 ring-black/5">
@@ -312,405 +300,345 @@
                   <a href="/services/digital-marketing/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition">Digital Marketing</a>
                   <a href="/services/branding/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition">Branding &amp; Identity</a>
                   <a href="/services/media-management/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition">Media Management</a>
+                  <a href="/services/ai/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition">AI &amp; Automation</a>
                 </div>
               </div>
             </div>
           </div>
-          <a href="/portfolio/" class="text-gray-700 hover:text-blue-600 font-medium transition duration-300">Portfolio</a>
-          <a href="/blogs/" class="text-gray-700 hover:text-blue-600 font-medium transition duration-300">Blog</a>
-          <a href="/contact/" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-2xl hover:shadow-md transition duration-300">Contact</a>
+          <a href="/portfolio/" class="nav-link transition duration-300">Portfolio</a>
+          <a href="/blogs/" class="nav-link transition duration-300">Blog</a>
+          <a href="/contact/" class="btn-v2 btn-v2--orange !px-6 !py-2.5 !text-base">Start a Project</a>
         </div>
 
         <!-- Mobile btn -->
         <div class="md:hidden">
-          <button id="mobile-menu-btn" aria-label="Toggle menu" aria-controls="mobile-menu" aria-expanded="false" class="text-gray-700 hover:text-blue-600 focus:outline-none">
+          <button id="mobile-menu-btn" aria-label="Toggle menu" aria-controls="mobile-menu" aria-expanded="false" class="text-slate-200 hover:text-white focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
         </div>
       </div>
       <!-- Mobile menu -->
       <div id="mobile-menu" class="hidden menu-closed md:hidden mt-4 pb-4 space-y-2">
-        <a href="/" class="block py-2 text-blue-600 hover:text-blue-600 font-medium">Home</a>
-        <button type="button" class="flex w-full items-center justify-between py-2 text-gray-700 hover:text-blue-600 font-medium mobile-submenu-toggle" data-submenu-toggle="mobile-about-submenu" aria-controls="mobile-about-submenu" aria-expanded="false">
+        <a href="/" class="block py-2 text-white font-semibold" aria-current="page">Home</a>
+        <button type="button" class="flex w-full items-center justify-between py-2 text-slate-200 hover:text-white font-medium mobile-submenu-toggle" data-submenu-toggle="mobile-about-submenu" aria-controls="mobile-about-submenu" aria-expanded="false">
           <span>About</span>
-          <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-submenu-icon><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-submenu-icon><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div id="mobile-about-submenu" class="hidden pl-4 space-y-2">
-          <a href="/about/" class="block py-1 text-gray-700 hover:text-blue-600 font-medium">About Us</a>
-          <a href="/careers/" class="block py-1 text-gray-600 hover:text-blue-600">Join Our Team</a>
-          <a href="/faqs/" class="block py-1 text-gray-600 hover:text-blue-600">FAQs</a>
+          <a href="/about/" class="block py-1 text-slate-300 hover:text-white">About Us</a>
+          <a href="/careers/" class="block py-1 text-slate-300 hover:text-white">Join Our Team</a>
+          <a href="/faqs/" class="block py-1 text-slate-300 hover:text-white">FAQs</a>
         </div>
-        <button type="button" class="flex w-full items-center justify-between py-2 text-gray-700 hover:text-blue-600 font-medium mobile-submenu-toggle" data-submenu-toggle="mobile-services-submenu" aria-controls="mobile-services-submenu" aria-expanded="false">
+        <button type="button" class="flex w-full items-center justify-between py-2 text-slate-200 hover:text-white font-medium mobile-submenu-toggle" data-submenu-toggle="mobile-services-submenu" aria-controls="mobile-services-submenu" aria-expanded="false">
           <span>Services</span>
-          <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-submenu-icon><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-submenu-icon><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div id="mobile-services-submenu" class="hidden pl-4 space-y-2">
-          <a href="/services/" class="block py-1 text-gray-700 hover:text-blue-600 font-medium">All Services</a>
-          <a href="/services/web-design/" class="block py-1 text-gray-600 hover:text-blue-600">Web Design &amp; Development</a>
-          <a href="/services/digital-marketing/" class="block py-1 text-gray-600 hover:text-blue-600">Digital Marketing</a>
-          <a href="/services/branding/" class="block py-1 text-gray-600 hover:text-blue-600">Branding &amp; Identity</a>
-          <a href="/services/media-management/" class="block py-1 text-gray-600 hover:text-blue-600">Media Management</a>
+          <a href="/services/" class="block py-1 text-slate-300 hover:text-white">All Services</a>
+          <a href="/services/web-design/" class="block py-1 text-slate-300 hover:text-white">Web Design &amp; Development</a>
+          <a href="/services/digital-marketing/" class="block py-1 text-slate-300 hover:text-white">Digital Marketing</a>
+          <a href="/services/branding/" class="block py-1 text-slate-300 hover:text-white">Branding &amp; Identity</a>
+          <a href="/services/media-management/" class="block py-1 text-slate-300 hover:text-white">Media Management</a>
+          <a href="/services/ai/" class="block py-1 text-slate-300 hover:text-white">AI &amp; Automation</a>
         </div>
-        <a href="/portfolio/" class="block py-2 text-gray-700 font-medium" aria-current="page">Portfolio</a>
-        <a href="/blogs/" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Blog</a>
-        <a href="/contact/" class="block py-2 text-gray-700 hover:text-blue-600 font-medium">Contact</a>
+        <a href="/portfolio/" class="block py-2 text-slate-200 hover:text-white font-medium">Portfolio</a>
+        <a href="/blogs/" class="block py-2 text-slate-200 hover:text-white font-medium">Blog</a>
+        <a href="/contact/" class="block py-2 text-brand-orange font-bold">Start a Project</a>
       </div>
     </nav>
   </header>
 
   <main id="main">
-    <!-- Hero Section -->
-    <section id="hero" class="pt-36 md:pt-48 pb-24 md:pb-32 bg-gradient-to-br from-purple-400 via-pink-300 to-indigo-400">
-      <div class="container mx-auto px-6">
-        <div class="max-w-4xl mx-auto text-center">
-<h1 class="text-4xl md:text-6xl font-bold text-white mb-6 reveal" data-reveal="fade-up">
-  <span class="typed" data-words='["Brandible", "Marketing Group"]'></span><span class="caret text-yellow-300">|</span>
-          </h1>
-          <h2 class="text-2xl md:text-3xl font-semibold text-white/90 mb-6 reveal" data-reveal="fade-up" data-reveal-delay="100">
-            Digital Marketing Made Simple
-          </h2>
-          <p class="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto reveal" data-reveal="fade-up" data-reveal-delay="200">
-            You've built a great local business… Now let's give you the digital presence you deserve!
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="/services/" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-md hover:ring-2 hover:ring-yellow-400 focus:ring-2 focus:ring-yellow-400 transition duration-300">
-              View Services
-            </a>
-            <a href="/contact/#book-call" class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-md hover:ring-2 hover:ring-white focus:ring-2 focus:ring-white transition duration-300">
-              Get Started!
-            </a>
-            <a href="/portfolio/" class="border-2 border-white/30 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:border-yellow-400 hover:bg-white/10 hover:ring-2 hover:ring-yellow-300 transition duration-300">
-              See Portfolio
-            </a>
+    <!-- Hero -->
+    <section id="hero" class="hero-v2">
+      <div class="hero-watermark" aria-hidden="true">Brandible!</div>
+      <div class="container mx-auto px-6 pt-28 md:pt-32 pb-20 md:pb-24 relative z-10">
+        <div class="grid lg:grid-cols-12 gap-14 lg:gap-10 items-center">
+          <div class="lg:col-span-6">
+            <p class="hero-eyebrow mb-6">Strategy · Design · Growth</p>
+            <p class="hero-brand mb-5">Brand<span class="text-brand-orange italic">i</span>ble<span class="text-brand-orange">!</span></p>
+            <h1 class="hero-headline mb-6">
+              <span class="sr-only">Brandible Marketing Group — </span>Make it easy to <span class="accent-underline">choose you</span>.
+            </h1>
+            <p class="text-lg md:text-xl text-slate-300 max-w-xl mb-10">
+              We build high-performing websites, brands, and growth systems for ambitious local businesses.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="/portfolio/" class="btn-v2 btn-v2--orange">View Our Work</a>
+              <a href="/contact/" class="btn-v2 btn-v2--outline">Start a Project</a>
+            </div>
+          </div>
+
+          <!-- Layered project frames — real client site screenshots -->
+          <div class="lg:col-span-6 hidden sm:block" aria-hidden="true">
+            <div class="hero-stack">
+              <div class="site-frame hero-frame-1">
+                <div class="site-frame-bar"><span></span><span></span><span></span><em>thedoorstepdetailer.com</em></div>
+                <div class="site-frame-screen site-frame-screen--shot">
+                  <img src="/assets/work/tdd.webp" alt="" width="1200" height="750" loading="eager" decoding="async" class="site-frame-shot" />
+                </div>
+              </div>
+              <div class="site-frame hero-frame-2">
+                <div class="site-frame-bar"><span></span><span></span><span></span><em>crossandblack.com</em></div>
+                <div class="site-frame-screen site-frame-screen--shot">
+                  <img src="/assets/work/crossblack.webp" alt="" width="1200" height="750" loading="eager" decoding="async" class="site-frame-shot" />
+                </div>
+              </div>
+              <div class="site-frame hero-frame-3">
+                <div class="site-frame-bar"><span></span><span></span><span></span><em>consultdrnader.com</em></div>
+                <div class="site-frame-screen site-frame-screen--shot">
+                  <img src="/assets/work/drnader.webp" alt="" width="1200" height="750" loading="eager" decoding="async" class="site-frame-shot" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Why Choose Us -->
-    <section id="why" class="py-20 bg-gray-50">
+    <!-- Proof strip -->
+    <section class="proof-strip" aria-label="Results at a glance">
       <div class="container mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4 reveal" data-reveal="fade-up">Why Choose <span class="text-blue-700">Brand<span class="italic text-yellow-400">i</span>ble</span><span class="text-yellow-400">!</span>?</h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto reveal" data-reveal="fade-up" data-reveal-delay="100">We make digital marketing accessible and effective for local businesses in New Jersey. As one of the top marketing groups in NJ, Brandible Marketing Group is your trusted marketing agency.</p>
-        </div>
-        
-        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <div class="rounded-2xl border border-gray-200 p-6 hover:shadow-md transition bg-white text-center reveal" data-reveal="zoom">
-            <div class="w-12 h-12 mb-6 mx-auto">
-              <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Affordable Solutions</h3>
-            <p class="text-gray-600">Quality marketing services that fit your budget, with transparent pricing and no hidden fees.</p>
+        <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-navy-900/10">
+          <div class="proof-item reveal" data-reveal="fade-up">
+            <p class="proof-value"><span class="proof-accent">#1</span> Google ranking</p>
+            <p class="proof-label">achieved for a client in Hunterdon County</p>
           </div>
-
-          <div class="rounded-2xl border border-gray-200 p-6 hover:shadow-md transition bg-white text-center reveal" data-reveal="zoom" data-reveal-delay="100">
-            <div class="w-12 h-12 mb-6 mx-auto">
-              <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Custom Websites & Branding</h3>
-            <p class="text-gray-600">Unique designs tailored to your business, creating a memorable brand that stands out.</p>
+          <div class="proof-item reveal" data-reveal="fade-up" data-reveal-delay="100">
+            <p class="proof-value"><span class="proof-accent">100/100</span> site scores</p>
+            <p class="proof-label">on Google Lighthouse &amp; HubSpot Website Grader</p>
           </div>
-
-          <div class="rounded-2xl border border-gray-200 p-6 hover:shadow-md transition bg-white text-center reveal" data-reveal="zoom" data-reveal-delay="200">
-            <div class="w-12 h-12 mb-6 mx-auto">
-              <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Proven Local Results</h3>
-            <p class="text-gray-600">Track record of helping local businesses increase visibility, leads, and revenue.</p>
+          <div class="proof-item reveal" data-reveal="fade-up" data-reveal-delay="200">
+            <p class="proof-value"><span class="proof-accent">5.0</span> ★ feedback</p>
+            <p class="proof-label">from every client we've worked with</p>
+          </div>
+          <div class="proof-item reveal" data-reveal="fade-up" data-reveal-delay="300">
+            <p class="proof-value"><span class="proof-accent">NJ</span> based</p>
+            <p class="proof-label">working with businesses across the region</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Marketing Groups in NJ Section -->
-    <section id="marketing-groups-nj" class="py-24 bg-gradient-to-b from-white via-gray-50 to-white relative overflow-hidden">
-      <!-- Subtle background texture -->
-      <div class="absolute inset-0 opacity-[0.02]">
-        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgb(0 0 0) 1px, transparent 0); background-size: 24px 24px;"></div>
+    <!-- Featured work -->
+    <section id="work" class="py-20 md:py-28">
+      <div class="container mx-auto px-6">
+        <div class="max-w-3xl mb-16 md:mb-20">
+          <p class="kicker mb-4 reveal" data-reveal="fade-up">Featured Work</p>
+          <h2 class="section-h reveal" data-reveal="fade-up" data-reveal-delay="100">Real businesses. Real results.</h2>
+        </div>
+
+        <div class="space-y-20 md:space-y-28 max-w-6xl mx-auto">
+          <!-- The Doorstep Detailer -->
+          <article class="work-row">
+            <a href="/portfolio/#tdd" class="work-media block reveal" data-reveal="fade-up" aria-label="See The Doorstep Detailer project in our portfolio">
+              <div class="site-frame">
+                <div class="site-frame-bar"><span></span><span></span><span></span><em>thedoorstepdetailer.com</em></div>
+                <div class="site-frame-screen site-frame-screen--shot">
+                  <img src="/assets/work/tdd.webp" alt="The Doorstep Detailer website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                </div>
+              </div>
+            </a>
+            <div class="work-copy reveal" data-reveal="fade-up" data-reveal-delay="100">
+              <p class="work-meta mb-4">Website · Local SEO · Google Presence</p>
+              <h3 class="work-outcome mb-4">From no online presence to the #1 detailing result in Hunterdon County.</h3>
+              <p class="text-slate-600 mb-6">We built The Doorstep Detailer's brand and website from scratch, optimized its Google presence, and turned search visibility into a steady stream of leads and appointments.</p>
+              <a href="/portfolio/#tdd" class="work-link">
+                See the work
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Cross & Black -->
+          <article class="work-row work-row--flip">
+            <a href="/portfolio/#crossblack" class="work-media block reveal" data-reveal="fade-up" aria-label="See the Cross &amp; Black project in our portfolio">
+              <div class="site-frame">
+                <div class="site-frame-bar"><span></span><span></span><span></span><em>crossandblack.com</em></div>
+                <div class="site-frame-screen site-frame-screen--shot">
+                  <img src="/assets/work/crossblack.webp" alt="Cross &amp; Black Inc. website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                </div>
+              </div>
+            </a>
+            <div class="work-copy reveal" data-reveal="fade-up" data-reveal-delay="100">
+              <p class="work-meta mb-4">Website · Content</p>
+              <h3 class="work-outcome mb-4">A web presence as precise as the lab behind it.</h3>
+              <p class="text-slate-600 mb-6">Cross &amp; Black has run an ISO/IEC 17025 certified battery testing laboratory since 1989. We built a clean, technical site that puts its certifications, capabilities, and leadership front and center for OEM partners.</p>
+              <a href="/portfolio/#crossblack" class="work-link">
+                See the work
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Dr. Nader Youssef -->
+          <article class="work-row">
+            <a href="/portfolio/#drnader" class="work-media block reveal" data-reveal="fade-up" aria-label="See the Dr. Nader Youssef project in our portfolio">
+              <div class="site-frame">
+                <div class="site-frame-bar"><span></span><span></span><span></span><em>consultdrnader.com</em></div>
+                <div class="site-frame-screen site-frame-screen--shot">
+                  <img src="/assets/work/drnader.webp" alt="Dr. Nader Youssef consulting website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                </div>
+              </div>
+            </a>
+            <div class="work-copy reveal" data-reveal="fade-up" data-reveal-delay="100">
+              <p class="work-meta mb-4">Website · Brand · Content</p>
+              <h3 class="work-outcome mb-4">A credible online home for a physician-led consulting practice.</h3>
+              <p class="text-slate-600 mb-6">Dr. Nader Youssef helps patients, pharma teams, and healthcare providers communicate better. We built a warm, professional site that makes his approach easy to understand and turns visitors into scheduled conversations.</p>
+              <a href="/portfolio/#drnader" class="work-link">
+                See the work
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Jet Rose -->
+          <article class="work-row work-row--flip">
+            <a href="/portfolio/#jetrose" class="work-media block reveal" data-reveal="fade-up" aria-label="See the Jet Rose project in our portfolio">
+              <div class="site-frame">
+                <div class="site-frame-bar"><span></span><span></span><span></span><em>jetroseofficial.com</em></div>
+                <div class="site-frame-screen site-frame-screen--shot">
+                  <img src="/assets/work/jetrose.webp" alt="Jet Rose website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                </div>
+              </div>
+            </a>
+            <div class="work-copy reveal" data-reveal="fade-up" data-reveal-delay="100">
+              <p class="work-meta mb-4">Website · Content</p>
+              <h3 class="work-outcome mb-4">Better engagement and more traffic from day one.</h3>
+              <p class="text-slate-600 mb-6">Independent artist Jet Rose needed a home for his music. We built a site that's clean, fast, and true to his sound — and it started pulling its weight immediately.</p>
+              <a href="/portfolio/#jetrose" class="work-link">
+                See the work
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div class="mt-16 md:mt-20 text-center reveal" data-reveal="fade-up">
+          <a href="/portfolio/" class="btn-v2 btn-v2--blue">Explore the Full Portfolio</a>
+        </div>
       </div>
-      
-      <div class="container mx-auto px-6 relative z-10">
+    </section>
+
+    <!-- Service pillars -->
+    <section id="services" class="py-20 md:py-28 bg-white">
+      <div class="container mx-auto px-6">
+        <div class="max-w-3xl mb-14 md:mb-16">
+          <p class="kicker mb-4 reveal" data-reveal="fade-up">What We Do</p>
+          <h2 class="section-h reveal" data-reveal="fade-up" data-reveal-delay="100">Five ways we grow your business.</h2>
+        </div>
+
         <div class="max-w-6xl mx-auto">
-          <!-- Header with left alignment for more editorial feel -->
-          <div class="mb-16 max-w-3xl">
-            <h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight reveal" data-reveal="fade-up">Why NJ Businesses Choose Brandible</h2>
-            <p class="text-xl md:text-2xl text-gray-700 leading-relaxed reveal" data-reveal="fade-up" data-reveal-delay="100">There's no shortage of marketing agencies in New Jersey.<br>What is hard to find is one that actually understands local businesses—and builds things that work in the real world.</p>
-          </div>
-          
-          <!-- Asymmetric grid layout -->
-          <div class="grid md:grid-cols-12 gap-6 mb-16">
-            <!-- Card 1: Large featured card -->
-            <div class="md:col-span-7 group relative">
-              <div class="h-full bg-white border-l-4 border-blue-600 p-10 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 relative overflow-hidden reveal" data-reveal="fade-up">
-                <!-- Decorative element -->
-                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <div class="relative z-10">
-                  <div class="flex items-start gap-4 mb-6">
-                    <div class="flex-shrink-0">
-                      <div class="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center transform group-hover:rotate-6 transition-transform">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                      </div>
-                    </div>
-                    <div class="flex-1">
-                      <h3 class="text-3xl font-bold text-gray-900 mb-4 leading-tight">We Actually Know the NJ Market</h3>
-                      <p class="text-lg text-gray-700 leading-relaxed">We work with local businesses every day—from Hunterdon County to the Jersey Shore. We know what customers respond to here, what doesn't work, and how to position your business so it feels local, not generic.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Card 2: Medium card -->
-            <div class="md:col-span-5 group relative">
-              <div class="h-full bg-gradient-to-br from-indigo-600 to-indigo-700 text-white p-10 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative overflow-hidden reveal" data-reveal="fade-up" data-reveal-delay="100">
-                <!-- Pattern overlay -->
-                <div class="absolute inset-0 opacity-10">
-                  <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px);"></div>
-                </div>
-                <div class="relative z-10">
-                  <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-6 backdrop-blur-sm">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
-                  </div>
-                  <h3 class="text-2xl font-bold mb-4 leading-tight">We're Easy to Work With</h3>
-                  <p class="text-indigo-100 leading-relaxed text-base">We keep things simple and clear. You'll always know what we're working on, why we're doing it, and how it helps your business. No buzzwords. No confusing contracts. Just honest communication.</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Card 3: Medium card with different style -->
-            <div class="md:col-span-5 group relative md:mt-8">
-              <div class="h-full bg-white border-2 border-purple-200 p-10 shadow-sm hover:shadow-xl hover:border-purple-400 transition-all duration-500 hover:-translate-y-1 relative reveal" data-reveal="fade-up" data-reveal-delay="200">
-                <!-- Accent corner -->
-                <div class="absolute top-0 left-0 w-20 h-20 bg-purple-100 rounded-br-full"></div>
-                <div class="relative z-10">
-                  <div class="flex items-center gap-3 mb-6">
-                    <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                      </svg>
-                    </div>
-                    <div class="h-px flex-1 bg-gradient-to-r from-purple-200 to-transparent"></div>
-                  </div>
-                  <h3 class="text-2xl font-bold text-gray-900 mb-4 leading-tight">We Move Fast<br><span class="text-purple-600">(Because Your Business Can't Wait)</span></h3>
-                  <p class="text-gray-700 leading-relaxed">Most agencies move at corporate speed. We don't. Whether it's a website, campaign, or update, we focus on getting you live quickly—without cutting corners.</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Card 4: Large card with different treatment -->
-            <div class="md:col-span-7 group relative md:mt-8">
-              <div class="h-full bg-gradient-to-br from-yellow-400 via-yellow-300 to-yellow-200 p-10 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 relative overflow-hidden reveal" data-reveal="fade-up" data-reveal-delay="300">
-                <!-- Decorative circles -->
-                <div class="absolute -top-8 -right-8 w-32 h-32 bg-yellow-500/30 rounded-full"></div>
-                <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-yellow-500/20 rounded-full"></div>
-                <div class="relative z-10">
-                  <div class="flex items-start justify-between gap-6 mb-6">
-                    <div class="flex-1">
-                      <h3 class="text-3xl font-bold text-gray-900 mb-4 leading-tight">Real Results for Real NJ Businesses</h3>
-                    </div>
-                    <div class="flex-shrink-0">
-                      <div class="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-lg">
-                        <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-lg text-gray-900 leading-relaxed font-medium">Our clients have seen more leads, better visibility, and stronger online presence. We don't aim to be the biggest agency in NJ—just the one our clients actually trust.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- CTA with more personality -->
-          <div class="text-center max-w-2xl mx-auto">
-            <p class="text-xl text-gray-800 mb-8 font-medium">Ready to work with one of the most trusted marketing groups in NJ?</p>
-            <a href="/contact/#book-call" class="inline-flex items-center justify-center gap-3 bg-gray-900 text-white px-10 py-5 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:bg-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-300 transform hover:scale-105">
-              <span>Schedule Your Free Consultation</span>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-              </svg>
-            </a>
-          </div>
+          <a href="/services/web-design/" class="pillar-row group reveal" data-reveal="fade-up">
+            <span class="pillar-num">01</span>
+            <span class="pillar-name">Web Design &amp; Development</span>
+            <span class="pillar-hook">Fast, modern sites built to convert — like the one that took The Doorstep Detailer from invisible to #1 on Google.</span>
+            <span class="pillar-arrow" aria-hidden="true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </span>
+          </a>
+          <a href="/services/digital-marketing/" class="pillar-row group reveal" data-reveal="fade-up" data-reveal-delay="50">
+            <span class="pillar-num">02</span>
+            <span class="pillar-name">Digital Marketing</span>
+            <span class="pillar-hook">SEO, ads, and email working as one system — measured, reported, and tuned for leads, not vanity metrics.</span>
+            <span class="pillar-arrow" aria-hidden="true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </span>
+          </a>
+          <a href="/services/branding/" class="pillar-row group reveal" data-reveal="fade-up" data-reveal-delay="100">
+            <span class="pillar-num">03</span>
+            <span class="pillar-name">Branding &amp; Identity</span>
+            <span class="pillar-hook">Logos, palettes, and brand systems that finally feel like you — so customers recognize you instantly.</span>
+            <span class="pillar-arrow" aria-hidden="true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </span>
+          </a>
+          <a href="/services/media-management/" class="pillar-row group reveal" data-reveal="fade-up" data-reveal-delay="150">
+            <span class="pillar-num">04</span>
+            <span class="pillar-name">Media Management</span>
+            <span class="pillar-hook">Your content, your voice — planned, created, and posted so you stay consistent without living on your phone.</span>
+            <span class="pillar-arrow" aria-hidden="true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </span>
+          </a>
+          <a href="/services/ai/" class="pillar-row group reveal" data-reveal="fade-up" data-reveal-delay="200">
+            <span class="pillar-num">05</span>
+            <span class="pillar-name">AI &amp; Automation</span>
+            <span class="pillar-hook">Practical AI for local businesses — chat, follow-ups, and workflows that save time and catch more leads.</span>
+            <span class="pillar-arrow" aria-hidden="true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </span>
+          </a>
         </div>
       </div>
     </section>
 
-    <!-- Services Snapshot -->
-    <section id="services" class="py-20 bg-white">
+    <!-- Why NJ businesses choose Brandible -->
+    <section id="why-nj" class="why-nj py-20 md:py-28" aria-labelledby="why-nj-heading">
       <div class="container mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4 reveal" data-reveal="fade-up">Our Services</h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto reveal" data-reveal="fade-up" data-reveal-delay="100">There's no shortage of marketing agencies in New Jersey.<br>What is hard to find is one that actually understands local businesses—and builds things that work in the real world.</p>
+        <div class="max-w-3xl mb-12 md:mb-16">
+          <p class="kicker mb-4 reveal" data-reveal="fade-up">Central New Jersey</p>
+          <h2 id="why-nj-heading" class="section-h reveal" data-reveal="fade-up" data-reveal-delay="100">Why NJ businesses choose Brandible.</h2>
+          <p class="mt-5 text-lg text-slate-600 max-w-2xl reveal" data-reveal="fade-up" data-reveal-delay="150">
+            There's no shortage of marketing agencies in New Jersey. What's hard to find is one that actually understands local businesses — and builds things that work in the real world.
+          </p>
         </div>
-        
-        <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          <a href="/services/" class="group h-full flex flex-col rounded-3xl border border-gray-200 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white reveal" data-reveal="zoom">
-            <div class="w-14 h-14 mb-6 mx-auto rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-              <svg class="w-7 h-7 text-blue-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Branding & Web Design</h3>
-            <p class="text-gray-600 mb-4 text-center">Unified visual identity and modern websites built to connect and convert.</p>
-            <p class="text-sm text-gray-600 text-center italic mb-6">Logos • Websites • Brand systems</p>
-            <div class="mt-auto flex justify-center">
-              <span class="inline-flex items-center gap-2 text-blue-600 font-semibold group-hover:gap-3 transition-all">
-                Learn More
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </span>
-            </div>
-          </a>
 
-          <a href="/services/" class="group h-full flex flex-col rounded-3xl border border-gray-200 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white reveal" data-reveal="zoom" data-reveal-delay="100">
-            <div class="w-14 h-14 mb-6 mx-auto rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
-              <svg class="w-7 h-7 text-indigo-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Marketing Strategy & Campaigns</h3>
-            <p class="text-gray-600 mb-4 text-center">Goal-driven marketing strategies with social, SEO, and ads working together.</p>
-            <p class="text-sm text-gray-600 text-center italic mb-6">Social Media • Ads • SEO</p>
-            <div class="mt-auto flex justify-center">
-              <span class="inline-flex items-center gap-2 text-indigo-600 font-semibold group-hover:gap-3 transition-all">
-                Learn More
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </span>
-            </div>
-          </a>
-
-          <a href="/services/" class="group h-full flex flex-col rounded-3xl border border-gray-200 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white reveal" data-reveal="zoom" data-reveal-delay="200">
-            <div class="w-14 h-14 mb-6 mx-auto rounded-full bg-pink-100 flex items-center justify-center group-hover:bg-pink-200 transition-colors">
-              <svg class="w-7 h-7 text-pink-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Content & Media Management</h3>
-            <p class="text-gray-600 mb-4 text-center">Consistent visuals, posts, and creative storytelling across platforms.</p>
-            <p class="text-sm text-gray-600 text-center italic mb-6">Photography • Copy • Social Planning</p>
-            <div class="mt-auto flex justify-center">
-              <span class="inline-flex items-center gap-2 text-pink-600 font-semibold group-hover:gap-3 transition-all">
-                Learn More
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </span>
-            </div>
-          </a>
-
-          <a href="/services/" class="group h-full flex flex-col rounded-3xl border border-gray-200 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white reveal" data-reveal="zoom" data-reveal-delay="300">
-            <div class="w-14 h-14 mb-6 mx-auto rounded-full bg-yellow-100 flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
-              <svg class="w-7 h-7 text-yellow-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Analytics & Growth Tracking</h3>
-            <p class="text-gray-600 mb-4 text-center">Real data that drives smarter decisions and shows measurable ROI.</p>
-            <p class="text-sm text-gray-600 text-center italic mb-6">Dashboards • Reports • Performance Audits</p>
-            <div class="mt-auto flex justify-center">
-              <span class="inline-flex items-center gap-2 text-yellow-600 font-semibold group-hover:gap-3 transition-all">
-                Learn More
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </span>
-            </div>
-          </a>
+        <div class="why-nj-list max-w-6xl mx-auto">
+          <article class="why-nj-item reveal" data-reveal="fade-up">
+            <h3 class="why-nj-title">We actually know the NJ market</h3>
+            <p class="why-nj-copy">We work with local businesses every day — from Hunterdon County to the Jersey Shore. We know what customers respond to here, what falls flat, and how to position your business so it feels local, not generic.</p>
+          </article>
+          <article class="why-nj-item reveal" data-reveal="fade-up" data-reveal-delay="100">
+            <h3 class="why-nj-title">We're easy to work with</h3>
+            <p class="why-nj-copy">You'll always know what we're working on, why we're doing it, and how it helps your business. No buzzwords. No confusing contracts. Just honest communication.</p>
+          </article>
+          <article class="why-nj-item reveal" data-reveal="fade-up" data-reveal-delay="150">
+            <h3 class="why-nj-title">We move fast</h3>
+            <p class="why-nj-copy">Most agencies move at corporate speed. We don't. Whether it's a website, campaign, or update, we focus on getting you live quickly — without cutting corners.</p>
+          </article>
+          <article class="why-nj-item reveal" data-reveal="fade-up" data-reveal-delay="200">
+            <h3 class="why-nj-title">Real results for real NJ businesses</h3>
+            <p class="why-nj-copy">Our clients have seen more leads, better visibility, and a stronger online presence. We don't aim to be the biggest agency in NJ — just the one our clients actually trust.</p>
+          </article>
         </div>
+
+        <p class="why-nj-towns max-w-6xl mx-auto mt-12 reveal" data-reveal="fade-up">
+          Proudly serving <span>Somerville</span>, <span>Flemington</span>, <span>Bridgewater</span>, <span>Hillsborough</span>, <span>Princeton</span>, <span>Clinton</span>, and businesses across Central New Jersey.
+        </p>
       </div>
     </section>
 
-    <!-- Process Teaser -->
-    <section id="process" class="py-20 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
-      <!-- Subtle background pattern -->
-      <div class="absolute inset-0 opacity-5">
-        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgb(99 102 241) 1px, transparent 0); background-size: 40px 40px;"></div>
-      </div>
-      
-      <div class="container mx-auto px-6 relative z-10">
-        <div class="text-center mb-16">
-          <p class="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3">How It Works</p>
-          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Our Simple Process</h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">Three easy steps to transform your digital presence</p>
-        </div>
-        
-        <div class="grid md:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto relative">
-          <!-- Connecting line (hidden on mobile) -->
-          <div class="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200"></div>
-          
-          <div class="relative z-10 text-center">
-            <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-              </svg>
+    <!-- Founder story -->
+    <section id="story" class="founder-band py-20 md:py-28">
+      <div class="container mx-auto px-6">
+        <div class="grid lg:grid-cols-12 gap-12 items-center max-w-6xl mx-auto">
+          <div class="lg:col-span-4 reveal" data-reveal="fade-right">
+            <div class="founder-photo max-w-sm mx-auto lg:mx-0">
+              <img src="/assets/team/mikecard.webp" alt="Mike, founder of Brandible Marketing Group" width="400" height="400" loading="lazy" decoding="async" />
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Consultation</h3>
-            <p class="text-gray-600 leading-relaxed">We learn about your business, goals, and target audience to create the perfect strategy.</p>
           </div>
-
-          <div class="relative z-10 text-center">
-            <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Strategy</h3>
-            <p class="text-gray-600 leading-relaxed">We develop a customized marketing plan tailored to your business needs and budget.</p>
-          </div>
-
-          <div class="relative z-10 text-center">
-            <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Growth</h3>
-            <p class="text-gray-600 leading-relaxed">Watch your business grow as we implement and optimize your marketing campaigns.</p>
-          </div>
-        </div>
-
-        <div class="text-center">
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="/contact/#book-call" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-yellow-300">
-              Book a Free Call
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-              </svg>
-            </a>
-            <a href="/portfolio/" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300">
-              View Our Work
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-            </a>
+          <div class="lg:col-span-8 reveal" data-reveal="fade-left" data-reveal-delay="100">
+            <p class="kicker kicker--light mb-4">The Brandible Story</p>
+            <h2 class="section-h section-h--light mb-6">Built by a business owner who learned marketing by growing one.</h2>
+            <p class="text-lg text-slate-300 max-w-2xl mb-4">
+              Before Brandible, there was The Doorstep Detailer — a local business we built, branded, and grew from zero to the #1 result in its county. Everything we recommend to clients, we've tested on our own business first.
+            </p>
+            <p class="text-lg text-slate-300 max-w-2xl mb-8">
+              That's the difference: we're not selling marketing theory. We're sharing what actually worked.
+            </p>
+            <a href="/about/#team" class="btn-v2 btn-v2--outline">Meet the Team</a>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Testimonials -->
-    <section id="testimonials" class="py-20 bg-gray-50">
+    <section id="testimonials" class="py-20 md:py-28">
       <div class="container mx-auto px-6">
-        <div class="text-center mb-12 max-w-2xl mx-auto">
-          <h2 class="text-4xl font-bold text-gray-900 mb-3">What Our Clients Say</h2>
-          <p class="text-lg text-gray-600">Real results from real local businesses</p>
+        <div class="max-w-3xl mb-14 md:mb-16">
+          <p class="kicker mb-4 reveal" data-reveal="fade-up">Client Results</p>
+          <h2 class="section-h reveal" data-reveal="fade-up" data-reveal-delay="100">What working with us actually gets you.</h2>
         </div>
 
         <div class="testimonials-grid max-w-7xl mx-auto">
@@ -783,156 +711,114 @@
             </footer>
           </article>
         </div>
-
-        <div class="text-center mt-12 max-w-2xl mx-auto">
-          <p class="text-sm text-gray-500 mb-2">Trusted by local businesses throughout New Jersey</p>
-          <p class="text-sm font-semibold text-gray-800" aria-label="5 out of 5 stars, 5-Star Client Feedback">
-            <span class="testimonial-stars" aria-hidden="true">★★★★★</span>
-            <span> 5-Star Client Feedback</span>
-          </p>
-        </div>
       </div>
     </section>
 
-    <!-- Latest Blog Posts -->
-    <section class="py-20 bg-white">
+    <!-- Process -->
+    <section id="process" class="py-20 md:py-24 bg-white">
       <div class="container mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">Latest from Our Blog</h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">Insights, tips, and updates to help grow your business</p>
+        <div class="max-w-3xl mb-14 reveal" data-reveal="fade-up">
+          <p class="kicker mb-4">How It Works</p>
+          <h2 class="section-h">Three steps. No mystery.</h2>
         </div>
-        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <article class="rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition bg-white flex flex-col">
-            <a href="/blogs/what-is-seo-and-why-it-matters-for-your-business/" class="block aspect-[16/10] overflow-hidden bg-gray-100">
-              <img src="/assets/blog-images/blog-covers.webp" alt="Featured image for What Is SEO and Why It Matters for Your Business" class="w-full h-full object-cover" loading="lazy" width="400" height="250" />
-            </a>
-            <div class="p-6 flex flex-col flex-grow">
-              <time class="text-sm text-gray-500 mb-2" datetime="2026-01-23">January 23, 2026</time>
-              <h3 class="text-xl font-bold text-gray-900 mb-3 flex-grow">
-                <a href="/blogs/what-is-seo-and-why-it-matters-for-your-business/" class="hover:text-blue-600 transition">What Is SEO and Why It Matters for Your Business</a>
-              </h3>
-              <p class="text-gray-600 mb-4">Strong SEO improves trust, increases visibility, and brings customers directly to your business.</p>
-              <a href="/blogs/what-is-seo-and-why-it-matters-for-your-business/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 mt-auto" aria-label="Read More: What Is SEO and Why It Matters for Your Business">
-                Read More<span class="sr-only">: What Is SEO and Why It Matters for Your Business</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-              </a>
-            </div>
-          </article>
-          <article class="rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition bg-white flex flex-col">
-            <a href="/blogs/why-your-business-website-matters-more-than-you-think/" class="block aspect-[16/10] overflow-hidden bg-gray-100">
-              <img src="/assets/blog-images/webblogcover.webp" alt="Featured image for Why Your Business Website Matters More Than You Think" class="w-full h-full object-cover" loading="lazy" width="400" height="250" />
-            </a>
-            <div class="p-6 flex flex-col flex-grow">
-              <time class="text-sm text-gray-500 mb-2" datetime="2025-12-09">December 9, 2025</time>
-              <h3 class="text-xl font-bold text-gray-900 mb-3 flex-grow">
-                <a href="/blogs/why-your-business-website-matters-more-than-you-think/" class="hover:text-blue-600 transition">Why Your Business Website Matters More Than You Think</a>
-              </h3>
-              <p class="text-gray-600 mb-4">A strong website builds trust, improves visibility, and guides customers toward taking action.</p>
-              <a href="/blogs/why-your-business-website-matters-more-than-you-think/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 mt-auto" aria-label="Read More: Why Your Business Website Matters More Than You Think">
-                Read More<span class="sr-only">: Why Your Business Website Matters More Than You Think</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-              </a>
-            </div>
-          </article>
-          <article class="rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition bg-white flex flex-col">
-            <a href="/blogs/welcome-to-the-brandible-marketing-group-blog-what-to-expect/" class="block aspect-[16/10] overflow-hidden bg-gray-100">
-              <img src="/assets/blog-images/welcomeblogcover.webp" alt="Featured image for Welcome to the Brandible Marketing Group Blog" class="w-full h-full object-cover" loading="lazy" width="400" height="250" />
-            </a>
-            <div class="p-6 flex flex-col flex-grow">
-              <time class="text-sm text-gray-500 mb-2" datetime="2025-12-04">December 4, 2025</time>
-              <h3 class="text-xl font-bold text-gray-900 mb-3 flex-grow">
-                <a href="/blogs/welcome-to-the-brandible-marketing-group-blog-what-to-expect/" class="hover:text-blue-600 transition">Welcome to the Brandible Marketing Group Blog</a>
-              </h3>
-              <p class="text-gray-600 mb-4">Learn about our blog and what content you can expect from Brandible Marketing Group.</p>
-              <a href="/blogs/welcome-to-the-brandible-marketing-group-blog-what-to-expect/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 mt-auto" aria-label="Read More: Welcome to the Brandible Marketing Group Blog">
-                Read More<span class="sr-only">: Welcome to the Brandible Marketing Group Blog</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-              </a>
-            </div>
-          </article>
-        </div>
-        <div class="text-center mt-12">
-          <a href="/blogs/" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-md transition duration-300">
-            View All Posts
-          </a>
+
+        <div class="grid md:grid-cols-3 gap-10 md:gap-14 max-w-5xl mx-auto">
+          <div class="reveal" data-reveal="fade-up">
+            <p class="step-num mb-4">01</p>
+            <h3 class="text-xl font-extrabold text-navy-900 mb-3 font-display">Consultation</h3>
+            <p class="text-slate-600">We learn your business, your customers, and what "growth" actually means for you.</p>
+          </div>
+          <div class="reveal" data-reveal="fade-up" data-reveal-delay="100">
+            <p class="step-num mb-4">02</p>
+            <h3 class="text-xl font-extrabold text-navy-900 mb-3 font-display">Strategy</h3>
+            <p class="text-slate-600">You get a clear plan tailored to your goals and budget — no buzzwords, no filler.</p>
+          </div>
+          <div class="reveal" data-reveal="fade-up" data-reveal-delay="200">
+            <p class="step-num mb-4">03</p>
+            <h3 class="text-xl font-extrabold text-navy-900 mb-3 font-display">Growth</h3>
+            <p class="text-slate-600">We build, launch, and keep optimizing — and you always know what's working.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Final CTA Band -->
-    <section id="cta" class="py-16 bg-white border-t border-gray-200">
+    <!-- Closing CTA -->
+    <section id="cta" class="cta-band py-24 md:py-32">
       <div class="container mx-auto px-6 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Ready to grow your business?</h2>
-        <p class="text-xl text-gray-600 mb-8">Let's build your brand together.</p>
-        <a href="/contact/" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-md hover:ring-2 hover:ring-yellow-400 focus:ring-2 focus:ring-yellow-400 transition duration-300">
-          Talk to Us
-        </a>
+        <p class="hero-eyebrow justify-center mb-6 reveal" data-reveal="fade-up">Brandible!</p>
+        <h2 class="cta-headline max-w-4xl mx-auto mb-8 reveal" data-reveal="fade-up" data-reveal-delay="100">Let's make your business easy to choose.</h2>
+        <div class="reveal" data-reveal="fade-up" data-reveal-delay="200">
+          <a href="/contact/" class="btn-v2 btn-v2--orange !px-10 !py-5 !text-lg">Start a Project</a>
+          <p class="mt-6 text-slate-400">Prefer to talk first? <a href="/contact/#book-call" class="text-brand-sky underline underline-offset-4 hover:text-white transition">Book a free call</a>.</p>
+        </div>
       </div>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-800 text-white py-16">
+  <footer class="bg-navy-950 text-white py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-4 gap-8 mb-12">
         <!-- Company Info -->
         <div class="md:col-span-2">
-          <div class="text-2xl font-bold mb-4"><span class="text-blue-300">Brand<span class="italic text-yellow-400">i</span>ble</span><span class="text-yellow-400">!</span></div>
-          <p class="text-gray-300 mb-6 max-w-md">
-            Professional digital marketing for established local businesses in New Jersey. Brandible Marketing Group helps you build the online presence your business deserves with website design, social media marketing, and SEO strategies.
+          <div class="wordmark text-white text-2xl mb-4">Brand<span class="wm-i">i</span>ble<span class="wm-bang">!</span></div>
+          <p class="text-slate-400 mb-6 max-w-md">
+            Brandible Marketing Group builds high-performing websites, brands, and growth systems for ambitious local businesses in New Jersey.
           </p>
           <div class="flex space-x-4">
-            <a href="https://www.linkedin.com/company/brandible-marketing-group/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition duration-300" aria-label="Follow us on LinkedIn">
+            <a href="https://www.linkedin.com/company/brandible-marketing-group/" target="_blank" rel="noopener noreferrer" class="text-slate-500 hover:text-white transition duration-300" aria-label="Follow us on LinkedIn">
               <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             </a>
-            <a href="https://www.instagram.com/brandiblemarketing/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition duration-300" aria-label="Follow us on Instagram">
+            <a href="https://www.instagram.com/brandiblemarketing/" target="_blank" rel="noopener noreferrer" class="text-slate-500 hover:text-white transition duration-300" aria-label="Follow us on Instagram">
               <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.2 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
-            <a href="https://www.facebook.com/brandiblemg/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition duration-300" aria-label="Follow us on Facebook">
+            <a href="https://www.facebook.com/brandiblemg/" target="_blank" rel="noopener noreferrer" class="text-slate-500 hover:text-white transition duration-300" aria-label="Follow us on Facebook">
               <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>
-            <a href="mailto:hello@brandiblemg.com" class="text-gray-400 hover:text-white transition duration-300" aria-label="Email us">
+            <a href="mailto:hello@brandiblemg.com" class="text-slate-500 hover:text-white transition duration-300" aria-label="Email us">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </a>
           </div>
         </div>
-        
+
         <!-- Quick Links -->
         <div>
           <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
           <ul class="space-y-2">
-            <li><a href="/" class="text-gray-300 hover:text-white transition duration-300">Home</a></li>
-            <li><a href="/about/" class="text-gray-300 hover:text-white transition duration-300">About</a></li>
-            <li><a href="/careers/" class="text-gray-300 hover:text-white transition duration-300">Join Our Team</a></li>
-            <li><a href="/services/" class="text-gray-300 hover:text-white transition duration-300">Services</a></li>
-            <li><a href="/portfolio/" class="text-gray-300 hover:text-white transition duration-300">Portfolio</a></li>
-            <li><a href="/blogs/" class="text-gray-300 hover:text-white transition duration-300">Blog</a></li>
-            <li><a href="/faqs/" class="text-gray-300 hover:text-white transition duration-300">FAQs</a></li>
-            <li><a href="/contact/" class="text-gray-300 hover:text-white transition duration-300">Contact</a></li>
+            <li><a href="/" class="text-slate-400 hover:text-white transition duration-300">Home</a></li>
+            <li><a href="/about/" class="text-slate-400 hover:text-white transition duration-300">About</a></li>
+            <li><a href="/careers/" class="text-slate-400 hover:text-white transition duration-300">Join Our Team</a></li>
+            <li><a href="/services/" class="text-slate-400 hover:text-white transition duration-300">Services</a></li>
+            <li><a href="/portfolio/" class="text-slate-400 hover:text-white transition duration-300">Portfolio</a></li>
+            <li><a href="/blogs/" class="text-slate-400 hover:text-white transition duration-300">Blog</a></li>
+            <li><a href="/faqs/" class="text-slate-400 hover:text-white transition duration-300">FAQs</a></li>
+            <li><a href="/contact/" class="text-slate-400 hover:text-white transition duration-300">Contact</a></li>
           </ul>
         </div>
-        
+
         <!-- Services (deep links) -->
         <div>
           <h3 class="text-lg font-semibold text-white mb-4">Services</h3>
           <ul class="space-y-2">
-            <li><a href="/services/#website-design" class="text-gray-300 hover:text-white transition duration-300">Website Design</a></li>
-            <li><a href="/services/#social-media" class="text-gray-300 hover:text-white transition duration-300">Social Media Management</a></li>
-            <li><a href="/services/#branding" class="text-gray-300 hover:text-white transition duration-300">Branding</a></li>
-            <li><a href="/services/#digital-ads" class="text-gray-300 hover:text-white transition duration-300">Digital Advertising</a></li>
-            <li><a href="/services/#maintenance" class="text-gray-300 hover:text-white transition duration-300">Website Maintenance</a></li>
+            <li><a href="/services/web-design/" class="text-slate-400 hover:text-white transition duration-300">Web Design &amp; Development</a></li>
+            <li><a href="/services/digital-marketing/" class="text-slate-400 hover:text-white transition duration-300">Digital Marketing</a></li>
+            <li><a href="/services/branding/" class="text-slate-400 hover:text-white transition duration-300">Branding &amp; Identity</a></li>
+            <li><a href="/services/media-management/" class="text-slate-400 hover:text-white transition duration-300">Media Management</a></li>
+            <li><a href="/services/ai/" class="text-slate-400 hover:text-white transition duration-300">AI &amp; Automation</a></li>
           </ul>
         </div>
       </div>
-      
+
       <!-- Bottom bar -->
-      <div class="border-t border-gray-700 pt-8">
+      <div class="border-t border-white/10 pt-8">
         <div class="flex flex-col md:flex-row justify-between items-center">
-          <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2025 <span class="text-blue-300 font-semibold">Brand<span class="text-yellow-400 italic">i</span>ble<span class="text-yellow-400">!</span></span> Marketing Group. All rights reserved.</p>
-          <div class="flex space-x-6 text-sm">
-            <a href="/privacy.html" class="hover:text-brandblue">Privacy Policy</a>
-            <a href="/terms.html" class="hover:text-brandblue">Terms of Service</a>
+          <p class="text-slate-500 text-sm mb-4 md:mb-0">© 2026 <span class="wordmark text-slate-300">Brand<span class="wm-i">i</span>ble<span class="wm-bang">!</span></span> Marketing Group. All rights reserved.</p>
+          <div class="flex space-x-6 text-sm text-slate-400">
+            <a href="/privacy.html" class="hover:text-white transition">Privacy Policy</a>
+            <a href="/terms.html" class="hover:text-white transition">Terms of Service</a>
           </div>
+        </div>
+      </div>
     </div>
   </footer>
 

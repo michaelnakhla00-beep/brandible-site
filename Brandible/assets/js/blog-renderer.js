@@ -1,32 +1,29 @@
 // Blog Posts Renderer
 // Fetches and displays blog posts from markdown files
 
-// Parse frontmatter from markdown content
 function parseFrontmatter(content) {
   const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
   const match = content.match(frontmatterRegex);
-  
+
   if (!match) {
     return { frontmatter: {}, body: content };
   }
-  
+
   const frontmatterText = match[1];
   const body = match[2];
   const frontmatter = {};
-  
+
   frontmatterText.split('\n').forEach(line => {
     const colonIndex = line.indexOf(':');
     if (colonIndex > 0) {
       const key = line.substring(0, colonIndex).trim();
       let value = line.substring(colonIndex + 1).trim();
-      
-      // Remove quotes if present
-      if ((value.startsWith('"') && value.endsWith('"')) || 
+
+      if ((value.startsWith('"') && value.endsWith('"')) ||
           (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1);
       }
-      
-      // Handle arrays (tags)
+
       if (value.startsWith('[') && value.endsWith(']')) {
         value = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''));
       }
@@ -37,11 +34,10 @@ function parseFrontmatter(content) {
       frontmatter[key] = value;
     }
   });
-  
+
   return { frontmatter, body };
 }
 
-// Generate slug from title
 function generateSlug(title) {
   return title
     .toLowerCase()
@@ -53,33 +49,50 @@ function isDraftPost(frontmatter) {
   return frontmatter.draft === true;
 }
 
-// Format date
 function formatDate(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-// Load and render blog posts
+function estimateReadTime(body) {
+  if (!body) return '';
+  const words = body.trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.round(words / 200));
+  return `${minutes} min read`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function setFilterChipActive(activeButton) {
+  const allFilterButtons = document.querySelectorAll('.blog-filter, .blog-filter-active');
+  allFilterButtons.forEach(btn => {
+    btn.classList.remove('blog-filter-active', 'cat-active', 'bg-blue-600', 'text-white', 'border-blue-600');
+    btn.classList.add('blog-filter');
+    btn.setAttribute('aria-pressed', 'false');
+  });
+
+  activeButton.classList.add('blog-filter', 'blog-filter-active', 'cat-active');
+  activeButton.setAttribute('aria-pressed', 'true');
+}
+
 async function loadBlogPosts() {
   const blogContainer = document.getElementById('blog-posts-grid');
   if (!blogContainer) return;
 
-  // Show loading spinner
   blogContainer.innerHTML = `
-    <div class="col-span-full flex justify-center items-center py-12">
-      <div class="flex flex-col items-center gap-4">
-        <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p class="text-gray-600 text-sm">Loading blog posts...</p>
-      </div>
+    <div class="blog-list-status">
+      <p class="text-slate-500 text-sm">Loading blog posts...</p>
     </div>
   `;
 
   try {
-    // Try to fetch posts index first (if it exists)
     let postsList = [];
     try {
       const indexResponse = await fetch('/blogs/posts/index.json');
@@ -90,34 +103,29 @@ async function loadBlogPosts() {
       console.log('No posts index found, will use placeholder posts');
     }
 
-    // If no posts index, show a message
     if (postsList.length === 0) {
       blogContainer.innerHTML = `
-        <div class="col-span-full text-center py-12">
-          <p class="text-gray-500 text-lg mb-2">No blog posts yet</p>
-          <p class="text-gray-400 text-sm">Check back soon for updates!</p>
+        <div class="blog-list-status">
+          <p class="text-slate-600 text-lg mb-2">No blog posts yet</p>
+          <p class="text-slate-400 text-sm">Check back soon for updates!</p>
         </div>
       `;
       return;
     }
 
-    // Clear container before loading posts
     blogContainer.innerHTML = '';
 
-    // Load each post
     const posts = await Promise.all(
       postsList.map(async (postFile) => {
         try {
           const response = await fetch(`/blogs/posts/${postFile}`);
           if (!response.ok) return null;
-          
+
           const markdown = await response.text();
           const { frontmatter, body } = parseFrontmatter(markdown);
-          
-          // Generate slug from filename (remove date prefix and .md extension)
-          // Format: YYYY-MM-DD-slug.md -> slug
+
           const slug = postFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
-          
+
           if (isDraftPost(frontmatter)) return null;
 
           return {
@@ -130,7 +138,8 @@ async function loadBlogPosts() {
             featured_image: frontmatter.featured_image || '',
             featured_image_alt: frontmatter.featured_image_alt || '',
             tags: frontmatter.tags || [],
-            body: body
+            body: body,
+            readTime: estimateReadTime(body)
           };
         } catch (error) {
           console.error(`Error loading post ${postFile}:`, error);
@@ -139,184 +148,209 @@ async function loadBlogPosts() {
       })
     );
 
-    // Filter out null posts and sort by date (newest first)
     const validPosts = posts.filter(p => p !== null).sort((a, b) => {
       return new Date(b.date) - new Date(a.date);
     });
 
     if (validPosts.length === 0) {
       blogContainer.innerHTML = `
-        <div class="col-span-full text-center py-12">
-          <p class="text-gray-500 text-lg mb-2">No blog posts yet</p>
-          <p class="text-gray-400 text-sm">Check back soon for updates!</p>
+        <div class="blog-list-status">
+          <p class="text-slate-600 text-lg mb-2">No blog posts yet</p>
+          <p class="text-slate-400 text-sm">Check back soon for updates!</p>
         </div>
       `;
       return;
     }
 
-    // Render posts
-    validPosts.forEach(post => {
-      const postCard = createPostCard(post);
-      blogContainer.appendChild(postCard);
+    const featuredSlot = document.getElementById('blog-featured');
+    const [featured, ...rest] = validPosts;
+
+    if (featuredSlot && featured) {
+      featuredSlot.innerHTML = '';
+      featuredSlot.appendChild(createFeaturedPost(featured));
+    }
+
+    rest.forEach(post => {
+      blogContainer.appendChild(createPostCard(post));
     });
 
-    // Hide static posts when dynamic posts are loaded (for SEO - static links remain in HTML source)
+    // If only one post, still show it in the list when featured is empty or keep list empty
+    if (rest.length === 0 && !featuredSlot) {
+      blogContainer.appendChild(createPostCard(featured));
+    }
+
     const staticPosts = document.getElementById('static-blog-posts');
     if (staticPosts) {
       staticPosts.style.display = 'none';
     }
 
-    // Re-initialize filter functionality with new posts
     initializeFilters();
   } catch (error) {
     console.error('Error loading blog posts:', error);
     blogContainer.innerHTML = `
-      <div class="col-span-full text-center py-12">
-        <p class="text-red-500 text-lg mb-2">Error loading blog posts</p>
-        <p class="text-gray-400 text-sm">Please try again later</p>
+      <div class="blog-list-status">
+        <p class="text-red-600 text-lg mb-2">Error loading blog posts</p>
+        <p class="text-slate-400 text-sm">Please try again later</p>
       </div>
     `;
   }
 }
 
-// Create a blog post card element
-function createPostCard(post) {
+function createFeaturedPost(post) {
   const article = document.createElement('article');
-  article.className = 'blog-post bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100';
+  article.className = 'blog-featured blog-post';
   article.setAttribute('data-category', post.category || '');
-  
-  const categoryColors = {
-    'Marketing': 'bg-blue-100 text-blue-700',
-    'Web Design': 'bg-purple-100 text-purple-700',
-    'SEO': 'bg-yellow-100 text-yellow-700',
-    'Social Media': 'bg-green-100 text-green-700',
-    'Business Tips': 'bg-red-100 text-red-700',
-    'Case Studies': 'bg-indigo-100 text-indigo-700'
-  };
-  
-  const categoryColor = categoryColors[post.category] || 'bg-gray-100 text-gray-700';
-  
-  const imgAlt = post.featured_image_alt || (post.title ? `Featured image for ${post.title}` : 'Blog post featured image');
-  const featuredImage = post.featured_image 
-    ? `<img src="${post.featured_image}" alt="${imgAlt.replace(/"/g, '&quot;')}" class="w-full h-48 object-cover" loading="lazy" decoding="async" width="800" height="192" />`
-    : `<div class="h-48 bg-gradient-to-br from-blue-400 to-indigo-500"></div>`;
-  
+
+  const title = escapeHtml(post.title);
+  const excerpt = post.excerpt ? escapeHtml(post.excerpt) : '';
+  const category = post.category ? escapeHtml(post.category) : '';
+  const metaParts = [
+    formatDate(post.date),
+    category,
+    post.readTime
+  ].filter(Boolean);
+
+  const imgAlt = escapeHtml(post.featured_image_alt || (post.title ? `Featured image for ${post.title}` : 'Blog post featured image'));
+  const media = post.featured_image
+    ? `<div class="blog-featured-media"><img src="${escapeHtml(post.featured_image)}" alt="${imgAlt}" loading="lazy" decoding="async" width="960" height="540" /></div>`
+    : `<div class="blog-featured-media blog-featured-media--fallback" aria-hidden="true"><span>${category || 'Blog'}</span></div>`;
+
   article.innerHTML = `
-    ${featuredImage}
-    <div class="p-6">
-      <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
-        <span>${formatDate(post.date)}</span>
-        ${post.category ? `<span class="px-2 py-1 ${categoryColor} rounded-full text-xs font-medium">${post.category}</span>` : ''}
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900 mb-3">
-        <a href="/blogs/${post.slug}/" class="hover:text-blue-600 transition">${post.title}</a>
+    ${media}
+    <div class="blog-featured-body">
+      <p class="blog-featured-label">Latest</p>
+      <p class="blog-list-meta">${metaParts.join(' · ')}</p>
+      <h2 class="blog-featured-title">
+        <a href="/blogs/${post.slug}/">${title}</a>
       </h2>
-      ${post.excerpt ? `<p class="text-gray-600 mb-4 line-clamp-3">${post.excerpt}</p>` : ''}
-      <a href="/blogs/${post.slug}/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2" aria-label="Read More: ${post.title}">
-        Read More<span class="sr-only">: ${post.title}</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      ${excerpt ? `<p class="blog-featured-excerpt">${excerpt}</p>` : ''}
+      <a href="/blogs/${post.slug}/" class="blog-list-read" aria-label="Read: ${title}">
+        Read article
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
       </a>
     </div>
   `;
-  
+
   return article;
 }
 
-// Re-initialize filters after posts are loaded
+function createPostCard(post) {
+  const article = document.createElement('article');
+  article.className = 'blog-post blog-list-item';
+  article.setAttribute('data-category', post.category || '');
+
+  const title = escapeHtml(post.title);
+  const excerpt = post.excerpt ? escapeHtml(post.excerpt) : '';
+  const category = post.category ? escapeHtml(post.category) : '';
+  const metaParts = [
+    formatDate(post.date),
+    category,
+    post.readTime
+  ].filter(Boolean);
+
+  const imgAlt = escapeHtml(post.featured_image_alt || (post.title ? `Featured image for ${post.title}` : 'Blog post featured image'));
+  const thumb = post.featured_image
+    ? `<a href="/blogs/${post.slug}/" class="blog-list-thumb" tabindex="-1" aria-hidden="true">
+        <img src="${escapeHtml(post.featured_image)}" alt="" loading="lazy" decoding="async" width="320" height="200" />
+      </a>`
+    : `<a href="/blogs/${post.slug}/" class="blog-list-thumb blog-list-thumb--fallback" tabindex="-1" aria-hidden="true">
+        <span>${category || 'Blog'}</span>
+      </a>`;
+
+  article.innerHTML = `
+    ${thumb}
+    <div class="blog-list-body">
+      <p class="blog-list-meta">${metaParts.join(' · ')}</p>
+      <h2 class="blog-list-title">
+        <a href="/blogs/${post.slug}/">${title}</a>
+      </h2>
+      ${excerpt ? `<p class="blog-list-excerpt">${excerpt}</p>` : ''}
+      <a href="/blogs/${post.slug}/" class="blog-list-read" aria-label="Read: ${title}">
+        Read
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </a>
+    </div>
+  `;
+
+  return article;
+}
+
 function initializeFilters() {
   const filterButtons = document.querySelectorAll('.blog-filter, .blog-filter-active');
   const searchInput = document.getElementById('blog-search');
-  const blogPosts = document.querySelectorAll('.blog-post');
   let currentCategory = 'all';
   let currentSearch = '';
 
-  // Filter by category
   filterButtons.forEach(button => {
-    // Remove existing listeners by cloning
     const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
-    
+
     newButton.addEventListener('click', function() {
-      // Get fresh reference to all filter buttons (after DOM changes)
-      const allFilterButtons = document.querySelectorAll('.blog-filter, .blog-filter-active');
-      
-      // Update active state on all buttons
-      allFilterButtons.forEach(btn => {
-        btn.classList.remove('blog-filter-active', 'bg-blue-600', 'text-white', 'border-blue-600');
-        btn.classList.add('blog-filter', 'hover:bg-gray-100');
-        btn.setAttribute('aria-pressed', 'false');
-      });
-      
-      this.classList.remove('blog-filter', 'hover:bg-gray-100');
-      this.classList.add('blog-filter-active', 'bg-blue-600', 'text-white', 'border-blue-600');
-      this.setAttribute('aria-pressed', 'true');
-      
+      setFilterChipActive(this);
       currentCategory = this.getAttribute('data-category');
       filterPosts();
     });
   });
 
-  // Search functionality
   if (searchInput) {
     const newInput = searchInput.cloneNode(true);
     searchInput.parentNode.replaceChild(newInput, searchInput);
-    
+
     newInput.addEventListener('input', function() {
       currentSearch = this.value.toLowerCase().trim();
       filterPosts();
     });
   }
 
-  // Filter posts based on category and search
   function filterPosts() {
+    const blogPosts = document.querySelectorAll('#blog-featured .blog-post, #blog-posts-grid .blog-post');
     let visibleCount = 0;
-    
+
     blogPosts.forEach(post => {
       const category = post.getAttribute('data-category') || '';
       const title = post.querySelector('h2 a')?.textContent.toLowerCase() || '';
-      const excerpt = post.querySelector('p')?.textContent.toLowerCase() || '';
+      const excerpt = post.querySelector('.blog-list-excerpt, .blog-featured-excerpt')?.textContent.toLowerCase() || '';
       const searchText = title + ' ' + excerpt;
-      
+
       const matchesCategory = currentCategory === 'all' || category === currentCategory;
       const matchesSearch = !currentSearch || searchText.includes(currentSearch);
-      
+
       if (matchesCategory && matchesSearch) {
-        post.style.display = 'block';
+        post.style.display = '';
         visibleCount++;
       } else {
         post.style.display = 'none';
       }
     });
 
-    // Show message if no posts match
     const grid = document.getElementById('blog-posts-grid');
+    if (!grid) return;
+
     let noResultsMsg = grid.querySelector('.no-results-message');
-    
+
     if (visibleCount === 0) {
       if (!noResultsMsg) {
         noResultsMsg = document.createElement('div');
-        noResultsMsg.className = 'no-results-message col-span-full text-center py-12';
+        noResultsMsg.className = 'no-results-message blog-list-status';
         noResultsMsg.innerHTML = `
-          <p class="text-gray-500 text-lg mb-2">No blog posts found</p>
-          <p class="text-gray-400 text-sm">Try adjusting your filters or search terms</p>
+          <p class="text-slate-600 text-lg mb-2">No blog posts found</p>
+          <p class="text-slate-400 text-sm">Try adjusting your filters or search terms</p>
         `;
         grid.appendChild(noResultsMsg);
       }
       noResultsMsg.style.display = 'block';
-    } else {
-      if (noResultsMsg) {
-        noResultsMsg.style.display = 'none';
-      }
+    } else if (noResultsMsg) {
+      noResultsMsg.style.display = 'none';
     }
   }
 }
 
-// Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', loadBlogPosts);
 } else {
   loadBlogPosts();
 }
-

@@ -10,26 +10,25 @@
   let currentCategory = 'all';
   let currentSearch = '';
 
-  // Filter by category
+  function setFilterChipActive(activeButton) {
+    filterButtons.forEach(btn => {
+      btn.classList.remove('blog-filter-active', 'cat-active', 'bg-blue-600', 'text-white', 'border-blue-600');
+      btn.classList.add('blog-filter');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+
+    activeButton.classList.add('blog-filter', 'blog-filter-active', 'cat-active');
+    activeButton.setAttribute('aria-pressed', 'true');
+  }
+
   filterButtons.forEach(button => {
     button.addEventListener('click', function() {
-      // Update active state
-      filterButtons.forEach(btn => {
-        btn.classList.remove('blog-filter-active', 'bg-blue-600', 'text-white', 'border-blue-600');
-        btn.classList.add('blog-filter', 'hover:bg-gray-100');
-        btn.setAttribute('aria-pressed', 'false');
-      });
-      
-      this.classList.remove('blog-filter', 'hover:bg-gray-100');
-      this.classList.add('blog-filter-active', 'bg-blue-600', 'text-white', 'border-blue-600');
-      this.setAttribute('aria-pressed', 'true');
-      
+      setFilterChipActive(this);
       currentCategory = this.getAttribute('data-category');
       filterPosts();
     });
   });
 
-  // Search functionality
   if (searchInput) {
     searchInput.addEventListener('input', function() {
       currentSearch = this.value.toLowerCase().trim();
@@ -37,46 +36,42 @@
     });
   }
 
-  // Filter posts based on category and search
   function filterPosts() {
     let visibleCount = 0;
-    
+
     blogPosts.forEach(post => {
       const category = post.getAttribute('data-category');
-      const title = post.querySelector('h2 a')?.textContent.toLowerCase() || '';
-      const excerpt = post.querySelector('p')?.textContent.toLowerCase() || '';
+      const title = post.querySelector('h2 a, h3 a')?.textContent.toLowerCase() || '';
+      const excerpt = post.querySelector('.blog-list-excerpt, p')?.textContent.toLowerCase() || '';
       const searchText = title + ' ' + excerpt;
-      
+
       const matchesCategory = currentCategory === 'all' || category === currentCategory;
       const matchesSearch = !currentSearch || searchText.includes(currentSearch);
-      
+
       if (matchesCategory && matchesSearch) {
-        post.style.display = 'block';
+        post.style.display = '';
         visibleCount++;
       } else {
         post.style.display = 'none';
       }
     });
 
-    // Show message if no posts match
     const grid = document.getElementById('blog-posts-grid');
     let noResultsMsg = grid?.querySelector('.no-results-message');
-    
+
     if (visibleCount === 0 && grid) {
       if (!noResultsMsg) {
         noResultsMsg = document.createElement('div');
-        noResultsMsg.className = 'no-results-message col-span-full text-center py-12';
+        noResultsMsg.className = 'no-results-message blog-list-status';
         noResultsMsg.innerHTML = `
-          <p class="text-gray-600 text-lg mb-2">No blog posts found</p>
-          <p class="text-gray-500 text-sm">Try adjusting your filters or search terms</p>
+          <p class="text-slate-600 text-lg mb-2">No blog posts found</p>
+          <p class="text-slate-500 text-sm">Try adjusting your filters or search terms</p>
         `;
         grid.appendChild(noResultsMsg);
       }
       noResultsMsg.style.display = 'block';
-    } else {
-      if (noResultsMsg) {
-        noResultsMsg.style.display = 'none';
-      }
+    } else if (noResultsMsg) {
+      noResultsMsg.style.display = 'none';
     }
   }
 })();

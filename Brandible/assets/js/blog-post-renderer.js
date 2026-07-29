@@ -59,6 +59,21 @@ function formatDate(dateString) {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+function estimateReadTime(body) {
+  if (!body) return '';
+  const words = body.trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.round(words / 200));
+  return `${minutes} min read`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // Load and render blog post
 async function loadBlogPost() {
   const postContainer = document.getElementById('blog-post-content');
@@ -177,7 +192,7 @@ async function loadBlogPost() {
       const staticH1 = document.getElementById('blog-post-title');
       if (staticH1) {
         staticH1.textContent = frontmatter.title || seoTitle;
-        staticH1.classList.remove('sr-only'); // Make it visible
+        staticH1.classList.remove('sr-only');
       }
 
       // Update Open Graph title (include brand name for SEO)
@@ -273,12 +288,10 @@ function copyToClipboard(url) {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
           </svg>
         `;
-        button.classList.remove('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
-        button.classList.add('bg-green-50', 'text-green-600');
+        button.classList.add('is-copied');
         setTimeout(() => {
           button.innerHTML = originalHTML;
-          button.classList.remove('bg-green-50', 'text-green-600');
-          button.classList.add('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
+          button.classList.remove('is-copied');
         }, 2000);
       }
     }).catch(err => {
@@ -312,12 +325,10 @@ function fallbackCopyToClipboard(text) {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
         </svg>
       `;
-      button.classList.remove('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
-      button.classList.add('bg-green-50', 'text-green-600');
+      button.classList.add('is-copied');
       setTimeout(() => {
         button.innerHTML = originalHTML;
-        button.classList.remove('bg-green-50', 'text-green-600');
-        button.classList.add('bg-purple-50', 'text-purple-600', 'hover:bg-purple-100');
+        button.classList.remove('is-copied');
       }, 2000);
     }
   } catch (err) {
@@ -375,22 +386,27 @@ async function loadRelatedPosts(currentSlug) {
     
     if (validPosts.length === 0) return '';
     
-    // Generate HTML for related posts (use new URL format)
-    return validPosts.map(post => `
-      <article class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition">
-        <h4 class="text-lg font-bold text-gray-900 mb-2">
-          <a href="/blogs/${post.slug}/" class="hover:text-blue-600">${post.title}</a>
+    return validPosts.map(post => {
+      const title = escapeHtml(post.title);
+      const excerpt = post.excerpt ? escapeHtml(post.excerpt) : '';
+      const metaParts = [formatDate(post.date), post.category ? escapeHtml(post.category) : ''].filter(Boolean);
+      return `
+      <article class="blog-list-item blog-related-item">
+        <p class="blog-list-meta">${metaParts.join(' · ')}</p>
+        <h4 class="blog-list-title">
+          <a href="/blogs/${post.slug}/">${title}</a>
         </h4>
-        ${post.excerpt ? `<p class="text-gray-600 text-sm mb-3">${post.excerpt}</p>` : ''}
-        <a href="/blogs/${post.slug}/" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1" aria-label="Read More: ${post.title}">
-          Read More<span class="sr-only">: ${post.title}</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        ${excerpt ? `<p class="blog-list-excerpt">${excerpt}</p>` : ''}
+        <a href="/blogs/${post.slug}/" class="blog-list-read" aria-label="Read: ${title}">
+          Read
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
           </svg>
         </a>
       </article>
-    `).join('');
-    
+    `;
+    }).join('');
+
   } catch (error) {
     console.error('Error loading related posts:', error);
     return '';
@@ -489,149 +505,120 @@ function addArticleSchema(frontmatter, postFile, body) {
 
 // Render the post content
 function renderPost(frontmatter, body, container) {
-  const categoryColors = {
-    'Marketing': 'bg-blue-100 text-blue-700',
-    'Web Design': 'bg-purple-100 text-purple-700',
-    'SEO': 'bg-yellow-100 text-yellow-700',
-    'Social Media': 'bg-green-100 text-green-700',
-    'Business Tips': 'bg-red-100 text-red-700',
-    'Case Studies': 'bg-indigo-100 text-indigo-700'
-  };
-  
-  const categoryColor = categoryColors[frontmatter.category] || 'bg-gray-100 text-gray-700';
   const hadStaticCluster = !!document.querySelector('[data-static-internal-links="true"]');
-  
-  // Convert markdown to HTML
   const htmlBody = marked.parse(body);
-  
-  // Generate post URL for sharing
+  const readTime = estimateReadTime(body);
+
   const urlParams = new URLSearchParams(window.location.search);
   let slug = urlParams.get('slug') || window.location.pathname.split('/').slice(-2, -1)[0];
-  // If slug is empty or invalid, try to extract from current path
   if (!slug || slug === 'post.html' || slug === 'blogs') {
     const pathParts = window.location.pathname.split('/').filter(p => p);
     slug = pathParts[pathParts.length - 1] || slug;
   }
-  // Use the static HTML file format for better SEO and social sharing
   const postUrl = `https://www.brandiblemg.com/blogs/${slug}/`;
   const shareUrls = getSocialShareUrls(frontmatter.title || 'Blog Post', postUrl);
-  
-  container.innerHTML = `
-    <!-- Breadcrumb Navigation -->
-    <nav aria-label="Breadcrumb" class="mb-8 pb-4 border-b border-gray-200">
-      <ol class="flex items-center space-x-2 text-sm">
-        <li>
-          <a href="/" class="text-gray-500 hover:text-blue-600 transition">Home</a>
-        </li>
-        <li class="flex items-center">
-          <svg class="w-4 h-4 text-gray-400 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </li>
-        <li>
-          <a href="/blogs/" class="text-gray-500 hover:text-blue-600 transition">Blog</a>
-        </li>
-        <li class="flex items-center">
-          <svg class="w-4 h-4 text-gray-400 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </li>
-        <li class="text-gray-900 font-medium" aria-current="page">${frontmatter.title || 'Post'}</li>
-      </ol>
-    </nav>
 
-    <article class="max-w-4xl mx-auto">
-      ${frontmatter.featured_image ? `
-        <div class="mb-8">
-          <img src="${frontmatter.featured_image.startsWith('http') ? frontmatter.featured_image : (frontmatter.featured_image.startsWith('/') ? `https://www.brandiblemg.com${frontmatter.featured_image}` : frontmatter.featured_image)}" alt="${(frontmatter.featured_image_alt || (frontmatter.title ? `Featured image for ${frontmatter.title}` : 'Blog post featured image')).replace(/"/g, '&quot;')}" class="w-full h-64 md:h-96 object-cover rounded-lg" loading="lazy" decoding="async" />
-        </div>
-      ` : ''}
-      
-      <header class="mb-8">
-        <div class="flex items-center gap-3 text-sm text-gray-500 mb-4">
-          <span>${formatDate(frontmatter.date)}</span>
-          ${frontmatter.category ? `<span class="px-2 py-1 ${categoryColor} rounded-full text-xs font-medium">${frontmatter.category}</span>` : ''}
-          ${frontmatter.author ? `<span>By ${frontmatter.author}</span>` : ''}
-        </div>
-        ${frontmatter.excerpt ? `<p class="text-xl text-gray-600 mb-6">${frontmatter.excerpt}</p>` : ''}
-        
-        <!-- Social Share Buttons -->
-        <div class="pt-6 border-t border-gray-200">
-          <div class="flex items-center gap-4">
-            <span class="text-sm font-medium text-gray-700">Share:</span>
-            <div class="flex items-center gap-3">
-              <a href="${shareUrls.facebook}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors" aria-label="Share on Facebook">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a href="${shareUrls.linkedin}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors" aria-label="Share on LinkedIn">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              </a>
-              <a href="${shareUrls.email}" class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" aria-label="Share via Email">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-              </a>
-              <button type="button" data-share-url="${postUrl}" data-share-title="${frontmatter.title || 'Blog Post'}" class="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors messages-share-btn" aria-label="Share via Messages">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-              </button>
-              <button type="button" data-copy-url="${postUrl.replace(/"/g, '&quot;')}" class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-600 transition-colors copy-link-btn" aria-label="Copy link to clipboard" title="Copy link">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-      
-      <div class="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700 prose-blockquote:border-blue-600 prose-blockquote:text-gray-600">
-        ${htmlBody}
+  const metaParts = [
+    frontmatter.category ? escapeHtml(frontmatter.category) : '',
+    formatDate(frontmatter.date),
+    readTime,
+    frontmatter.author ? `By ${escapeHtml(frontmatter.author)}` : ''
+  ].filter(Boolean);
+
+  const imgSrc = frontmatter.featured_image
+    ? (frontmatter.featured_image.startsWith('http')
+      ? frontmatter.featured_image
+      : (frontmatter.featured_image.startsWith('/')
+        ? `https://www.brandiblemg.com${frontmatter.featured_image}`
+        : frontmatter.featured_image))
+    : '';
+  const imgAlt = escapeHtml(
+    frontmatter.featured_image_alt ||
+    (frontmatter.title ? `Featured image for ${frontmatter.title}` : 'Blog post featured image')
+  );
+
+  container.innerHTML = `
+    ${imgSrc ? `
+      <div class="blog-post-hero-media">
+        <img src="${escapeHtml(imgSrc)}" alt="${imgAlt}" loading="lazy" decoding="async" />
       </div>
-      
-      ${frontmatter.tags && frontmatter.tags.length > 0 ? `
-        <footer class="mt-12 pt-8 border-t border-gray-200">
-          <div class="flex flex-wrap gap-2 mb-8">
-            <span class="text-sm text-gray-600 font-medium">Tags:</span>
-            ${frontmatter.tags.map(tag => `<span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">${tag}</span>`).join('')}
-          </div>
-        </footer>
-      ` : ''}
-      
-      ${hadStaticCluster ? '' : `
-      <!-- Related Services -->
-      <div class="mt-12 pt-8 border-t border-gray-200">
-        <h3 class="text-2xl font-bold text-gray-900 mb-6">Related Services</h3>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          ${getRelatedServices(frontmatter.category, frontmatter.tags)}
-        </div>
+    ` : ''}
+
+    ${frontmatter.excerpt ? `<p class="blog-post-dek">${escapeHtml(frontmatter.excerpt)}</p>` : ''}
+
+    <div class="blog-share">
+      <span class="blog-share-label">Share</span>
+      <div class="blog-share-actions">
+        <a href="${shareUrls.facebook}" target="_blank" rel="noopener noreferrer" class="blog-share-btn" aria-label="Share on Facebook">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="${shareUrls.linkedin}" target="_blank" rel="noopener noreferrer" class="blog-share-btn" aria-label="Share on LinkedIn">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="${shareUrls.email}" class="blog-share-btn" aria-label="Share via Email">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        </a>
+        <button type="button" data-share-url="${postUrl}" data-share-title="${escapeHtml(frontmatter.title || 'Blog Post')}" class="blog-share-btn messages-share-btn" aria-label="Share via Messages">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        </button>
+        <button type="button" data-copy-url="${postUrl.replace(/"/g, '&quot;')}" class="blog-share-btn copy-link-btn" aria-label="Copy link to clipboard" title="Copy link">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        </button>
       </div>
-      
-      <!-- Related Posts -->
-      <section class="mt-16 pt-12 border-t border-gray-200">
-        <h3 class="text-2xl font-bold text-gray-900 mb-6">More from Our Blog</h3>
-        <div class="grid md:grid-cols-2 gap-6" id="related-posts-container">
-          <div class="col-span-full text-center py-4 text-gray-500 text-sm">Loading related posts...</div>
+    </div>
+
+    <div class="prose prose-blog">
+      ${htmlBody}
+    </div>
+
+    ${frontmatter.tags && frontmatter.tags.length > 0 ? `
+      <footer class="blog-post-tags">
+        <span class="blog-tags-label">Tags</span>
+        <div class="blog-tags">
+          ${frontmatter.tags.map(tag => `<span class="blog-tag">${escapeHtml(tag)}</span>`).join('')}
         </div>
-        <div class="mt-8 text-center">
-          <a href="/blogs/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2">
-            View All Blog Posts
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
-        </div>
-      </section>
-      `}
-    </article>
+      </footer>
+    ` : ''}
+
+    ${hadStaticCluster ? '' : `
+    <div class="blog-related-services">
+      <h3 class="blog-section-heading">Related Services</h3>
+      <div class="blog-service-links">
+        ${getRelatedServices(frontmatter.category, frontmatter.tags)}
+      </div>
+    </div>
+
+    <section class="blog-related-posts">
+      <h3 class="blog-section-heading">More from Our Blog</h3>
+      <div class="blog-list" id="related-posts-container">
+        <div class="blog-list-status"><p class="text-slate-500 text-sm">Loading related posts...</p></div>
+      </div>
+      <div class="blog-related-footer">
+        <a href="/blogs/" class="blog-list-read">
+          View all posts
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </section>
+    `}
   `;
-  
-  // Add event listener for copy button
+
+  const metaSlot = document.getElementById('blog-post-meta');
+  if (metaSlot) {
+    metaSlot.innerHTML = `
+      <nav aria-label="Breadcrumb" class="blog-breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/blogs/">Blog</a></li>
+          <li aria-current="page">${escapeHtml(frontmatter.title || 'Post')}</li>
+        </ol>
+      </nav>
+      <p class="blog-post-meta">${metaParts.join(' · ')}</p>
+    `;
+  }
+
   const copyButton = container.querySelector('.copy-link-btn');
   if (copyButton) {
     copyButton.addEventListener('click', function() {
@@ -641,16 +628,14 @@ function renderPost(frontmatter, body, container) {
       }
     });
   }
-  
-  // Add event listener for Messages share button (use Web Share API)
+
   const messagesButtons = container.querySelectorAll('.messages-share-btn');
   messagesButtons.forEach(button => {
     button.addEventListener('click', async function() {
       const url = this.getAttribute('data-share-url');
       const title = this.getAttribute('data-share-title');
-      
+
       if (navigator.share) {
-        // Use Web Share API (works on mobile and modern browsers)
         try {
           await navigator.share({
             title: title,
@@ -658,18 +643,16 @@ function renderPost(frontmatter, body, container) {
             url: url
           });
         } catch (err) {
-          // User cancelled or error - fallback to sms:
           if (err.name !== 'AbortError') {
             window.location.href = `sms:?body=${encodeURIComponent(`${title} - Brandible Marketing Group`)}%20${encodeURIComponent(url)}`;
           }
         }
       } else {
-        // Fallback to sms: protocol for older browsers
         window.location.href = `sms:?body=${encodeURIComponent(`${title} - Brandible Marketing Group`)}%20${encodeURIComponent(url)}`;
       }
     });
   });
-  
+
   if (!hadStaticCluster) {
     loadRelatedPosts(slug).then(relatedPostsHTML => {
       const relatedPostsContainer = container.querySelector('#related-posts-container');
@@ -677,7 +660,7 @@ function renderPost(frontmatter, body, container) {
         relatedPostsContainer.innerHTML = relatedPostsHTML;
       } else if (relatedPostsContainer) {
         relatedPostsContainer.innerHTML = `
-        <div class="col-span-full text-center py-4 text-gray-500 text-sm">No other posts available</div>
+        <div class="blog-list-status"><p class="text-slate-500 text-sm">No other posts available</p></div>
       `;
       }
     });
@@ -800,15 +783,9 @@ function getRelatedServices(category, tags) {
   const relatedServices = collectRelatedServicesEntries(category, tags, 3);
 
   return relatedServices.map(service => `
-    <a href="${service.url}" class="block p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 hover:shadow-md transition-all hover:border-blue-200">
-      <h4 class="text-lg font-bold text-gray-900 mb-2">${service.name}</h4>
-      <p class="text-gray-600 text-sm mb-3">${service.description}</p>
-      <span class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1">
-        Learn More
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-        </svg>
-      </span>
+    <a href="${service.url}" class="blog-service-link">
+      <span class="blog-service-name">${service.name}</span>
+      <span class="blog-service-desc">${service.description}</span>
     </a>
   `).join('');
 }

@@ -189,6 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: encode(fd),
+        }).then((res) => {
+          if (!res.ok) throw new Error('Form submission failed');
         });
 
         // Success UX
@@ -412,11 +414,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateKey = formatDate(thisDate);
         const allTimesBooked = TIMES.every(time => bookedSlots.has(`${dateKey}-${time}`));
         
-        cell.className = 'text-sm py-2 rounded-lg text-center transition ' +
-          (isSelected ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' : 
-          isPast || allTimesBooked ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 
-          'hover:bg-gray-100 text-gray-700') +
-          (isToday && !isSelected && !isPast ? ' ring-1 ring-blue-300' : '');
+        cell.className = 'bk-day' +
+          (isSelected ? ' bk-day--selected' :
+          isPast || allTimesBooked ? ' bk-day--disabled' : '') +
+          (isToday && !isSelected && !isPast ? ' bk-day--today' : '');
         cell.textContent = String(d);
         
         if (isPast) {
@@ -454,11 +455,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasPassed = isToday && isTimePassed(t);
         
         if (isBooked || hasPassed) {
-          btn.className = 'px-3 py-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 text-sm cursor-not-allowed opacity-50';
+          btn.className = 'bk-time bk-time--disabled';
           btn.setAttribute('disabled', 'true');
           btn.title = isBooked ? 'Already booked' : 'This time has passed';
         } else {
-          btn.className = 'px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm transition';
+          btn.className = 'bk-time';
           btn.addEventListener('click', () => {
             selectedTime = t;
             // transition to step 2
@@ -730,30 +731,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===========================
    * Count-up on reveal
+   * Supports data-count-to, optional data-count-prefix / data-count-suffix,
+   * data-count-duration, data-count-decimals. Respects prefers-reduced-motion.
    * =========================== */
   (function(){
     const nums = Array.from(document.querySelectorAll('[data-count-to]'));
     if (!nums.length) return;
 
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fmt = new Intl.NumberFormat();
+
+    function formatValue(el, n){
+      const prefix = el.getAttribute('data-count-prefix') || '';
+      const suffix = el.getAttribute('data-count-suffix') || '';
+      const decimals = parseInt(el.getAttribute('data-count-decimals') || '0', 10);
+      let numStr;
+      if (decimals > 0) {
+        const fixed = n.toFixed(decimals);
+        const parts = fixed.split('.');
+        parts[0] = fmt.format(parseInt(parts[0], 10) || 0);
+        numStr = parts.join('.');
+      } else {
+        numStr = fmt.format(Math.round(n));
+      }
+      return prefix + numStr + suffix;
+    }
+
+    function setFinal(el){
+      const to = parseFloat(el.getAttribute('data-count-to') || '0');
+      el.textContent = formatValue(el, to);
+    }
+
     function animate(el){
-      const to = parseInt(el.getAttribute('data-count-to') || '0', 10);
+      const to = parseFloat(el.getAttribute('data-count-to') || '0');
       const dur = parseInt(el.getAttribute('data-count-duration') || '1200', 10);
       const start = performance.now();
-      const fmt = new Intl.NumberFormat();
+      el.textContent = formatValue(el, 0);
 
       function step(now){
         const t = Math.min(1, (now - start) / dur);
-        const eased = (t<.5) ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
-        el.textContent = fmt.format(Math.round(to * eased));
+        const eased = (t < 0.5) ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        el.textContent = formatValue(el, to * eased);
         if (t < 1) requestAnimationFrame(step);
+        else setFinal(el);
       }
       requestAnimationFrame(step);
     }
 
     nums.forEach(el => {
+      if (reduceMotion) {
+        setFinal(el);
+        return;
+      }
       if ('IntersectionObserver' in window) {
+        el.textContent = formatValue(el, 0);
         const io = new IntersectionObserver((entries, obs) => {
-          entries.forEach(e => { if (e.isIntersecting) { animate(el); obs.unobserve(el); } });
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              animate(el);
+              obs.unobserve(el);
+            }
+          });
         }, { rootMargin: '100px' });
         io.observe(el);
       } else {
@@ -762,6 +800,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 });
+
 
 /* ===========================
  * FAQs: accordion

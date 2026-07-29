@@ -278,10 +278,11 @@
         transition:background-color .2s ease, color .2s ease, box-shadow .2s ease;
       }
       .cookie-btn-primary{
-        background:linear-gradient(90deg, #2563EB, #4F46E5);
+        background:#1D4ED8;
         color:#fff;
       }
       .cookie-btn-primary:hover{
+        background:#2563EB;
         box-shadow:0 4px 12px rgba(37,99,235,.35);
       }
       .cookie-btn-secondary{
@@ -301,7 +302,7 @@
         color:#111827;
       }
       .cookie-btn:focus-visible{
-        outline:2px solid #FACC15;
+        outline:2px solid #F97316;
         outline-offset:2px;
       }
       @keyframes cookieFadeIn{
