@@ -441,96 +441,115 @@
     <!-- More work -->
     <section id="more" class="py-20 md:py-28 bg-white" aria-labelledby="more-heading" data-filter-section="web brand">
       <div class="container mx-auto px-6">
-        <div class="max-w-3xl mb-14 md:mb-16">
+        <div class="max-w-3xl mb-10 md:mb-12">
           <p class="kicker mb-4 reveal" data-reveal="fade-up">More Work</p>
           <h2 id="more-heading" class="section-h reveal" data-reveal="fade-up" data-reveal-delay="100">More sites we’ve shipped.</h2>
         </div>
 
-        <div class="portfolio-grid max-w-6xl mx-auto">
-          <!-- Vision Impex -->
-          <article id="vision" class="portfolio-tile portfolio-item reveal" data-reveal="fade-up" data-tags="web brand">
-            <span id="visionimpex" class="sr-only"></span>
-            <a href="https://visionimpex.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="Visit Vision Impex website">
-              <div class="site-frame">
-                <div class="site-frame-bar"><span></span><span></span><span></span><em>visionimpex.netlify.app</em></div>
-                <div class="site-frame-screen site-frame-screen--shot">
-                  <img src="/assets/work/visionimpex.webp" alt="Vision Impex website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
-                </div>
-              </div>
-            </a>
-            <div>
-              <p class="work-meta mb-2">Website · Branding</p>
-              <h3 class="portfolio-tile-title mb-3">Vision Impex</h3>
-              <p class="text-slate-600 text-sm mb-4">Multi-page site with e-commerce, custom logo, typography, and brand palette.</p>
-              <div class="portfolio-tile-actions">
-                <a href="https://visionimpex.netlify.app/" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
-                <button type="button" class="portfolio-tile-btn" data-case="visionimpex">Details</button>
-              </div>
-            </div>
-          </article>
+        <div class="concepts-carousel reveal" data-reveal="fade-up" data-concepts-carousel>
+          <button type="button" class="concepts-nav concepts-nav--prev" data-concepts-prev aria-label="Previous shipped site">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
 
-          <!-- Unite Transport -->
-          <article id="unite" class="portfolio-tile portfolio-item reveal" data-reveal="fade-up" data-reveal-delay="100" data-tags="web">
-            <a href="https://unitetransport.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="Visit Unite Transport website">
-              <div class="site-frame">
-                <div class="site-frame-bar"><span></span><span></span><span></span><em>unitetransport.netlify.app</em></div>
-                <div class="site-frame-screen site-frame-screen--shot">
-                  <img src="/assets/work/unite.webp" alt="Unite Transport LLC website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+          <div class="concepts-viewport" data-concepts-viewport tabindex="0" aria-roledescription="carousel" aria-label="Shipped site previews">
+            <div class="concepts-track" data-concepts-track>
+              <!-- Vision Impex -->
+              <article id="vision" class="concepts-slide portfolio-tile portfolio-item" data-tags="web brand" data-concepts-slide>
+                <span id="visionimpex" class="sr-only"></span>
+                <a href="https://visionimpex.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="Visit Vision Impex website">
+                  <div class="site-frame">
+                    <div class="site-frame-bar"><span></span><span></span><span></span><em>visionimpex.netlify.app</em></div>
+                    <div class="site-frame-screen site-frame-screen--shot">
+                      <img src="/assets/work/visionimpex.webp" alt="Vision Impex website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                    </div>
+                  </div>
+                </a>
+                <div>
+                  <p class="work-meta mb-2">Website · Branding</p>
+                  <h3 class="portfolio-tile-title mb-3">Vision Impex</h3>
+                  <p class="text-slate-600 text-sm mb-4">Multi-page site with e-commerce, custom logo, typography, and brand palette.</p>
+                  <div class="portfolio-tile-actions">
+                    <a href="https://visionimpex.netlify.app/" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
+                    <button type="button" class="portfolio-tile-btn" data-case="visionimpex">Details</button>
+                  </div>
                 </div>
-              </div>
-            </a>
-            <div>
-              <p class="work-meta mb-2">Website</p>
-              <h3 class="portfolio-tile-title mb-3">Unite Transport LLC</h3>
-              <p class="text-slate-600 text-sm mb-4">Dispatch-focused site with quote form, service areas, and driver application.</p>
-              <div class="portfolio-tile-actions">
-                <a href="https://unitetransport.netlify.app" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
-                <button type="button" class="portfolio-tile-btn" data-case="unite">Details</button>
-              </div>
-            </div>
-          </article>
+              </article>
 
-          <!-- East Coast -->
-          <article id="eastcoast" class="portfolio-tile portfolio-item reveal" data-reveal="fade-up" data-tags="web">
-            <a href="https://eastcoastautonj.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="Visit East Coast Speed &amp; Performance website">
-              <div class="site-frame">
-                <div class="site-frame-bar"><span></span><span></span><span></span><em>eastcoastautonj.netlify.app</em></div>
-                <div class="site-frame-screen site-frame-screen--shot">
-                  <img src="/assets/work/eastcoast.webp" alt="East Coast Speed &amp; Performance website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+              <!-- Unite Transport -->
+              <article id="unite" class="concepts-slide portfolio-tile portfolio-item" data-tags="web" data-concepts-slide>
+                <a href="https://unitetransport.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="Visit Unite Transport website">
+                  <div class="site-frame">
+                    <div class="site-frame-bar"><span></span><span></span><span></span><em>unitetransport.netlify.app</em></div>
+                    <div class="site-frame-screen site-frame-screen--shot">
+                      <img src="/assets/work/unite.webp" alt="Unite Transport LLC website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                    </div>
+                  </div>
+                </a>
+                <div>
+                  <p class="work-meta mb-2">Website</p>
+                  <h3 class="portfolio-tile-title mb-3">Unite Transport LLC</h3>
+                  <p class="text-slate-600 text-sm mb-4">Dispatch-focused site with quote form, service areas, and driver application.</p>
+                  <div class="portfolio-tile-actions">
+                    <a href="https://unitetransport.netlify.app" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
+                    <button type="button" class="portfolio-tile-btn" data-case="unite">Details</button>
+                  </div>
                 </div>
-              </div>
-            </a>
-            <div>
-              <p class="work-meta mb-2">Website</p>
-              <h3 class="portfolio-tile-title mb-3">East Coast Speed &amp; Performance</h3>
-              <p class="text-slate-600 text-sm mb-4">Performance shop site with services, builds gallery, and high-impact visuals.</p>
-              <div class="portfolio-tile-actions">
-                <a href="https://eastcoastautonj.netlify.app/" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
-                <button type="button" class="portfolio-tile-btn" data-case="eastcoast">Details</button>
-              </div>
-            </div>
-          </article>
+              </article>
 
-          <!-- Golden Star -->
-          <article id="goldenstar" class="portfolio-tile portfolio-item reveal" data-reveal="fade-up" data-reveal-delay="100" data-tags="web">
-            <a href="https://goldenstardiner.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="Visit Golden Star Diner website">
-              <div class="site-frame">
-                <div class="site-frame-bar"><span></span><span></span><span></span><em>goldenstardiner.netlify.app</em></div>
-                <div class="site-frame-screen site-frame-screen--shot">
-                  <img src="/assets/work/goldenstar.webp" alt="Golden Star Diner website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+              <!-- East Coast -->
+              <article id="eastcoast" class="concepts-slide portfolio-tile portfolio-item" data-tags="web" data-concepts-slide>
+                <a href="https://eastcoastautonj.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="Visit East Coast Speed &amp; Performance website">
+                  <div class="site-frame">
+                    <div class="site-frame-bar"><span></span><span></span><span></span><em>eastcoastautonj.netlify.app</em></div>
+                    <div class="site-frame-screen site-frame-screen--shot">
+                      <img src="/assets/work/eastcoast.webp" alt="East Coast Speed &amp; Performance website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                    </div>
+                  </div>
+                </a>
+                <div>
+                  <p class="work-meta mb-2">Website</p>
+                  <h3 class="portfolio-tile-title mb-3">East Coast Speed &amp; Performance</h3>
+                  <p class="text-slate-600 text-sm mb-4">Performance shop site with services, builds gallery, and high-impact visuals.</p>
+                  <div class="portfolio-tile-actions">
+                    <a href="https://eastcoastautonj.netlify.app/" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
+                    <button type="button" class="portfolio-tile-btn" data-case="eastcoast">Details</button>
+                  </div>
                 </div>
-              </div>
-            </a>
-            <div>
-              <p class="work-meta mb-2">Website</p>
-              <h3 class="portfolio-tile-title mb-3">Golden Star Diner</h3>
-              <p class="text-slate-600 text-sm mb-4">Full menu, map, hours, and branded visuals for a local diner favorite.</p>
-              <div class="portfolio-tile-actions">
-                <a href="https://goldenstardiner.netlify.app" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
-                <button type="button" class="portfolio-tile-btn" data-case="goldenstar">Details</button>
-              </div>
+              </article>
+
+              <!-- Golden Star -->
+              <article id="goldenstar" class="concepts-slide portfolio-tile portfolio-item" data-tags="web" data-concepts-slide>
+                <a href="https://goldenstardiner.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="Visit Golden Star Diner website">
+                  <div class="site-frame">
+                    <div class="site-frame-bar"><span></span><span></span><span></span><em>goldenstardiner.netlify.app</em></div>
+                    <div class="site-frame-screen site-frame-screen--shot">
+                      <img src="/assets/work/goldenstar.webp" alt="Golden Star Diner website homepage" width="1200" height="750" loading="lazy" decoding="async" class="site-frame-shot" />
+                    </div>
+                  </div>
+                </a>
+                <div>
+                  <p class="work-meta mb-2">Website</p>
+                  <h3 class="portfolio-tile-title mb-3">Golden Star Diner</h3>
+                  <p class="text-slate-600 text-sm mb-4">Full menu, map, hours, and branded visuals for a local diner favorite.</p>
+                  <div class="portfolio-tile-actions">
+                    <a href="https://goldenstardiner.netlify.app" target="_blank" rel="noopener noreferrer" class="work-link">View live <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></a>
+                    <button type="button" class="portfolio-tile-btn" data-case="goldenstar">Details</button>
+                  </div>
+                </div>
+              </article>
             </div>
-          </article>
+          </div>
+
+          <button type="button" class="concepts-nav concepts-nav--next" data-concepts-next aria-label="Next shipped site">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <div class="concepts-dots" data-concepts-dots role="tablist" aria-label="Shipped site slides">
+            <button type="button" class="concepts-dot is-active" data-concepts-dot="0" role="tab" aria-selected="true" aria-label="Show Vision Impex"></button>
+            <button type="button" class="concepts-dot" data-concepts-dot="1" role="tab" aria-selected="false" aria-label="Show Unite Transport"></button>
+            <button type="button" class="concepts-dot" data-concepts-dot="2" role="tab" aria-selected="false" aria-label="Show East Coast Speed &amp; Performance"></button>
+            <button type="button" class="concepts-dot" data-concepts-dot="3" role="tab" aria-selected="false" aria-label="Show Golden Star Diner"></button>
+          </div>
         </div>
 
         <p id="portfolio-empty" class="hidden text-center text-slate-500 mt-12">No projects in this category.</p>
@@ -1056,97 +1075,127 @@
         requestAnimationFrame(() => setTimeout(handleHash, 80));
       }
 
-      // Concept sites peek carousel
-      (function initConceptsCarousel() {
-        const root = document.querySelector('[data-concepts-carousel]');
-        if (!root) return;
-        const track = root.querySelector('[data-concepts-track]');
-        const viewport = root.querySelector('[data-concepts-viewport]');
-        const slides = Array.from(root.querySelectorAll('[data-concepts-slide]'));
-        const dots = Array.from(root.querySelectorAll('[data-concepts-dot]'));
-        const prevBtn = root.querySelector('[data-concepts-prev]');
-        const nextBtn = root.querySelector('[data-concepts-next]');
-        if (!track || !viewport || slides.length < 2) return;
+      // Peek carousels (More Work + Concept Sites)
+      (function initPeekCarousels() {
+        document.querySelectorAll('[data-concepts-carousel]').forEach((root) => {
+          const track = root.querySelector('[data-concepts-track]');
+          const viewport = root.querySelector('[data-concepts-viewport]');
+          const slides = Array.from(root.querySelectorAll('[data-concepts-slide]'));
+          const dots = Array.from(root.querySelectorAll('[data-concepts-dot]'));
+          const prevBtn = root.querySelector('[data-concepts-prev]');
+          const nextBtn = root.querySelector('[data-concepts-next]');
+          if (!track || !viewport || slides.length < 2) return;
 
-        let index = 0;
-        let startX = 0;
-        let deltaX = 0;
-        let dragging = false;
+          let index = 0;
+          let startX = 0;
+          let deltaX = 0;
+          let dragging = false;
 
-        function slideWidth() {
-          return slides[0].getBoundingClientRect().width;
-        }
+          function visibleSlides() {
+            return slides.filter((slide) => !slide.classList.contains('is-hidden'));
+          }
 
-        function gap() {
-          const styles = getComputedStyle(track);
-          return parseFloat(styles.columnGap || styles.gap) || 20;
-        }
+          function slideWidth(visible) {
+            const sample = visible[0] || slides[0];
+            return sample.getBoundingClientRect().width;
+          }
 
-        function update() {
-          const w = slideWidth();
-          const g = gap();
-          const viewportW = viewport.getBoundingClientRect().width;
-          const offset = (viewportW - w) / 2 - index * (w + g);
-          track.style.transform = `translate3d(${offset}px, 0, 0)`;
-          slides.forEach((slide, i) => {
-            const active = i === index;
-            slide.classList.toggle('is-active', active);
-            slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+          function gap() {
+            const styles = getComputedStyle(track);
+            return parseFloat(styles.columnGap || styles.gap) || 20;
+          }
+
+          function update() {
+            const visible = visibleSlides();
+            if (!visible.length) return;
+            if (index >= visible.length) index = 0;
+
+            const w = slideWidth(visible);
+            const g = gap();
+            const viewportW = viewport.getBoundingClientRect().width;
+            const offset = (viewportW - w) / 2 - index * (w + g);
+            track.style.transform = `translate3d(${offset}px, 0, 0)`;
+
+            const activeSlide = visible[index];
+            slides.forEach((slide) => {
+              const active = slide === activeSlide;
+              slide.classList.toggle('is-active', active);
+              slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+            });
+
+            const activeGlobal = slides.indexOf(activeSlide);
+            dots.forEach((dot, i) => {
+              const slide = slides[i];
+              const hidden = slide && slide.classList.contains('is-hidden');
+              dot.hidden = !!hidden;
+              const active = i === activeGlobal;
+              dot.classList.toggle('is-active', active);
+              dot.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+
+            const multi = visible.length > 1;
+            if (prevBtn) prevBtn.hidden = !multi;
+            if (nextBtn) nextBtn.hidden = !multi;
+          }
+
+          function go(i) {
+            const visible = visibleSlides();
+            if (!visible.length) return;
+            index = ((i % visible.length) + visible.length) % visible.length;
+            update();
+          }
+
+          prevBtn && prevBtn.addEventListener('click', () => go(index - 1));
+          nextBtn && nextBtn.addEventListener('click', () => go(index + 1));
+          dots.forEach((dot) => {
+            dot.addEventListener('click', () => {
+              const global = Number(dot.dataset.conceptsDot);
+              const visible = visibleSlides();
+              const visibleIndex = visible.indexOf(slides[global]);
+              if (visibleIndex >= 0) go(visibleIndex);
+            });
           });
-          dots.forEach((dot, i) => {
-            const active = i === index;
-            dot.classList.toggle('is-active', active);
-            dot.setAttribute('aria-selected', active ? 'true' : 'false');
+
+          viewport.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
           });
-        }
 
-        function go(i) {
-          index = (i + slides.length) % slides.length;
-          update();
-        }
+          viewport.addEventListener('pointerdown', (e) => {
+            dragging = true;
+            startX = e.clientX;
+            deltaX = 0;
+            viewport.setPointerCapture(e.pointerId);
+          });
+          viewport.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            deltaX = e.clientX - startX;
+          });
+          viewport.addEventListener('pointerup', () => {
+            if (!dragging) return;
+            dragging = false;
+            if (Math.abs(deltaX) > 50) go(index + (deltaX < 0 ? 1 : -1));
+            deltaX = 0;
+          });
+          viewport.addEventListener('pointercancel', () => { dragging = false; deltaX = 0; });
 
-        prevBtn && prevBtn.addEventListener('click', () => go(index - 1));
-        nextBtn && nextBtn.addEventListener('click', () => go(index + 1));
-        dots.forEach((dot) => {
-          dot.addEventListener('click', () => go(Number(dot.dataset.conceptsDot)));
+          window.addEventListener('resize', update);
+          window.addEventListener('load', update);
+          requestAnimationFrame(update);
+
+          // Sync deep links like #modernboutique / #vision to the matching slide
+          function syncFromHash() {
+            const raw = (location.hash || '').replace(/^#/, '');
+            if (!raw) return;
+            const global = slides.findIndex((s) => s.id === raw || s.querySelector(`#${CSS.escape(raw)}`));
+            if (global < 0) return;
+            const visible = visibleSlides();
+            const visibleIndex = visible.indexOf(slides[global]);
+            if (visibleIndex >= 0) go(visibleIndex);
+          }
+          window.addEventListener('hashchange', syncFromHash);
+          syncFromHash();
         });
-
-        viewport.addEventListener('keydown', (e) => {
-          if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
-          if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
-        });
-
-        viewport.addEventListener('pointerdown', (e) => {
-          dragging = true;
-          startX = e.clientX;
-          deltaX = 0;
-          viewport.setPointerCapture(e.pointerId);
-        });
-        viewport.addEventListener('pointermove', (e) => {
-          if (!dragging) return;
-          deltaX = e.clientX - startX;
-        });
-        viewport.addEventListener('pointerup', () => {
-          if (!dragging) return;
-          dragging = false;
-          if (Math.abs(deltaX) > 50) go(index + (deltaX < 0 ? 1 : -1));
-          deltaX = 0;
-        });
-        viewport.addEventListener('pointercancel', () => { dragging = false; deltaX = 0; });
-
-        window.addEventListener('resize', update);
-        window.addEventListener('load', update);
-        requestAnimationFrame(update);
-
-        // Sync deep links like #modernboutique to the matching slide
-        function syncFromHash() {
-          const raw = (location.hash || '').replace(/^#/, '');
-          if (!raw) return;
-          const i = slides.findIndex((s) => s.id === raw);
-          if (i >= 0) go(i);
-        }
-        window.addEventListener('hashchange', syncFromHash);
-        syncFromHash();
       })();
     })();
   </script>
