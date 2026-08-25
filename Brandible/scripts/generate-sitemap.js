@@ -52,8 +52,8 @@ const baseUrls = [
   { loc: 'https://www.brandiblemg.com/contact/', priority: '0.9', changefreq: 'monthly', lastmod: '2025-12-04' },
   { loc: 'https://www.brandiblemg.com/faqs/', priority: '0.7', changefreq: 'monthly', lastmod: '2025-12-04' },
   { loc: 'https://www.brandiblemg.com/blogs/', priority: '0.8', changefreq: 'weekly', lastmod: '2025-12-04' },
-  { loc: 'https://www.brandiblemg.com/privacy', priority: '0.3', changefreq: 'yearly', lastmod: '2025-12-04' },
-  { loc: 'https://www.brandiblemg.com/terms', priority: '0.3', changefreq: 'yearly', lastmod: '2025-12-04' }
+  { loc: 'https://www.brandiblemg.com/privacy/', priority: '0.3', changefreq: 'yearly', lastmod: '2025-12-04' },
+  { loc: 'https://www.brandiblemg.com/terms/', priority: '0.3', changefreq: 'yearly', lastmod: '2025-12-04' }
 ];
 
 // Try to read posts index
