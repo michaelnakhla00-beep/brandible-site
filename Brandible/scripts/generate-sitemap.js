@@ -47,6 +47,7 @@ const baseUrls = [
   { loc: 'https://www.brandiblemg.com/services/digital-marketing/', priority: '0.8', changefreq: 'monthly', lastmod: '2025-12-04' },
   { loc: 'https://www.brandiblemg.com/services/branding/', priority: '0.8', changefreq: 'monthly', lastmod: '2025-12-04' },
   { loc: 'https://www.brandiblemg.com/services/media-management/', priority: '0.8', changefreq: 'monthly', lastmod: '2025-12-04' },
+  { loc: 'https://www.brandiblemg.com/services/ai/', priority: '0.8', changefreq: 'monthly', lastmod: '2025-12-04' },
   { loc: 'https://www.brandiblemg.com/portfolio/', priority: '0.8', changefreq: 'weekly', lastmod: '2025-12-04' },
   { loc: 'https://www.brandiblemg.com/contact/', priority: '0.9', changefreq: 'monthly', lastmod: '2025-12-04' },
   { loc: 'https://www.brandiblemg.com/faqs/', priority: '0.7', changefreq: 'monthly', lastmod: '2025-12-04' },

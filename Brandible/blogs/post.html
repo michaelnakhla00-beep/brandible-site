@@ -36,17 +36,17 @@
   <meta property="og:title" content="{{BLOG_POST_TITLE}} | Brandible Marketing Group" />
   <meta property="og:description" content="Read our latest blog post on digital marketing, web design, and growing your local business." />
   <meta property="og:image" content="https://www.brandiblemg.com/assets/Brandible.png" />
-  <meta property="og:url" content="https://www.brandiblemg.com/blogs/post.html" />
+  <meta property="og:url" content="https://www.brandiblemg.com/blogs/" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{{BLOG_POST_TITLE}} | Brandible Marketing Group" />
   <meta name="twitter:description" content="Read our latest blog post on digital marketing, web design, and growing your local business." />
   <meta name="twitter:image" content="https://www.brandiblemg.com/assets/Brandible.png" />
 
-  <!-- Canonical: generator replaces href per post; legacy post.html keeps this self-URL until JS resolves slug -->
-  <link rel="canonical" href="https://www.brandiblemg.com/blogs/post.html" />
+  <!-- Fallback only: forced Netlify redirects send /blogs/post* → /blogs/. Generator overwrites robots to index,follow for published posts. -->
+  <link rel="canonical" href="https://www.brandiblemg.com/blogs/" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="noindex, follow" />
   <meta name="theme-color" content="#0A1633" />
 
   <script type="application/ld+json">
@@ -65,12 +65,6 @@
         "position": 2,
         "name": "Blog",
         "item": "https://www.brandiblemg.com/blogs/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": "Post",
-        "item": "https://www.brandiblemg.com/blogs/post/"
       }
     ]
   }
@@ -255,8 +249,8 @@
         <div class="flex flex-col md:flex-row justify-between items-center">
           <p class="text-slate-500 text-sm mb-4 md:mb-0">© 2026 <span class="wordmark text-slate-300">Brand<span class="wm-i">i</span>ble<span class="wm-bang">!</span></span> Marketing Group. All rights reserved.</p>
           <div class="flex space-x-6 text-sm text-slate-400">
-            <a href="/privacy.html" class="hover:text-white transition">Privacy Policy</a>
-            <a href="/terms.html" class="hover:text-white transition">Terms of Service</a>
+            <a href="/privacy" class="hover:text-white transition">Privacy Policy</a>
+            <a href="/terms" class="hover:text-white transition">Terms of Service</a>
           </div>
         </div>
       </div>

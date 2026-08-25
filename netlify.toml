@@ -27,6 +27,54 @@
   force = true
 
 # ============================================
+# LEGACY URL CLEANUP (forced 301s)
+# ============================================
+# Physical HTML files + Pretty URLs can otherwise serve these as 200.
+# force = true ensures the redirect wins. Keep these before catch-alls.
+
+[[redirects]]
+  from = "/blogs/post.html"
+  to = "/blogs/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/blogs/post"
+  to = "/blogs/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/blogs/post/"
+  to = "/blogs/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/privacy.html"
+  to = "/privacy"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/terms.html"
+  to = "/terms"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/privacy/"
+  to = "/privacy"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/terms/"
+  to = "/terms"
+  status = 301
+  force = true
+
+# ============================================
 # TRAILING SLASH HANDLING (301 redirects)
 # ============================================
 
@@ -86,37 +134,8 @@
   status = 301
 
 [[redirects]]
-  from = "/blogs/post"
-  to = "/blogs/"
-  status = 301
-
-[[redirects]]
-  from = "/blogs/post/"
-  to = "/blogs/"
-  status = 301
-
-# ============================================
-# HTML EXTENSION HANDLING
-# ============================================
-
-[[redirects]]
-  from = "/terms/"
-  to = "/terms.html"
-  status = 200
-
-[[redirects]]
-  from = "/privacy/"
-  to = "/privacy.html"
-  status = 200
-
-[[redirects]]
-  from = "/terms.html"
-  to = "/terms/"
-  status = 301
-
-[[redirects]]
-  from = "/privacy.html"
-  to = "/privacy/"
+  from = "/services/ai"
+  to = "/services/ai/"
   status = 301
 
 # ============================================
@@ -188,6 +207,11 @@
 [[redirects]]
   from = "/services/media-management/"
   to = "/services/media-management/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/ai/"
+  to = "/services/ai/index.html"
   status = 200
 
 [[redirects]]

@@ -44,7 +44,7 @@
         <p class="cookie-banner-title">We use cookies</p>
         <p class="cookie-banner-text">
           We use cookies to improve your experience and analyze website traffic.
-          <a href="/privacy.html" class="cookie-banner-link">Privacy Policy</a>
+          <a href="/privacy" class="cookie-banner-link">Privacy Policy</a>
         </p>
         <div class="cookie-banner-actions">
           <button

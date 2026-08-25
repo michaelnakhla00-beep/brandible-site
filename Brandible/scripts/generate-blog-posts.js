@@ -473,6 +473,12 @@ try {
         /<link rel="canonical" href="[^"]*" \/>/,
         `<link rel="canonical" href="${postUrl}" />`
       );
+
+      // Published posts must be indexable; post.html template uses noindex as a crawl fallback
+      html = html.replace(
+        /<meta name="robots" content="[^"]*" \/>/,
+        `<meta name="robots" content="index, follow" />`
+      );
       
       // Update breadcrumb structured data
       const breadcrumbSchema = {
