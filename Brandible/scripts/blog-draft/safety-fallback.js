@@ -1,6 +1,7 @@
 'use strict';
 
 const { toPlainDisplayText } = require('./allowed-claims');
+const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 
 const MAX_SAFETY_REPAIRS = 3;
 const EM_DASH = '\u2014';
@@ -23,28 +24,25 @@ function quotedFromMessage(message) {
   return match ? match[1] || match[2] : null;
 }
 
-function splitSentences(text) {
-  return String(text || '')
-    .replace(/\n+/g, ' ')
-    .split(/(?<=[.!?])\s+(?=[A-Z*"“\[])/)
-    .map((item) => item.trim())
-    .filter((item) => item.length > 20);
-}
-
-function bodyParagraphs(body) {
-  return String(body || '').split(/\n\s*\n/);
-}
-
 function findSentenceInBody(body, test) {
-  for (const paragraph of bodyParagraphs(body)) {
-    if (/^##\s+/.test(paragraph.trim()) && !paragraph.includes('\n')) continue;
-    const sentences = splitSentences(paragraph);
-    for (const sentence of sentences) {
-      if (test(sentence)) return sentence;
-    }
-    if (sentences.length === 0 && test(paragraph.trim())) return paragraph.trim();
+  for (const sentence of segmentMarkdownSentences(body)) {
+    if (isMarkdownHeading(sentence)) continue;
+    if (test(sentence)) return sentence;
   }
   return null;
+}
+
+function findShortestSegmentContaining(body, quoted) {
+  const target = normalizeSnippet(quoted);
+  if (!target) return null;
+  let best = null;
+  for (const segment of segmentMarkdownSentences(body)) {
+    if (isMarkdownHeading(segment)) continue;
+    const normalized = normalizeSnippet(segment);
+    if (!normalized.includes(target)) continue;
+    if (!best || segment.length < best.length) best = segment;
+  }
+  return best;
 }
 
 function cleanupEmptyHeadings(body) {
@@ -110,13 +108,7 @@ function collectSafetyRepairs(article, problems) {
     }
     if (code === 'V7_CLAIM_LEDGER' && /factual platform assertion is not an approved claim token/i.test(message)) {
       const quoted = quotedFromMessage(message);
-      const sentence =
-        quoted &&
-        findSentenceInBody(
-          article.body,
-          (item) =>
-            normalizeSnippet(item) === normalizeSnippet(quoted) || normalizeSnippet(item).includes(normalizeSnippet(quoted))
-        );
+      const sentence = quoted ? findShortestSegmentContaining(article.body, quoted) : null;
       if (sentence) repairs.push({ type: 'v7_body', sentence });
     }
   }

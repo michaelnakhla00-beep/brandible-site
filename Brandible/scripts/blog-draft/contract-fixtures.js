@@ -20,6 +20,7 @@ const {
   splitSentences
 } = require('./validate');
 const { applySafetyFallback, collectSafetyRepairs } = require('./safety-fallback');
+const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const {
   GENERATION_TOOL_NAME,
   REVISION_TOOL_NAME,
@@ -119,6 +120,74 @@ function validRevisionPayload() {
       }
     ]
   };
+}
+
+function markdownSegmentFixtures() {
+  const headingUnits = segmentMarkdownSentences(
+    [
+      'That depends on what the site actually has.',
+      '',
+      '### No Reviews',
+      '',
+      '[Prominence means how well-known a business is.](https://support.google.com/business/answer/7091?hl=en)'
+    ].join('\n')
+  );
+  assert(
+    'commentary before ### is its own sentence',
+    headingUnits[0] === 'That depends on what the site actually has.',
+    JSON.stringify(headingUnits)
+  );
+  assert(
+    '### heading is its own unit',
+    headingUnits[1] === '### No Reviews' && isMarkdownHeading(headingUnits[1]),
+    JSON.stringify(headingUnits)
+  );
+  assert(
+    'canonical citation beginning with [ is its own unit',
+    headingUnits[2] ===
+      '[Prominence means how well-known a business is.](https://support.google.com/business/answer/7091?hl=en)' &&
+      headingUnits.length === 3,
+    JSON.stringify(headingUnits)
+  );
+
+  const adjacentUnits = segmentMarkdownSentences(
+    [
+      'That depends on what the site actually has.',
+      '### No Reviews',
+      '[Prominence means how well-known a business is.](https://support.google.com/business/answer/7091?hl=en)'
+    ].join('\n')
+  );
+  assert(
+    'headings stay separate from adjacent prose without blank lines',
+    adjacentUnits.length === 3 &&
+      adjacentUnits[0] === 'That depends on what the site actually has.' &&
+      adjacentUnits[1] === '### No Reviews' &&
+      adjacentUnits[2].startsWith('[Prominence means'),
+    JSON.stringify(adjacentUnits)
+  );
+
+  const proseUnits = segmentMarkdownSentences(
+    'Sentence one. Sentence two. [Approved fact](https://example.com/fact). Sentence four.'
+  );
+  assert(
+    'ordinary multi-sentence paragraphs still segment correctly',
+    proseUnits.length === 4 &&
+      proseUnits[0] === 'Sentence one.' &&
+      proseUnits[1] === 'Sentence two.' &&
+      proseUnits[2] === '[Approved fact](https://example.com/fact).' &&
+      proseUnits[3] === 'Sentence four.',
+    JSON.stringify(proseUnits)
+  );
+
+  const validateSrc = fs.readFileSync(path.join(__dirname, 'validate.js'), 'utf8');
+  const fallbackSrc = fs.readFileSync(path.join(__dirname, 'safety-fallback.js'), 'utf8');
+  assert(
+    'validator and fallback use the shared Markdown segmenter',
+    /require\('\.\/segments'\)/.test(validateSrc) &&
+      /require\('\.\/segments'\)/.test(fallbackSrc) &&
+      !/function splitSentences/.test(validateSrc) &&
+      !/function splitSentences/.test(fallbackSrc)
+  );
 }
 
 async function structuredOutputFixtures() {
@@ -1746,6 +1815,7 @@ async function run() {
     JSON.stringify({ repairs: malformedV7Repairs, body: malformedV7Fallback.article.body })
   );
 
+  markdownSegmentFixtures();
   await structuredOutputFixtures();
 
   const numberedEvidence = [];
@@ -1843,6 +1913,150 @@ async function run() {
     'GitHub-like pipeline has no false V6 and passes final validation',
     !hasCode(githubFinal, 'V6_ABSOLUTE_WORDING') && githubFinal.length === 0,
     githubFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const latestEvidence = [];
+  for (let i = 1; i <= 5; i += 1) {
+    if (i === 5) {
+      latestEvidence.push({
+        about: 'prominence',
+        quote:
+          'Prominence means how well-known a business is. A business that is prominent in the real world is more likely to be prominent in local search results.'
+      });
+    } else {
+      latestEvidence.push({
+        about: `filler ${i}`,
+        quote: `Google Business Profile filler claim number ${i} stays long enough for an evidence unit.`
+      });
+    }
+  }
+  const latestPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: 'https://support.google.com/business/answer/7091?hl=en',
+        title: 'Tips to improve your local ranking on Google',
+        excerpt: '',
+        evidence: latestEvidence
+      }
+    ]
+  };
+  const latestClaims = buildAllowedClaims(latestPack);
+  const ac5 = latestClaims.find((item) => item.id === 'AC5');
+  assert(
+    'latest-run pack exposes AC5 prominence claim',
+    Boolean(ac5 && /Prominence means how well-known a business is/.test(ac5.safe_wording || ac5.claim)),
+    JSON.stringify(ac5)
+  );
+  const ac5Cited = renderCitedClaim(ac5, { cite: true });
+  const latestCtx = ctx(latestPack, latestClaims);
+  const latestDraft = neverDraft(
+    [
+      'That depends on what the site actually has.',
+      '',
+      '### No Reviews, or Reviews That Never Get a Response',
+      '',
+      '{{AC5}}',
+      '',
+      'Everyone assumes the listing fixes itself.',
+      '',
+      "[There's no way to request or pay for a better local ranking on Google.",
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  );
+  const latestAssembled = assembleArticle(latestDraft, latestClaims);
+  const latestUnits = segmentMarkdownSentences(latestAssembled.body);
+  const commentaryUnit = latestUnits.find((item) => item === 'That depends on what the site actually has.');
+  const headingUnit = latestUnits.find((item) => item === '### No Reviews, or Reviews That Never Get a Response');
+  const ac5Unit = latestUnits.find((item) => item.includes(ac5Cited) || /Prominence means how well-known a business is/.test(item));
+  assert(
+    'latest-run commentary before ### is its own sentence',
+    Boolean(commentaryUnit) && !/No Reviews/.test(commentaryUnit) && !/Prominence/.test(commentaryUnit),
+    JSON.stringify(latestUnits)
+  );
+  assert(
+    'latest-run ### No Reviews heading is its own unit',
+    Boolean(headingUnit) &&
+      isMarkdownHeading(headingUnit) &&
+      !/That depends/.test(headingUnit) &&
+      !/Prominence/.test(headingUnit),
+    JSON.stringify(latestUnits)
+  );
+  assert(
+    'latest-run AC5 is its own cited factual unit',
+    Boolean(ac5Unit) &&
+      ac5Unit !== commentaryUnit &&
+      ac5Unit !== headingUnit &&
+      /Prominence means how well-known a business is/.test(ac5Unit),
+    JSON.stringify({ ac5Cited, ac5Unit, units: latestUnits })
+  );
+
+  const latestFirst = validateGeneratedArticle(latestAssembled, latestCtx);
+  assert(
+    'latest-run commentary/heading do not cause false V6 against AC5',
+    !latestFirst.some((item) => item.code === 'V6_ABSOLUTE_WORDING' && /AC5/.test(item.message)),
+    latestFirst.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+  assert(
+    'latest-run everyone produces V9',
+    hasCode(latestFirst, 'V9_QUANTIFIER') &&
+      latestFirst.some((item) => /unsupported quantifier in body/i.test(item.message)),
+    latestFirst.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+  assert(
+    'latest-run malformed leading-[ raw Google assertion produces V7',
+    latestFirst.some(
+      (item) =>
+        item.code === 'V7_CLAIM_LEDGER' &&
+        /factual platform assertion is not an approved claim token/i.test(item.message) &&
+        /There's no way to request or pay for a better local ranking on Google/i.test(item.message)
+    ),
+    latestFirst.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const latestRevised = latestAssembled;
+  const latestAfterRevision = validateGeneratedArticle(latestRevised, latestCtx);
+  const latestFallback = applySafetyFallback(latestRevised, latestAfterRevision);
+  assert(
+    'latest-run existing v7_body fallback deletes the raw Google assertion',
+    !latestFallback.refused &&
+      latestFallback.applied.includes('v7_body') &&
+      latestFallback.applied.includes('v9_body') &&
+      !/There's no way to request or pay for a better local ranking on Google/.test(latestFallback.article.body),
+    JSON.stringify({ applied: latestFallback.applied, body: latestFallback.article.body })
+  );
+
+  let latestArticle = latestRevised;
+  if (latestFallback.applied.length && !latestFallback.refused) {
+    latestArticle = latestFallback.article;
+    if (latestFallback.needsAssemble) {
+      latestArticle = assembleArticle(latestArticle, latestClaims);
+    }
+    latestArticle = refreshAssemblyState(latestArticle, latestClaims);
+  }
+  const latestFinal = validateGeneratedArticle(latestArticle, latestCtx);
+  assert(
+    'latest-run everyone is deleted and AC5 remains intact',
+    !/\beveryone\b/i.test(latestArticle.body) && latestArticle.body.includes(ac5Cited),
+    latestArticle.body
+  );
+  assert(
+    'latest-run refreshed sourced ledger still contains AC5',
+    latestArticle.claim_tokens_used.includes('AC5') &&
+      latestArticle.claims.some((item) => item.kind === 'sourced_fact' && item.allowed_claim_id === 'AC5') &&
+      latestArticle.rendered_facts.some((item) => item.id === 'AC5' && latestArticle.body.includes(item.text)),
+    JSON.stringify({
+      used: latestArticle.claim_tokens_used,
+      claims: latestArticle.claims,
+      rendered: latestArticle.rendered_facts
+    })
+  );
+  assert(
+    'latest-run final validation has zero problems',
+    latestFinal.length === 0,
+    latestFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   if (failed) {

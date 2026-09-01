@@ -5,6 +5,7 @@ const { extractMarkdownHrefs, allowedUrlSet } = require('./catalog');
 const { buildAllowlist, moneySetHas } = require('./facts');
 const { findAllowedClaim, isAbsoluteUpgrade } = require('./allowed-claims');
 const { matchingRenderedFact, isRenderedAllowedFact, extractClaimTokens, ctaNamesBrandible } = require('./assemble');
+const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const {
   sourceUrlSet,
   topicAllowedProducts,
@@ -174,6 +175,15 @@ function firstUnsupportedQuantifier(text) {
   return match ? match[0] : null;
 }
 
+function firstUnsupportedQuantifierInProse(text) {
+  for (const unit of segmentMarkdownSentences(text)) {
+    if (isMarkdownHeading(unit)) continue;
+    const hit = firstUnsupportedQuantifier(unit);
+    if (hit) return hit;
+  }
+  return null;
+}
+
 function checkQuantifiersByField(article) {
   const problems = [];
   const fields = [
@@ -184,7 +194,7 @@ function checkQuantifiersByField(article) {
     ['body', article.body]
   ];
   for (const [name, value] of fields) {
-    const hit = firstUnsupportedQuantifier(value);
+    const hit = firstUnsupportedQuantifierInProse(value);
     if (hit) {
       problems.push({
         code: 'V9_QUANTIFIER',
@@ -727,13 +737,6 @@ function checkTopicScope(article, topic) {
   return problems;
 }
 
-function splitSentences(text) {
-  return String(text || '')
-    .replace(/\n+/g, ' ')
-    .split(/(?<=[.!?])\s+(?=[A-Z*"“\[])/)
-    .map((item) => item.trim())
-    .filter((item) => item.length > 20);
-}
 
 function textOverlap(a, b) {
   const terms = significantTerms(a);
@@ -919,7 +922,8 @@ function checkClaimLedger(article, sourcePack, allowedClaims) {
     ['excerpt', article.excerpt]
   ];
   for (const [field, value] of frontmatterBits) {
-    for (const sentence of splitSentences(value)) {
+    for (const sentence of segmentMarkdownSentences(value)) {
+      if (isMarkdownHeading(sentence) || sentence.length <= 20) continue;
       if (!looksLikeExternalFact(sentence, field)) continue;
       const covered = coveringClaim(sentence, claims);
       if (!covered) {
@@ -941,8 +945,8 @@ function checkClaimLedger(article, sourcePack, allowedClaims) {
   for (const section of bodySections(article.body)) {
     const paragraphs = section.text.split(/\n\s*\n/).map((item) => item.trim()).filter(Boolean);
     for (const paragraph of paragraphs) {
-      if (/^##\s+/.test(paragraph) && !paragraph.includes('\n')) continue;
-      for (const sentence of splitSentences(paragraph)) {
+      for (const sentence of segmentMarkdownSentences(paragraph)) {
+        if (isMarkdownHeading(sentence) || sentence.length <= 20) continue;
         if (!looksLikeExternalFact(sentence, section.heading)) continue;
         const renderedMatch = matchingRenderedFact(sentence, article.rendered_facts || []);
         const covered = coveringClaim(sentence, claims);
@@ -1011,7 +1015,8 @@ function checkAbsoluteWording(article, allowedClaims) {
   const plan = allowedClaims || [];
   if (!plan.length) return problems;
   const body = String(article.body || '');
-  for (const sentence of splitSentences(body)) {
+  for (const sentence of segmentMarkdownSentences(body)) {
+    if (isMarkdownHeading(sentence) || sentence.length <= 20) continue;
     const plain = stripMarkdownLinks(sentence);
     if (isRenderedAllowedFact(sentence, article.rendered_facts || [])) continue;
     const matched = plan.find((item) => textOverlap(plain, item.claim) >= 0.4);
@@ -1342,5 +1347,7 @@ module.exports = {
   allowedActionsForCode,
   formatProblem,
   formatV4Diagnostics,
-  splitSentences
+  splitSentences: segmentMarkdownSentences,
+  segmentMarkdownSentences,
+  isMarkdownHeading
 };
