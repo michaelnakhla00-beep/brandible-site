@@ -15,23 +15,52 @@ function isAbsoluteUpgrade(evidence, claim) {
   return ABSOLUTE_MARKERS.test(proposed) && !ABSOLUTE_MARKERS.test(stored);
 }
 
-function stripMarkdownLinks(text) {
+function unwrapMarkdownLinks(text) {
   return String(text || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
 }
 
-function stripCitationWrappers(text) {
-  let next = stripMarkdownLinks(text).trim();
-  if (next.startsWith('[') && !/\]\(/.test(next)) {
-    next = next.slice(1);
-    if (next.endsWith(']') && !next.includes('[')) {
-      next = next.slice(0, -1);
+function unwrapWrappingQuotes(text) {
+  const next = String(text || '').trim();
+  if (next.length < 2) return next;
+  const pairs = [
+    ['"', '"'],
+    ["'", "'"],
+    ['\u201C', '\u201D'],
+    ['\u2018', '\u2019']
+  ];
+  for (const [open, close] of pairs) {
+    if (next.startsWith(open) && next.endsWith(close)) {
+      return next.slice(open.length, next.length - close.length).trim();
     }
   }
-  return next.trim();
+  return next;
+}
+
+function toPlainDisplayText(text) {
+  let next = String(text || '');
+  for (let i = 0; i < 8; i += 1) {
+    const before = next;
+    next = unwrapMarkdownLinks(next);
+    next = next.replace(/\s+/g, ' ').trim();
+    next = unwrapWrappingQuotes(next);
+    if (/^["'\u201C\u2018]\s*\[/.test(next)) {
+      next = next.replace(/^["'\u201C\u2018]\s*/, '');
+    }
+    const wrapped = next.match(/^\[([^[\]]+)\]([.!?])?$/);
+    if (wrapped) {
+      next = `${wrapped[1]}${wrapped[2] || ''}`;
+    } else if (next.startsWith('[') && !/\]\(/.test(next)) {
+      next = next.slice(1);
+      if (next.endsWith(']') && !next.includes('[')) next = next.slice(0, -1);
+      next = next.trim();
+    }
+    if (next === before) break;
+  }
+  return unwrapMarkdownLinks(next).replace(/\s+/g, ' ').trim();
 }
 
 function toSafeWording(quote) {
-  let text = stripCitationWrappers(quote)
+  let text = toPlainDisplayText(quote)
     .replace(/\u2014/g, ', ')
     .replace(/\u2013/g, '-')
     .replace(/\s+/g, ' ')
@@ -137,6 +166,7 @@ module.exports = {
   findAllowedClaim,
   isAbsoluteUpgrade,
   toSafeWording,
+  toPlainDisplayText,
   UNCERTAIN_MARKERS,
   ABSOLUTE_MARKERS
 };

@@ -2,10 +2,11 @@
 
 const path = require('path');
 const { loadFacts, buildAllowlist, factsForPrompt, moneySetHas } = require('./facts');
-const { buildAllowedClaims, isAbsoluteUpgrade, toSafeWording } = require('./allowed-claims');
+const { buildAllowedClaims, isAbsoluteUpgrade, toSafeWording, toPlainDisplayText } = require('./allowed-claims');
 const {
   assembleArticle,
   resolveClaimTokens,
+  renderCitedClaim,
   buildSourcedClaims,
   mergeNonSourcedClaims
 } = require('./assemble');
@@ -235,6 +236,50 @@ function run() {
       !/^\s*\[There's no way/m.test(unmatchedRendered.text) &&
       (unmatchedRendered.text.match(/\[[^\]]+\]\([^)]+\)/g) || []).length === 1,
     unmatchedRendered.text
+  );
+
+  const quotedWrapper = '"[Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears.]"';
+  assert(
+    'quoted citation wrapper becomes plain claim text',
+    toPlainDisplayText(quotedWrapper) ===
+      'Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears.' &&
+      !toPlainDisplayText(quotedWrapper).includes('http'),
+    toPlainDisplayText(quotedWrapper)
+  );
+  const quotedRendered = renderCitedClaim(
+    {
+      safe_wording: toSafeWording(quotedWrapper),
+      url: adsClaim.url,
+      requires_citation: true
+    },
+    { cite: true }
+  );
+  assert(
+    'quoted citation wrapper renders a clean canonical link',
+    quotedRendered.includes(`](${adsClaim.url})`) &&
+      !quotedRendered.includes('[[') &&
+      (quotedRendered.match(/\[[^\]]+\]\([^)]+\)/g) || []).length === 1,
+    quotedRendered
+  );
+
+  const nestedArtifact = `[[Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears.](${foreignUrl})]`;
+  const nestedPlain = toPlainDisplayText(nestedArtifact);
+  const nestedRendered = renderCitedClaim(
+    {
+      safe_wording: toSafeWording(nestedArtifact),
+      url: adsClaim.url,
+      requires_citation: true
+    },
+    { cite: true }
+  );
+  assert(
+    'nested bracket artifact cannot produce [[text](url)',
+    !nestedPlain.startsWith('[') &&
+      !nestedPlain.includes(foreignUrl) &&
+      !nestedRendered.includes('[[') &&
+      nestedRendered.includes(`](${adsClaim.url})`) &&
+      (nestedRendered.match(/\[[^\]]+\]\([^)]+\)/g) || []).length === 1,
+    `${nestedPlain} | ${nestedRendered}`
   );
 
   const fakeModelClaims = [
@@ -757,6 +802,73 @@ function run() {
     'V4 still fails when the approved URL is genuinely absent',
     hasCode(missingCanonicalProblems, 'V4_MISSING_SOURCE_LINK'),
     missingCanonicalProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const malformedRendered = {
+    ...markdownCitedArticle,
+    rendered_facts: (markdownCitedArticle.rendered_facts || []).map((item) => ({
+      ...item,
+      text: `[${item.text}`
+    }))
+  };
+  const malformedRenderedProblems = validateGeneratedArticle(
+    malformedRendered,
+    ctx(linkedEvidencePack, linkedEvidenceClaims)
+  );
+  assert(
+    'malformed rendered citation still fails V4',
+    hasCode(malformedRenderedProblems, 'V4_MISSING_SOURCE_LINK'),
+    malformedRenderedProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const editorialAroundLink = assembleArticle(
+    {
+      ...baseFields(),
+      title: 'What to check before you raise ad spend',
+      slug: 'what-to-check-before-you-raise-ad-spend',
+      meta_title: 'What to check before you raise ad spend',
+      category: 'Marketing',
+      excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+      meta_description:
+        'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+      body: [
+        '## How the auction works',
+        '',
+        `There's no way Brandible can skip the mechanics: {{${adsClaim.id}}} That does not mean raising the bid first.`,
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n'),
+      claims: [],
+      cta: {
+        names_brandible: true,
+        fit_case: 'If it is not, Brandible can set it up.',
+        walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+      }
+    },
+    adsAllowed
+  );
+  const editorialAroundProblems = validateGeneratedArticle(editorialAroundLink, ctx(adsPack(), adsAllowed));
+  assert(
+    'Brandible commentary around an approved sourced link is not source-owned',
+    /There's no way Brandible can skip the mechanics/.test(editorialAroundLink.body) &&
+      editorialAroundLink.body.includes(`](${adsClaim.url})`),
+    editorialAroundLink.body
+  );
+  assert(
+    'linked source validation passes when only the anchor is source-owned',
+    editorialAroundProblems.length === 0 && !hasCode(editorialAroundProblems, 'V6_ABSOLUTE_WORDING'),
+    editorialAroundProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const overstrongAnchor = {
+    ...editorialAroundLink,
+    body: `${editorialAroundLink.body.trim()}\n\n[There's no way your ad is eligible to show.](${adsClaim.url})\n`
+  };
+  const overstrongProblems = validateGeneratedArticle(overstrongAnchor, ctx(adsPack(), adsAllowed));
+  assert(
+    'genuinely overstrong anchor text still fails V6',
+    hasCode(overstrongProblems, 'V6_ABSOLUTE_WORDING'),
+    overstrongProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   const adsCtx = ctx(adsPack(), adsAllowed);

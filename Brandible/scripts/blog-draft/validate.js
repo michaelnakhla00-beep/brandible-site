@@ -664,7 +664,8 @@ function checkLinkedSentences(body, sourcePack, articleProduct) {
         `Citation product mismatch: sentence appears to discuss ${sentenceProduct} but the linked source is ${sourceProduct} (${url}).`
       );
     }
-    const stronger = claimStrongerThanSource(sentence, sourceEvidenceText(source));
+    const linkedText = match[1];
+    const stronger = claimStrongerThanSource(linkedText, sourceEvidenceText(source));
     if (stronger) {
       problems.push(`Linked sentence is stronger than the stored source excerpt (${source.id}): ${stronger}`);
     }
@@ -843,6 +844,25 @@ function paragraphLinksAllowedClaim(paragraph, allowed) {
   return extractMarkdownHrefs(paragraph).includes(allowed.url);
 }
 
+function renderedFactHasCanonicalCitation(renderedFact, allowed) {
+  const text = String((renderedFact && renderedFact.text) || '');
+  if (!allowed || !allowed.url || !text) return false;
+  if (/\[\[/.test(text) || /\]\]/.test(text)) return false;
+  const links = [];
+  const re = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    links.push({ label: match[1], href: match[2] });
+  }
+  if (links.length !== 1) return false;
+  if (links[0].href !== allowed.url) return false;
+  if (/\[/.test(links[0].label) || /\]\(/.test(links[0].label)) return false;
+  const leftoverOpen = (text.match(/\[/g) || []).length;
+  const leftoverClose = (text.match(/\]/g) || []).length;
+  if (leftoverOpen !== 1 || leftoverClose !== 1) return false;
+  return true;
+}
+
 function checkClaimLedger(article, sourcePack, allowedClaims) {
   const problems = [];
   const claims = Array.isArray(article.claims) ? article.claims : [];
@@ -921,11 +941,21 @@ function checkClaimLedger(article, sourcePack, allowedClaims) {
           });
           continue;
         }
-        if (allowed && allowed.requires_citation && !paragraphLinksAllowedClaim(paragraph, allowed)) {
-          problems.push({
-            code: 'V4_MISSING_SOURCE_LINK',
-            message: `Approved claim ${allowed.id} is missing its reader-facing source link: “${stripMarkdownLinks(sentence)}” Code should insert a markdown link to ${allowed.url}.`
-          });
+        if (allowed && allowed.requires_citation) {
+          const renderedInBody = String(article.body || '').includes(renderedMatch.text);
+          if (!renderedFactHasCanonicalCitation(renderedMatch, allowed) || !renderedInBody) {
+            problems.push({
+              code: 'V4_MISSING_SOURCE_LINK',
+              message: `Approved claim ${allowed.id} is missing its reader-facing source link: “${stripMarkdownLinks(sentence)}” Code should insert a markdown link to ${allowed.url}.`
+            });
+          }
+        } else if (!allowed && covered && covered.allowed_claim_id && covered.kind === 'sourced_fact') {
+          if (!paragraphLinksAllowedClaim(paragraph, findAllowedClaim(plan, covered.allowed_claim_id))) {
+            problems.push({
+              code: 'V4_MISSING_SOURCE_LINK',
+              message: `Approved claim ${covered.allowed_claim_id} is missing its reader-facing source link: “${stripMarkdownLinks(sentence)}” Code should insert a markdown link to the allowed claim URL.`
+            });
+          }
         }
       }
     }
