@@ -2,7 +2,9 @@
 
 const { checkSeoFields } = require('./seo');
 const { extractMarkdownHrefs, allowedUrlSet } = require('./catalog');
-const { approvedAmounts } = require('./facts');
+const { buildAllowlist, moneySetHas } = require('./facts');
+const { findAllowedClaim, isAbsoluteUpgrade } = require('./allowed-claims');
+const { matchingRenderedFact, isRenderedAllowedFact, extractClaimTokens, ctaNamesBrandible } = require('./assemble');
 const {
   sourceUrlSet,
   topicAllowedProducts,
@@ -12,6 +14,15 @@ const {
   findSource,
   topicProductScope
 } = require('./research');
+
+const RESOLUTION_ACTIONS = new Set([
+  'deleted',
+  'replaced_with_token',
+  'removed_token',
+  'attributed',
+  'self_qualified',
+  'rewritten_to_evidence'
+]);
 
 const BAN_PHRASES = [
   'in today’s',
@@ -54,8 +65,8 @@ const PHASE1_HARD_CHECKS = [
 ];
 
 const PHASE2_GROUNDING_CHECKS = [
-  'Every sourced_fact must be supported by the stored source excerpt/content, not merely by a related page from the same company.',
-  'If the excerpt does not support the exact specificity, soften or remove the sentence. Do not strengthen the source’s wording in claims[] or in the body.',
+  'Every sourced_fact must be supported by the stored source excerpt or evidence quotes, not merely by a related page from the same company.',
+  'If the stored excerpt and evidence quotes do not support the exact specificity, soften or remove the sentence. Do not strengthen the source’s wording in claims[] or in the body.',
   'Do not use evidence about one product/surface as proof of another. Local Services Ads documentation is not evidence for organic Google Business Profile or Maps ranking unless the sentence is explicitly about Local Services Ads.',
   'Platform instructions need a current first-party source. Do not recommend a feature that appears deprecated or materially changed (for example seeding traditional Google Business Profile Q&A after late 2025).',
   'Unsupported comparative or causal performance claims are not allowed as facts: “perform better,” “one of the most important,” “one of the most underused,” “often comes down to a few hours of setup,” and similar. Rewrite as practical advice or opinion, or drop them.',
@@ -63,7 +74,7 @@ const PHASE2_GROUNDING_CHECKS = [
   'claims[] is a complete ledger. Every material externally verifiable fact in the final title, meta fields, excerpt, or body must be recorded there as sourced_fact, first_party, hypothetical, or opinion. Omitting a fact from claims[] does not exempt it.',
   'Unsupported quantifiers (most people, most businesses, most local business owners, everyone) are checked in title, meta_title, meta_description, excerpt, and body.',
   'Externally researched platform facts need a natural reader-facing markdown link to the supporting source pack URL. Do not require citations on Brandible opinion, hypotheticals, or first-party Brandible pricing/results.',
-  'Do not use absolute wording (for example “there’s no residual benefit”) unless the stored source excerpt supports that exact level of certainty.'
+  'Do not use absolute wording (for example “there’s no residual benefit”) unless the stored source excerpt or evidence quotes support that exact level of certainty.'
 ];
 
 const CLAIM_KINDS = new Set(['sourced_fact', 'first_party', 'hypothetical', 'opinion']);
@@ -175,16 +186,25 @@ function checkQuantifiersByField(article) {
   for (const [name, value] of fields) {
     const hit = firstUnsupportedQuantifier(value);
     if (hit) {
-      problems.push(
-        `Unsupported quantifier in ${name}: “${hit}”. Ground it in an approved source, or describe the mechanism.`
-      );
+      problems.push({
+        code: 'V9_QUANTIFIER',
+        message: `Unsupported quantifier in ${name}: “${hit}”. Ground it in an approved source, or describe the mechanism.`
+      });
     }
   }
   return problems;
 }
 
-function firstUnlabeledOrUnapprovedPrice(text, facts) {
-  const allowed = approvedAmounts(facts);
+function percentInAllowedClaims(amount, allowedClaims) {
+  const needle = String(amount);
+  return (allowedClaims || []).some((item) => {
+    const blob = `${item.claim || ''} ${item.evidence || ''}`;
+    return new RegExp(`${needle}\\s*%`).test(blob) || blob.includes(needle);
+  });
+}
+
+function checkPrices(text, allowlist) {
+  const problems = [];
   const re = /\$\s*([\d,]+(?:\.\d+)?)/g;
   let match;
   while ((match = re.exec(text)) !== null) {
@@ -194,43 +214,86 @@ function firstUnlabeledOrUnapprovedPrice(text, facts) {
     const labeled = /Brandible|our range|our (?:typical )?(?:website )?projects|we (?:typically |usually )?(?:charge|run|build)|PEAC/i.test(
       window
     );
-    if (!allowed.has(amount) && amount !== 4.02 && amount !== 0.19) {
-      return `Price ${match[0]} is not an approved Brandible first-party figure.`;
+    if (!moneySetHas(allowlist, amount)) {
+      problems.push({
+        code: 'V1_UNAPPROVED_FIRST_PARTY_NUMBER',
+        message: `Price ${match[0]} is not an approved Brandible first-party figure. Delete that number and the claim that depends on it. Do not substitute another number. Do not estimate. Do not infer a market range.`
+      });
+      continue;
     }
     if (!labeled) {
-      return `Price ${match[0]} must be clearly labeled as Brandible’s.`;
+      problems.push({
+        code: 'V5_UNLABELED_FIRST_PARTY',
+        message: `Price ${match[0]} must be clearly labeled as Brandible’s.`
+      });
     }
   }
-  return null;
+  return problems;
 }
 
-function firstUnsourcedMetric(text, sourcePack) {
+function checkBrandiblePercents(text, allowlist, allowedClaims) {
+  const problems = [];
+  const re = /(\d+(?:\.\d+)?)\s*%/g;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    const amount = Number(match[1]);
+    const start = Math.max(0, match.index - 160);
+    const window = text.slice(start, match.index + match[0].length + 80);
+    const brandibleWindow = /Brandible|PEAC/i.test(window);
+    if (!brandibleWindow) continue;
+    if (allowlist.percents.has(amount)) continue;
+    if (percentInAllowedClaims(amount, allowedClaims)) continue;
+    problems.push({
+      code: 'V1_UNAPPROVED_FIRST_PARTY_NUMBER',
+      message: `Percentage “${match[0]}” is not an approved Brandible first-party figure. Delete that number and the claim that depends on it. Do not substitute another number.`
+    });
+  }
+  return problems;
+}
+
+function firstUnsourcedMetric(text, sourcePack, allowlist) {
   if (/\bin a week or two\b/i.test(text)) {
-    return 'Illustrative timeline “in a week or two” can be mistaken for a factual delivery window.';
+    return {
+      code: 'V1_UNAPPROVED_FIRST_PARTY_NUMBER',
+      message: 'Illustrative timeline “in a week or two” can be mistaken for a factual delivery window.'
+    };
   }
   const hasExternalSources = sourcePack && sourcePack.needed && sourcePack.sources && sourcePack.sources.length > 0;
   const percent = text.match(/(\d+(?:\.\d+)?)\s*%/);
   if (percent) {
     const start = Math.max(0, percent.index - 160);
     const window = text.slice(start, percent.index + percent[0].length + 80);
-    const allowedAdsPercent =
-      percent[1] === '15' && /Brandible/i.test(window) && /(ad|ads|spend|management)/i.test(window);
-    const allowedPeac = /PEAC/i.test(window) && /Brandible|portfolio|published/i.test(window);
-    if (!allowedAdsPercent && !allowedPeac && !hasExternalSources) {
-      return `Percentage “${percent[0]}” looks like data and is not an approved Brandible figure.`;
+    const amount = Number(percent[1]);
+    const labeled = /Brandible|PEAC/i.test(window);
+    const allowlisted = allowlist && allowlist.percents.has(amount) && labeled;
+    if (!allowlisted && !hasExternalSources) {
+      return {
+        code: 'V1_UNAPPROVED_FIRST_PARTY_NUMBER',
+        message: `Percentage “${percent[0]}” looks like data and is not an approved Brandible figure.`
+      };
     }
   }
   const responseTime = text.match(/\b\d+\s*(?:-|–)?\s*\d*\s*(seconds?|minutes?)\b/i);
   if (responseTime && !hasExternalSources) {
-    return `Response-time figure “${responseTime[0]}” looks like data. Describe the mechanism, or drop the number.`;
+    return {
+      code: 'V1_UNAPPROVED_FIRST_PARTY_NUMBER',
+      message: `Response-time figure “${responseTime[0]}” looks like data. Describe the mechanism, or drop the number.`
+    };
   }
   const duration = text.match(/\b(?:in|within)\s+\d+\s*(hours?|days?|weeks?|months?)\b/i);
   if (duration) {
     const start = Math.max(0, duration.index - 160);
     const window = text.slice(start, duration.index + duration[0].length);
-    const allowedWebsiteWeeks = /\b2\s*[–-]\s*4\s+weeks\b/i.test(window) && /Brandible/i.test(window);
+    const allowedWebsiteWeeks =
+      allowlist &&
+      allowlist.timelines.some((item) => item.unit === 'weeks') &&
+      /\b2\s*[–-]\s*4\s+weeks\b/i.test(window) &&
+      /Brandible/i.test(window);
     if (!allowedWebsiteWeeks && !hasExternalSources) {
-      return `Timeline “${duration[0]}” looks like data and is not a labeled Brandible first-party figure.`;
+      return {
+        code: 'V1_UNAPPROVED_FIRST_PARTY_NUMBER',
+        message: `Timeline “${duration[0]}” looks like data and is not a labeled Brandible first-party figure.`
+      };
     }
   }
   return null;
@@ -250,14 +313,46 @@ function automationDescribedAsAi(text) {
   return null;
 }
 
-function ctaNamesBrandibleWithoutSelfQualify(body) {
-  const tail = String(body).trim().slice(-900);
-  if (!/Brandible/i.test(tail)) return false;
-  const qualifies =
-    /if you (already|don['’]t|do not|need a |can (?:finish|catch|answer|handle))|if (?:this|that) isn['’]t|not the fit|Brandible can['’]t|you don['’]t need (?:this|Brandible)|if you(?:'re| are) already/i.test(
-      tail
-    );
-  return !qualifies;
+function bodyContainsIdea(body, idea) {
+  const text = String(idea || '').trim();
+  if (text.length < 12) return false;
+  const nBody = normalizeEvidence(body);
+  const nIdea = normalizeEvidence(text);
+  if (!nIdea) return false;
+  if (nBody.includes(nIdea)) return true;
+  const words = nIdea.split(' ').filter((word) => word.length > 2);
+  if (words.length < 4) return nBody.includes(nIdea.slice(0, Math.min(20, nIdea.length)));
+  const hits = words.filter((word) => nBody.includes(word));
+  return hits.length / words.length >= 0.6;
+}
+
+function checkCtaContract(article) {
+  const problems = [];
+  const cta = article.cta && typeof article.cta === 'object' ? article.cta : {};
+  if (!ctaNamesBrandible(article)) return problems;
+  const fit = String(cta.fit_case || '').trim();
+  const walkAway = String(cta.walk_away_case || '').trim();
+  if (!fit || !walkAway) {
+    problems.push({
+      code: 'V2_CTA_SELF_QUALIFY',
+      message:
+        'CTA names Brandible but the output contract is missing fit_case or walk_away_case. Supply both fields. Code renders them into the close. Walk-away: if the reader already has the identified problem handled effectively, they may not need Brandible.'
+    });
+    return problems;
+  }
+  if (!bodyContainsIdea(article.body, fit)) {
+    problems.push({
+      code: 'V2_CTA_SELF_QUALIFY',
+      message: 'CTA fit_case is not present in the article body.'
+    });
+  }
+  if (!bodyContainsIdea(article.body, walkAway)) {
+    problems.push({
+      code: 'V2_CTA_SELF_QUALIFY',
+      message: 'CTA walk_away_case is not present in the article body.'
+    });
+  }
+  return problems;
 }
 
 function checkInternalLinks(body, catalog) {
@@ -423,52 +518,88 @@ function sourceAllowsCurrentQa(sourcePack) {
   });
 }
 
-function checkClaims(article, sourcePack, articleProduct) {
+function checkClaims(article, sourcePack, articleProduct, allowedClaims) {
   const problems = [];
   const claims = Array.isArray(article.claims) ? article.claims : [];
+  const plan = allowedClaims || [];
   for (const claim of claims) {
     const kind = String(claim.kind || '').trim();
     const text = String(claim.claim || '').trim();
     if (!CLAIM_KINDS.has(kind)) {
-      problems.push(
-        `Claim kind “${kind || '(empty)'}” is not allowed. Use sourced_fact, first_party, hypothetical, or opinion.`
-      );
+      problems.push({
+        code: 'V7_CLAIM_LEDGER',
+        message: `Claim kind “${kind || '(empty)'}” is not allowed. Use sourced_fact, first_party, hypothetical, or opinion.`
+      });
       continue;
     }
     if (!text) {
-      problems.push('A claims[] entry is missing claim text.');
+      problems.push({ code: 'V7_CLAIM_LEDGER', message: 'A claims[] entry is missing claim text.' });
       continue;
     }
     if (kind !== 'sourced_fact') continue;
+    if (plan.length) {
+      const allowed = findAllowedClaim(plan, claim.allowed_claim_id);
+      if (!allowed) {
+        problems.push({
+          code: 'V7_CLAIM_LEDGER',
+          message: `sourced_fact is not mapped to the allowed external-facts plan: “${text}” Set allowed_claim_id to an AC id from the plan, or delete the fact.`
+        });
+        continue;
+      }
+      if (claim.source_id && claim.source_id !== allowed.source_id) {
+        problems.push({
+          code: 'V7_CLAIM_LEDGER',
+          message: `sourced_fact ${allowed.id} source_id ${claim.source_id} does not match the allowed claim source ${allowed.source_id}.`
+        });
+      }
+      if (isAbsoluteUpgrade(allowed.evidence || allowed.claim, text)) {
+        problems.push({
+          code: 'V6_ABSOLUTE_WORDING',
+          message: `sourced_fact upgrades certainty beyond allowed claim ${allowed.id}. Keep likelihood language from the stored evidence. Claim: “${text}”`
+        });
+      }
+    }
     const sourceId = claim.source_id;
     if (!sourceId) {
-      problems.push(`sourced_fact has no source_id: “${text}”`);
+      problems.push({ code: 'V3_SOURCE_ENTAILMENT', message: `sourced_fact has no source_id: “${text}”` });
       continue;
     }
     const source = findSource(sourcePack, sourceId);
     if (!source) {
-      problems.push(`sourced_fact references ${sourceId}, which is missing from the source pack: “${text}”`);
+      problems.push({
+        code: 'V3_SOURCE_ENTAILMENT',
+        message: `sourced_fact references ${sourceId}, which is missing from the source pack: “${text}”`
+      });
       continue;
     }
     const excerpt = sourceEvidenceText(source);
     const sourceProduct = inferSourceProduct(source);
     const statedProduct = claimProduct(text) || articleProduct;
     if (sourceProduct === 'local_services_ads' && statedProduct === 'google_business_profile') {
-      problems.push(
-        `sourced_fact uses a Local Services Ads source for a Google Business Profile claim: “${text}” (${sourceId})`
-      );
+      problems.push({
+        code: 'V3_SOURCE_ENTAILMENT',
+        message: `sourced_fact uses a Local Services Ads source for a Google Business Profile claim: “${text}” (${sourceId})`
+      });
     } else if (statedProduct && !productsCompatible(statedProduct, sourceProduct)) {
-      problems.push(
-        `sourced_fact uses a ${sourceProduct} source for a ${statedProduct} claim: “${text}” (${sourceId})`
-      );
+      problems.push({
+        code: 'V3_SOURCE_ENTAILMENT',
+        message: `sourced_fact uses a ${sourceProduct} source for a ${statedProduct} claim: “${text}” (${sourceId})`
+      });
     }
     const entailment = excerptSupportsClaim(text, excerpt);
     if (!entailment.ok) {
-      problems.push(`sourced_fact is not supported by the stored excerpt (${sourceId}): ${entailment.reason} Claim: “${text}”`);
+      problems.push({
+        code: 'V3_SOURCE_ENTAILMENT',
+        message: `sourced_fact is not supported by the stored excerpt (${sourceId}): ${entailment.reason} Claim: “${text}”`
+      });
     }
     const stronger = claimStrongerThanSource(text, excerpt);
     if (stronger) {
-      problems.push(`sourced_fact is stronger than the stored source (${sourceId}): ${stronger} Claim: “${text}”`);
+      const absolute = /absolute/i.test(stronger);
+      problems.push({
+        code: absolute ? 'V6_ABSOLUTE_WORDING' : 'V3_SOURCE_ENTAILMENT',
+        message: `sourced_fact is stronger than the stored source (${sourceId}): ${stronger} Claim: “${text}”`
+      });
     }
   }
   return problems;
@@ -580,14 +711,17 @@ function checkTopicScope(article, topic) {
     /\bprimary category\b/i.test(body) ||
     /Google Business Profile categor/i.test(body)
   ) {
-    problems.push(
-      'Out-of-scope Google Business Profile category guidance. This topic does not own GBP optimization. Remove that subsection and any sourced_fact that depends on it.'
-    );
+    problems.push({
+      code: 'V8_OUT_OF_SCOPE',
+      message:
+        'Out-of-scope Google Business Profile category guidance. This topic does not own GBP optimization. Remove that subsection and any sourced_fact that depends on it.'
+    });
   }
   if (/local services ads|\bLSA\b/i.test(body) && !allowed.includes('local_services_ads')) {
-    problems.push(
-      'Out-of-scope Local Services Ads guidance. Remove it unless the owned question is about Local Services Ads.'
-    );
+    problems.push({
+      code: 'V8_OUT_OF_SCOPE',
+      message: 'Out-of-scope Local Services Ads guidance. Remove it unless the owned question is about Local Services Ads.'
+    });
   }
   return problems;
 }
@@ -611,9 +745,10 @@ function textOverlap(a, b) {
 function coveringClaim(sentence, claims) {
   let best = null;
   let bestScore = 0;
+  const plain = stripMarkdownLinks(sentence);
   for (const claim of claims || []) {
     const claimText = String(claim.claim || '');
-    const score = Math.max(textOverlap(sentence, claimText), textOverlap(claimText, sentence) * 0.85);
+    const score = Math.max(textOverlap(plain, claimText), textOverlap(claimText, plain) * 0.85);
     if (score > bestScore) {
       bestScore = score;
       best = claim;
@@ -661,7 +796,10 @@ function looksLikeExternalFact(sentence, sectionHeading) {
     );
   const absoluteOutcome =
     /\bthere(?:['’]s| is) no\b/i.test(text) && /\b(?:google|ads|seo|search|rank|residual|lever)\b/i.test(`${sectionHeading} ${text}`);
-  return (platform && mechanism) || absoluteOutcome;
+  const untrackedRank =
+    /\bnothing to rank\b/i.test(text) ||
+    (/\bno (?:real )?content\b/i.test(text) && /\brank/i.test(text));
+  return (platform && mechanism) || absoluteOutcome || untrackedRank;
 }
 
 function paragraphSourceHrefs(paragraph, sourcePack) {
@@ -700,10 +838,16 @@ function bodySections(body) {
     .filter((section) => section.text);
 }
 
-function checkClaimLedger(article, sourcePack) {
+function paragraphLinksAllowedClaim(paragraph, allowed) {
+  if (!allowed || !allowed.url) return false;
+  return extractMarkdownHrefs(paragraph).includes(allowed.url);
+}
+
+function checkClaimLedger(article, sourcePack, allowedClaims) {
   const problems = [];
   const claims = Array.isArray(article.claims) ? article.claims : [];
   const pack = sourcePack && sourcePack.needed ? sourcePack : { needed: false, sources: [] };
+  const plan = allowedClaims || [];
 
   const frontmatterBits = [
     ['title', article.title],
@@ -716,13 +860,15 @@ function checkClaimLedger(article, sourcePack) {
       if (!looksLikeExternalFact(sentence, field)) continue;
       const covered = coveringClaim(sentence, claims);
       if (!covered) {
-        problems.push(
-          `Factual claim in ${field} is not recorded in claims[]: “${sentence}” Record it as sourced_fact, first_party, hypothetical, or opinion, or rewrite it.`
-        );
+        problems.push({
+          code: 'V7_CLAIM_LEDGER',
+          message: `Factual claim in ${field} is not allowed outside a body claim token: “${sentence}” Move the fact into a {{AC#}} token in the body, or rewrite the field as non-factual.`
+        });
       } else if (covered.kind === 'sourced_fact') {
-        problems.push(
-          `Factual claim in ${field} needs a reader-facing body citation, not only a claims[] entry: “${sentence}”`
-        );
+        problems.push({
+          code: 'V4_MISSING_SOURCE_LINK',
+          message: `Factual claim in ${field} needs a reader-facing body citation, not only a claims[] entry: “${sentence}”`
+        });
       }
     }
   }
@@ -735,10 +881,16 @@ function checkClaimLedger(article, sourcePack) {
       if (/^##\s+/.test(paragraph) && !paragraph.includes('\n')) continue;
       for (const sentence of splitSentences(paragraph)) {
         if (!looksLikeExternalFact(sentence, section.heading)) continue;
+        const renderedMatch = matchingRenderedFact(sentence, article.rendered_facts || []);
         const covered = coveringClaim(sentence, claims);
         const linked = paragraphSupportsSentence(paragraph, stripMarkdownLinks(sentence), pack);
+        const allowed = renderedMatch
+          ? findAllowedClaim(plan, renderedMatch.id)
+          : covered && covered.allowed_claim_id
+            ? findAllowedClaim(plan, covered.allowed_claim_id)
+            : null;
 
-        if (/\bno residual benefit\b|there(?:['’]s| is) no residual/i.test(sentence)) {
+        if (/\bno residual benefit\b|there(?:['’]s| is) no residual/i.test(sentence) && !renderedMatch) {
           const excerpt = linked ? sourceEvidenceText(linked) : '';
           const anySupport = (pack.sources || []).some((source) => {
             const text = sourceEvidenceText(source);
@@ -747,33 +899,33 @@ function checkClaimLedger(article, sourcePack) {
             );
           });
           if (!anySupport) {
-            problems.push(
-              `Absolute statement is not supported by the source pack at that level of certainty: “${stripMarkdownLinks(sentence)}” Soften it, or drop it.`
-            );
+            problems.push({
+              code: 'V6_ABSOLUTE_WORDING',
+              message: `Absolute statement is not supported by the source pack at that level of certainty: “${stripMarkdownLinks(sentence)}” Soften it, or drop it.`
+            });
             continue;
           }
           if (linked && claimStrongerThanSource(sentence, excerpt)) {
-            problems.push(
-              `Absolute statement is stronger than the linked source excerpt: “${stripMarkdownLinks(sentence)}”`
-            );
+            problems.push({
+              code: 'V6_ABSOLUTE_WORDING',
+              message: `Absolute statement is stronger than the linked source excerpt: “${stripMarkdownLinks(sentence)}”`
+            });
             continue;
           }
         }
 
-        if (!covered) {
-          problems.push(
-            `Factual claim in the article is not recorded in claims[]: “${stripMarkdownLinks(sentence)}” Record it as sourced_fact with a supporting excerpt, first_party, hypothetical, or opinion, or remove it.`
-          );
-        } else if (covered.kind === 'sourced_fact') {
-          if (!linked) {
-            const source = findSource(pack, covered.source_id);
-            const url = source && source.url ? source.url : 'the supporting source pack URL';
-            problems.push(
-              `Externally researched fact needs a natural reader-facing source link: “${stripMarkdownLinks(sentence)}” Link ${url} in this section. Do not leave Ads/SEO mechanics unsourced in the body.`
-            );
-          }
-        } else if (covered.kind === 'opinion' || covered.kind === 'hypothetical' || covered.kind === 'first_party') {
+        if (!renderedMatch) {
+          problems.push({
+            code: 'V7_CLAIM_LEDGER',
+            message: `Factual platform assertion is not an approved claim token: “${stripMarkdownLinks(sentence)}” Replace it with an approved {{AC#}} token or delete it. Do not invent a new sourced sentence.`
+          });
           continue;
+        }
+        if (allowed && allowed.requires_citation && !paragraphLinksAllowedClaim(paragraph, allowed)) {
+          problems.push({
+            code: 'V4_MISSING_SOURCE_LINK',
+            message: `Approved claim ${allowed.id} is missing its reader-facing source link: “${stripMarkdownLinks(sentence)}” Code should insert a markdown link to ${allowed.url}.`
+          });
         }
       }
     }
@@ -781,43 +933,216 @@ function checkClaimLedger(article, sourcePack) {
   return problems;
 }
 
+function checkAbsoluteWording(article, allowedClaims) {
+  const problems = [];
+  const plan = allowedClaims || [];
+  if (!plan.length) return problems;
+  const body = String(article.body || '');
+  for (const sentence of splitSentences(body)) {
+    const plain = stripMarkdownLinks(sentence);
+    if (isRenderedAllowedFact(sentence, article.rendered_facts || [])) continue;
+    const matched = plan.find((item) => textOverlap(plain, item.claim) >= 0.4);
+    if (!matched) continue;
+    if (isAbsoluteUpgrade(matched.evidence || matched.claim, plain)) {
+      problems.push({
+        code: 'V6_ABSOLUTE_WORDING',
+        message: `Body sentence upgrades certainty beyond allowed claim ${matched.id}: “${plain}” Replace it with {{${matched.id}}} or delete it.`
+      });
+    }
+  }
+  return problems;
+}
+
+function checkUnresolvedTokens(article) {
+  const problems = [];
+  const leftover = String(article.body || '').match(/\{\{\s*AC\d+\s*\}\}/g) || [];
+  for (const token of leftover) {
+    problems.push({
+      code: 'V7_CLAIM_LEDGER',
+      message: `Unresolved claim token ${token}. Use an approved {{AC#}} from the plan, or remove it.`
+    });
+  }
+  const front = [
+    ['title', article.title],
+    ['meta_title', article.meta_title],
+    ['meta_description', article.meta_description],
+    ['excerpt', article.excerpt]
+  ];
+  for (const [name, value] of front) {
+    const tokens = extractClaimTokens(value);
+    if (!tokens.length) continue;
+    problems.push({
+      code: 'V7_CLAIM_LEDGER',
+      message: `Claim tokens are only allowed in the body (${name}): ${tokens.map((id) => '{{' + id + '}}').join(', ')}`
+    });
+  }
+  return problems;
+}
+
+function problemMessage(item) {
+  if (item && typeof item === 'object') return String(item.message || '');
+  return String(item || '');
+}
+
+function problemCode(item) {
+  if (item && typeof item === 'object' && item.code) return item.code;
+  return classifyMessage(problemMessage(item));
+}
+
+function classifyMessage(message) {
+  const text = String(message || '');
+  if (/not an approved Brandible first-party figure|unapproved Brandible|looks like data|in a week or two/i.test(text)) {
+    return 'V1_UNAPPROVED_FIRST_PARTY_NUMBER';
+  }
+  if (/CTA |fit_case|walk_away|self-qualify|self.qualify/i.test(text)) return 'V2_CTA_SELF_QUALIFY';
+  if (/Absolute statement|upgrades certainty|level of certainty/i.test(text)) return 'V6_ABSOLUTE_WORDING';
+  if (
+    /not supported by the stored excerpt|stronger than the stored source|stronger than the linked|Citation product mismatch|has no source_id|missing from the source pack/i.test(
+      text
+    )
+  ) {
+    return 'V3_SOURCE_ENTAILMENT';
+  }
+  if (/reader-facing source link|reader-facing body citation/i.test(text)) return 'V4_MISSING_SOURCE_LINK';
+  if (/must be clearly labeled as Brandible/i.test(text)) return 'V5_UNLABELED_FIRST_PARTY';
+  if (/allowed external-facts plan|not recorded in claims\[\]|allowed_claim_id|Claim kind/i.test(text)) {
+    return 'V7_CLAIM_LEDGER';
+  }
+  if (/Out-of-scope/i.test(text)) return 'V8_OUT_OF_SCOPE';
+  if (/Unsupported quantifier/i.test(text)) return 'V9_QUANTIFIER';
+  return 'V10_OTHER';
+}
+
+function stampProblems(problems) {
+  const counts = {};
+  return (problems || []).map((item) => {
+    const code = problemCode(item);
+    const message = problemMessage(item);
+    counts[code] = (counts[code] || 0) + 1;
+    return {
+      id: `${code}_${counts[code]}`,
+      code,
+      message
+    };
+  });
+}
+
+function allowedActionsForCode(code) {
+  switch (code) {
+    case 'V1_UNAPPROVED_FIRST_PARTY_NUMBER':
+      return ['deleted'];
+    case 'V2_CTA_SELF_QUALIFY':
+      return ['self_qualified'];
+    case 'V3_SOURCE_ENTAILMENT':
+      return ['deleted', 'replaced_with_token'];
+    case 'V4_MISSING_SOURCE_LINK':
+      return ['deleted', 'replaced_with_token'];
+    case 'V5_UNLABELED_FIRST_PARTY':
+      return ['attributed', 'deleted'];
+    case 'V6_ABSOLUTE_WORDING':
+      return ['replaced_with_token', 'deleted'];
+    case 'V7_CLAIM_LEDGER':
+      return ['deleted', 'replaced_with_token', 'removed_token'];
+    case 'V8_OUT_OF_SCOPE':
+      return ['deleted'];
+    case 'V9_QUANTIFIER':
+      return ['rewritten_to_evidence', 'deleted'];
+    case 'V10_OTHER':
+      return ['deleted', 'rewritten_to_evidence', 'attributed', 'self_qualified'];
+    default: {
+      return ['deleted', 'replaced_with_token', 'removed_token', 'rewritten_to_evidence', 'attributed', 'self_qualified'];
+    }
+  }
+}
+
+function assertRevisionResolutions(problems, parsed) {
+  const missing = [];
+  const resolutions = parsed && Array.isArray(parsed.resolutions) ? parsed.resolutions : [];
+  const byId = new Map();
+  for (const item of resolutions) {
+    if (item && item.failure_id) byId.set(String(item.failure_id), item);
+  }
+  for (const problem of problems || []) {
+    const resolution = byId.get(problem.id);
+    if (!resolution) {
+      missing.push(`${problem.id}: no resolution`);
+      continue;
+    }
+    const action = String(resolution.action || '').trim();
+    if (!RESOLUTION_ACTIONS.has(action)) {
+      missing.push(
+        `${problem.id}: action must be one of deleted, replaced_with_token, removed_token, attributed, self_qualified, rewritten_to_evidence`
+      );
+      continue;
+    }
+    const allowed = allowedActionsForCode(problem.code);
+    if (!allowed.includes(action)) {
+      missing.push(`${problem.id}: action must be ${allowed.join(' or ')}`);
+      continue;
+    }
+    if (action === 'replaced_with_token' && !/\{\{\s*AC\d+\s*\}\}/.test(String(resolution.resulting_sentence || ''))) {
+      missing.push(`${problem.id}: replaced_with_token requires a resulting_sentence containing an {{AC#}} token`);
+      continue;
+    }
+    if (action !== 'deleted' && !String(resolution.resulting_sentence || '').trim()) {
+      missing.push(`${problem.id}: resulting_sentence required unless action is deleted`);
+    }
+  }
+  return missing;
+}
+
+function formatProblem(problem) {
+  if (problem && problem.id) return `${problem.id}: ${problem.message}`;
+  return problemMessage(problem);
+}
+
 function revisionRepairHints(problems) {
   const hints = [];
   const list = problems || [];
-  if (list.some((item) => /must be clearly labeled as Brandible/i.test(item))) {
+  const hasCode = (code) => list.some((item) => problemCode(item) === code);
+  if (hasCode('V1_UNAPPROVED_FIRST_PARTY_NUMBER')) {
     hints.push(
-      'First-party attribution: Each listed price, timeline, or capability is an approved Brandible first-party fact. Keep the approved figure. Put the word “Brandible” in the same clause immediately before the figure. Do not repair this by rephrasing a nearby sentence while leaving the figure unlabeled. Do not move the Brandible label to a later sentence. If you cannot attribute it, remove the figure.'
+      'V1_UNAPPROVED_FIRST_PARTY_NUMBER: action must be deleted. Remove the unauthorized number and the claim that depends on it. Do not substitute another number. Do not estimate. Do not infer a market range.'
     );
   }
-  if (list.some((item) => /Unsupported quantifier in (?:title|meta_title|meta_description|excerpt)/i.test(item))) {
+  if (hasCode('V5_UNLABELED_FIRST_PARTY')) {
     hints.push(
-      'Frontmatter quantifier: Rewrite the named field so it does not say “most people,” “most businesses,” “most local business owners,” or similar unless an approved source supports it. The body rewrite is not enough if title, meta_title, meta_description, or excerpt still has the phrase.'
+      'V5_UNLABELED_FIRST_PARTY: action attributed or deleted. Keep the approved figure and put “Brandible” in the same clause, or delete the figure.'
     );
   }
-  if (list.some((item) => /not recorded in claims\[\]/i.test(item))) {
+  if (hasCode('V9_QUANTIFIER')) {
     hints.push(
-      'Claim ledger: Add every flagged sentence to claims[] with the correct kind, or rewrite it as clearly labeled opinion, a hypothetical, or a first-party Brandible fact. Do not leave a platform fact in the article unlisted.'
+      'V9_QUANTIFIER: rewrite the named field so it does not say “most people,” “most businesses,” or similar unless an approved source supports it.'
     );
   }
-  if (list.some((item) => /reader-facing source link/i.test(item))) {
+  if (hasCode('V7_CLAIM_LEDGER')) {
     hints.push(
-      'Reader-facing citations: Keep the claim, and add a markdown link in that section to the supporting source pack URL. Do not cite Brandible opinion, hypotheticals, or first-party pricing. Do cite externally researched Ads/SEO mechanics such as auctions, Ad Rank, and conversion tracking.'
+      'V7_CLAIM_LEDGER: replace the raw platform fact with an approved {{AC#}} token, delete it, or remove an unused token. Do not invent a new sourced sentence.'
     );
   }
-  if (list.some((item) => /Absolute statement/i.test(item))) {
+  if (hasCode('V4_MISSING_SOURCE_LINK')) {
     hints.push(
-      'Absolute wording: Soften or remove the sentence unless a stored source excerpt supports that exact certainty. Do not write “there’s no residual benefit” unless the excerpt says so.'
+      'V4_MISSING_SOURCE_LINK: replace the raw factual sentence with the matching {{AC#}} token, or delete it. Code inserts the source link.'
     );
   }
-  if (
-    list.some((item) =>
-      /sourced_fact|Citation product mismatch|not supported by the stored excerpt|stronger than the stored source|Out-of-scope/i.test(
-        item
-      )
-    )
-  ) {
+  if (hasCode('V2_CTA_SELF_QUALIFY')) {
     hints.push(
-      'Unsupported or out-of-scope facts: Delete the failing sourced_fact from claims[] and remove the body sentences that depend on it. Do not paraphrase the same claim to sound closer to the excerpt. Do not keep Google Business Profile field how-tos or Local Services Ads in an article that does not own those questions.'
+      'V2_CTA_SELF_QUALIFY: action self_qualified. Set cta.fit_case and cta.walk_away_case. Code renders both into the close. Walk-away: if the reader already has the identified problem handled effectively, they may not need Brandible.'
+    );
+  }
+  if (hasCode('V6_ABSOLUTE_WORDING')) {
+    hints.push(
+      'V6_ABSOLUTE_WORDING: replace the upgraded sentence with the matching {{AC#}} token, or delete it. Do not rewrite the fact in prose.'
+    );
+  }
+  if (hasCode('V3_SOURCE_ENTAILMENT')) {
+    hints.push(
+      'V3_SOURCE_ENTAILMENT: replace unsupported factual copy with an approved {{AC#}} token, or delete it. Do not paraphrase a sourced sentence.'
+    );
+  }
+  if (hasCode('V8_OUT_OF_SCOPE')) {
+    hints.push(
+      'V8_OUT_OF_SCOPE: action deleted. Remove the out-of-scope sentences and any sourced_fact that depends on them.'
     );
   }
   return hints;
@@ -828,54 +1153,82 @@ function validateGeneratedArticle(article, context) {
   const catalog = context.catalog;
   const sourcePack = context.sourcePack || { needed: false, sources: [] };
   const cmsCategories = context.cmsCategories;
+  const allowlist = context.allowlist || buildAllowlist(facts);
+  const allowedClaims = context.allowedClaims || [];
 
   const problems = [];
-  if (!article.title) problems.push('Missing title.');
-  if (!article.body) problems.push('Missing body.');
-  if (!article.excerpt) problems.push('Missing excerpt.');
-  if (!article.meta_description) problems.push('Missing meta_description.');
+  if (!article.title) problems.push({ code: 'V10_OTHER', message: 'Missing title.' });
+  if (!article.body) problems.push({ code: 'V10_OTHER', message: 'Missing body.' });
+  if (!article.excerpt) problems.push({ code: 'V10_OTHER', message: 'Missing excerpt.' });
+  if (!article.meta_description) problems.push({ code: 'V10_OTHER', message: 'Missing meta_description.' });
   if (!cmsCategories.includes(article.category)) {
-    problems.push(`Category must be one of: ${cmsCategories.join(', ')}.`);
+    problems.push({ code: 'V10_OTHER', message: `Category must be one of: ${cmsCategories.join(', ')}.` });
   }
   const full = articleFullText(article);
   if (containsEmDash(full)) {
-    problems.push('Contains an em dash.');
+    problems.push({ code: 'V10_OTHER', message: 'Contains an em dash.' });
   }
   const banHit = firstBanHit(`${article.title}\n${article.body}`);
-  if (banHit) problems.push(`Contains banned phrasing: "${banHit}".`);
+  if (banHit) problems.push({ code: 'V10_OTHER', message: `Contains banned phrasing: "${banHit}".` });
   if (/^\s*#\s/m.test(article.body)) {
-    problems.push('Body should not repeat the title as an H1. The CMS page already renders the title.');
+    problems.push({
+      code: 'V10_OTHER',
+      message: 'Body should not repeat the title as an H1. The CMS page already renders the title.'
+    });
   }
-  const quantifierProblems = checkQuantifiersByField(article);
-  problems.push(...quantifierProblems);
-  const priceProblem = firstUnlabeledOrUnapprovedPrice(full, facts);
-  if (priceProblem) problems.push(priceProblem);
-  const metricProblem = firstUnsourcedMetric(full, sourcePack);
+  problems.push(...checkQuantifiersByField(article));
+  problems.push(...checkPrices(full, allowlist));
+  problems.push(...checkBrandiblePercents(full, allowlist, allowedClaims));
+  const metricProblem = firstUnsourcedMetric(full, sourcePack, allowlist);
   if (metricProblem) problems.push(metricProblem);
   const aiProblem = automationDescribedAsAi(article.body);
-  if (aiProblem) problems.push(aiProblem);
-  if (ctaNamesBrandibleWithoutSelfQualify(article.body)) {
-    problems.push(
-      'CTA names Brandible but does not self-qualify. Include a reasonable case where the reader may not need the service.'
-    );
-  }
-  problems.push(...checkSeoFields(article));
-  problems.push(...checkInternalLinks(article.body, catalog));
-  problems.push(...checkExternalLinks(article.body, sourcePack));
+  if (aiProblem) problems.push({ code: 'V10_OTHER', message: aiProblem });
+  problems.push(...checkCtaContract(article));
+  problems.push(...checkSeoFields(article).map((message) => ({ code: 'V10_OTHER', message })));
+  problems.push(...checkInternalLinks(article.body, catalog).map((message) => ({ code: 'V10_OTHER', message })));
+  problems.push(...checkExternalLinks(article.body, sourcePack).map((message) => ({ code: 'V10_OTHER', message })));
   const articleProduct = articleDiscussedProduct(article, context.topic);
-  problems.push(...checkClaims(article, sourcePack, articleProduct));
-  problems.push(...checkUnsupportedComparatives(article, sourcePack));
-  problems.push(...checkLinkedSentences(article.body, sourcePack, articleProduct));
-  problems.push(...checkMaterialSubsections(article.body, sourcePack, articleProduct));
-  problems.push(...checkDeprecatedFeatures(article.body, sourcePack));
+  problems.push(...checkClaims(article, sourcePack, articleProduct, allowedClaims));
+  problems.push(
+    ...checkUnsupportedComparatives(article, sourcePack).map((message) => ({
+      code: 'V3_SOURCE_ENTAILMENT',
+      message
+    }))
+  );
+  problems.push(
+    ...checkLinkedSentences(article.body, sourcePack, articleProduct).map((message) => ({
+      code: /Absolute/i.test(message) ? 'V6_ABSOLUTE_WORDING' : 'V3_SOURCE_ENTAILMENT',
+      message
+    }))
+  );
+  problems.push(
+    ...checkMaterialSubsections(article.body, sourcePack, articleProduct).map((message) => ({
+      code: 'V3_SOURCE_ENTAILMENT',
+      message
+    }))
+  );
+  problems.push(
+    ...checkDeprecatedFeatures(article.body, sourcePack).map((message) => ({
+      code: 'V8_OUT_OF_SCOPE',
+      message
+    }))
+  );
   problems.push(...checkTopicScope(article, context.topic));
-  problems.push(...checkClaimLedger(article, sourcePack));
-  return problems;
+  problems.push(...checkUnresolvedTokens(article));
+  problems.push(...checkClaimLedger(article, sourcePack, allowedClaims));
+  problems.push(...checkAbsoluteWording(article, allowedClaims));
+  return stampProblems(problems);
 }
 
 module.exports = {
   PHASE1_HARD_CHECKS,
   PHASE2_GROUNDING_CHECKS,
+  RESOLUTION_ACTIONS,
   validateGeneratedArticle,
-  revisionRepairHints
+  revisionRepairHints,
+  stampProblems,
+  classifyMessage,
+  assertRevisionResolutions,
+  allowedActionsForCode,
+  formatProblem
 };

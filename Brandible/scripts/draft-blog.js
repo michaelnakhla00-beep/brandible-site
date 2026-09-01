@@ -9,11 +9,21 @@ const BRANDIBLE_ROOT = path.resolve(__dirname, '..');
 const POSTS_DIR = path.join(BRANDIBLE_ROOT, 'blogs', 'posts');
 const EDITORIAL_DIR = path.join(BRANDIBLE_ROOT, 'blogs', 'editorial');
 
-const { loadFacts, factsForPrompt } = require('./blog-draft/facts');
+const { loadFacts, factsForPrompt, buildAllowlist, allowlistForPrompt, allowlistSnapshot } = require('./blog-draft/facts');
 const { buildCatalog, catalogForPrompt } = require('./blog-draft/catalog');
 const { parseQueueTopics, findTopic: findQueuedTopic } = require('./blog-draft/queue');
 const { buildSourcePack, sourcePackForPrompt } = require('./blog-draft/research');
-const { PHASE1_HARD_CHECKS, PHASE2_GROUNDING_CHECKS, validateGeneratedArticle, revisionRepairHints } = require('./blog-draft/validate');
+const { buildAllowedClaims, allowedClaimsForPrompt } = require('./blog-draft/allowed-claims');
+const { assembleArticle } = require('./blog-draft/assemble');
+const {
+  PHASE1_HARD_CHECKS,
+  PHASE2_GROUNDING_CHECKS,
+  validateGeneratedArticle,
+  revisionRepairHints,
+  assertRevisionResolutions,
+  formatProblem,
+  allowedActionsForCode
+} = require('./blog-draft/validate');
 
 const CMS_CATEGORIES = [
   'Marketing',
@@ -359,26 +369,30 @@ function buildGeneratePrompt({
   topic,
   facts,
   catalog,
-  sourcePack
+  sourcePack,
+  allowlist,
+  allowedClaims
 }) {
   return [
     'You are writing one Brandible Marketing Group blog post for brandiblemg.com.',
     'Follow the Voice Guide, Editorial Standard, and Voice Test Checklist exactly.',
-    'Return JSON only with keys: title, slug, meta_title, meta_description, excerpt, category, body, claims.',
-    'claims is an array of { "claim", "kind", "source_id" }.',
-    'kind must be one of: sourced_fact, first_party, hypothetical, opinion.',
-    'source_id is an id from the source pack (S1, S2, …) when kind is sourced_fact; otherwise null.',
-    'claims[] must match the terminology and scope of the stored excerpt. Do not normalize or strengthen the source.',
+    'Return JSON only with keys: title, slug, meta_title, meta_description, excerpt, category, body, claims, cta.',
+    'claims is an array of { "claim", "kind", "source_id" } for first_party, hypothetical, and opinion only.',
+    'Do not include sourced_fact rows. Code derives sourced facts from {{AC#}} tokens used in the body.',
+    'kind must be one of: first_party, hypothetical, opinion.',
+    'cta is { "names_brandible": boolean, "fit_case": string, "walk_away_case": string }.',
+    'If the closing names Brandible, names_brandible must be true and both fit_case and walk_away_case must be non-empty. Code renders those two fields into the final close.',
+    'walk_away_case: if the reader already has the identified problem handled effectively, they may not need Brandible.',
+    'External platform facts: insert {{AC#}} tokens from the approved token list. Do not write or paraphrase those factual sentences. Surrounding commentary may be Brandible voice.',
     'category must be exactly one of: Marketing, Web Design, SEO, Social Media, Business Tips, Case Studies.',
     'body is markdown. Do not include frontmatter. Do not repeat the title as an H1.',
     'Never use em dashes. Never invent statistics, citations, client stories, or unnamed clients.',
-    'Brandible prices, timelines, capabilities, and named work may come ONLY from FIRST-PARTY FACTS. When you use one, put the word Brandible in the same clause immediately before the figure or capability. Do not leave an approved number unlabeled.',
-    'External platform or statistical claims may come ONLY from the SOURCE PACK. If the pack does not support a claim, drop it or rewrite it as mechanism, opinion, or a labeled hypothetical.',
+    'Brandible currency amounts, percentages, timelines, and numeric case metrics may come ONLY from the approved number allowlist. Any other Brandible number is forbidden.',
+    'Do not write Google/Meta/platform facts in prose. If a fact is not an approved token, drop it or keep it as clearly labeled opinion, a hypothetical, or Brandible advice.',
     'Article ownership: every factual subsection must directly help answer the selected topic’s owned question. A source being available does not justify using it. Do not introduce adjacent platform guidance merely because it is related to the broader service.',
     'For a Google Ads vs SEO topic, distinguish Google Ads, organic Search/SEO, and Brandible’s own service/pricing. Google Business Profile optimization and Local Services Ads stay out unless the owned question requires them.',
-    'Cite a source in the body only when a factual claim benefits from support. Use a markdown link to the source URL. Do not cite opinion, first-party facts, or hypotheticals.',
+    'When an allowed claim has citation required, insert its {{AC#}} token. Code adds the markdown link.',
     'Internal links: only URLs in the INTERNAL LINK CATALOG. 1–3 useful links. Do not repeat a destination. Do not link unpublished drafts.',
-    'Self-qualify the CTA if Brandible is named.',
     'SEO: meta_title can be shorter than the editorial title. No | Brandible suffix. meta_description 80–170 characters. excerpt is listing-card copy, not a copy of meta_description. slug is short and search-intent, not the full headline.',
     '',
     '=== PHASE 1 HARD CHECKS ===',
@@ -387,8 +401,14 @@ function buildGeneratePrompt({
     '=== PHASE 2 GROUNDING CHECKS ===',
     PHASE2_GROUNDING_CHECKS.map((item, i) => `${i + 1}. ${item}`).join('\n'),
     '',
-    '=== FIRST-PARTY FACTS (only approved Brandible numbers and capabilities) ===',
-    factsForPrompt(facts),
+    '=== APPROVED FIRST-PARTY NUMBER ALLOWLIST ===',
+    allowlistForPrompt(allowlist),
+    '',
+    '=== FIRST-PARTY FACTS (sanitized to the allowlist) ===',
+    factsForPrompt(facts, allowlist),
+    '',
+    '=== ALLOWED EXTERNAL CLAIMS ===',
+    allowedClaimsForPrompt(allowedClaims),
     '',
     '=== SOURCE PACK ===',
     sourcePackForPrompt(sourcePack),
@@ -416,25 +436,42 @@ function buildGeneratePrompt({
   ].join('\n');
 }
 
-function buildRevisionPrompt(article, problems, { facts, catalog, sourcePack, topic }) {
+function buildRevisionPrompt(article, problems, { facts, catalog, sourcePack, topic, allowlist, allowedClaims }) {
   const hints = revisionRepairHints(problems);
+  const numbered = problems.map((item) => {
+    const actions = allowedActionsForCode(item.code).join(' | ');
+    return `${item.id} [${item.code}] required action: ${actions}\n${item.message}`;
+  });
   return [
     'Revise this Brandible blog JSON so it passes validation.',
     'Keep the same argument and the same owned question. Fix only the listed failures.',
     topic ? `Owned question: ${topic.title}` : '',
-    'Return JSON only with keys: title, slug, meta_title, meta_description, excerpt, category, body, claims.',
-    'Never use em dashes. Do not invent sources. Brandible facts only from the facts file. External facts only from the source pack.',
+    'Return JSON only with keys: title, slug, meta_title, meta_description, excerpt, category, body, claims, cta, resolutions.',
+    'claims may include first_party, hypothetical, and opinion only. Do not return sourced_fact rows.',
+    'cta is { "names_brandible": boolean, "fit_case": string, "walk_away_case": string }.',
+    'resolutions is an array with one entry per supplied failure_id: { "failure_id", "action", "resulting_sentence" }.',
+    'action must be one of: deleted, replaced_with_token, removed_token, attributed, self_qualified, rewritten_to_evidence.',
+    'For sourced-fact failures, replace raw factual copy with an approved {{AC#}} token, delete it, or remove an unused token. Do not invent a new sourced sentence.',
+    'If action is replaced_with_token, resulting_sentence must contain the {{AC#}} token. If action is deleted, resulting_sentence may be "deleted".',
+    'A response missing a resolution for any supplied failure_id is rejected immediately.',
+    'Never use em dashes. Do not invent sources. Brandible numbers only from the approved allowlist. why_selected is not evidence.',
     'Every factual subsection must directly help answer the owned question. A source being available does not justify keeping it. Do not add Google Business Profile field how-tos or Local Services Ads unless the owned question requires them.',
     PHASE1_HARD_CHECKS.join(' '),
     PHASE2_GROUNDING_CHECKS.join(' '),
     '',
-    'Failures:',
-    problems.map((item) => `- ${item}`).join('\n'),
+    'Validator failures. Return a resolutions[] entry for every ID. You get only this one revision call.',
+    numbered.join('\n\n'),
     '',
-    hints.length ? `How to repair those failures:\n${hints.map((item) => `- ${item}`).join('\n')}` : '',
+    hints.length ? `Required actions:\n${hints.map((item) => `- ${item}`).join('\n')}` : '',
     '',
-    '=== FIRST-PARTY FACTS ===',
-    factsForPrompt(facts),
+    '=== APPROVED FIRST-PARTY NUMBER ALLOWLIST ===',
+    allowlistForPrompt(allowlist),
+    '',
+    '=== FIRST-PARTY FACTS (sanitized to the allowlist) ===',
+    factsForPrompt(facts, allowlist),
+    '',
+    '=== ALLOWED EXTERNAL CLAIMS ===',
+    allowedClaimsForPrompt(allowedClaims),
     '',
     '=== SOURCE PACK ===',
     sourcePackForPrompt(sourcePack),
@@ -442,9 +479,23 @@ function buildRevisionPrompt(article, problems, { facts, catalog, sourcePack, to
     '=== INTERNAL LINK CATALOG ===',
     catalogForPrompt(catalog),
     '',
-    'Current JSON:',
-    JSON.stringify(article, null, 2)
+    'Current JSON (tokens unresolved; code will render claims and the CTA after this call):',
+    JSON.stringify(forRevision(article), null, 2)
   ].join('\n');
+}
+
+function forRevision(article) {
+  return {
+    title: article.title,
+    slug: article.slug,
+    meta_title: article.meta_title,
+    meta_description: article.meta_description,
+    excerpt: article.excerpt,
+    category: article.category,
+    body: article.body,
+    claims: (article.claims || []).filter((item) => String(item.kind || '') !== 'sourced_fact'),
+    cta: article.cta
+  };
 }
 
 function normalizeGenerated(article, topic) {
@@ -452,6 +503,7 @@ function normalizeGenerated(article, topic) {
   const category = String(article.category || categoryFromService(topic.service)).trim();
   const slug = slugify(article.slug || title);
   const claims = Array.isArray(article.claims) ? article.claims : [];
+  const cta = article.cta && typeof article.cta === 'object' ? article.cta : {};
   return {
     title,
     slug,
@@ -463,7 +515,12 @@ function normalizeGenerated(article, topic) {
       .replace(/^\uFEFF/, '')
       .replace(/^\s*#\s+.+?\n+/, '')
       .trim()}\n`,
-    claims
+    claims,
+    cta: {
+      names_brandible: Boolean(cta.names_brandible),
+      fit_case: String(cta.fit_case || '').trim(),
+      walk_away_case: String(cta.walk_away_case || '').trim()
+    }
   };
 }
 
@@ -478,7 +535,7 @@ function writeDraft({ fields, body }) {
   return outPath;
 }
 
-function writeSourceRecord({ fields, facts, sourcePack, claims }) {
+function writeSourceRecord({ fields, facts, sourcePack, claims, allowedClaims, allowlist, claimTokensUsed }) {
   const dir = path.join(EDITORIAL_DIR, 'research');
   fs.mkdirSync(dir, { recursive: true });
   const filename = `${dateStamp(fields.date)}-${fields.slug}.json`;
@@ -494,6 +551,9 @@ function writeSourceRecord({ fields, facts, sourcePack, claims }) {
       retrieved_at: sourcePack.retrieved_at || null
     },
     sources: sourcePack.sources || [],
+    allowed_claims: Array.isArray(allowedClaims) ? allowedClaims : [],
+    claim_tokens_used: Array.isArray(claimTokensUsed) ? claimTokensUsed : [],
+    approved_first_party_numbers: allowlistSnapshot(allowlist),
     claims: Array.isArray(claims) ? claims : [],
     internal_links_catalog_note: 'Internal URLs in the article must come from the approved catalog of live posts, services, and core pages.'
   };
@@ -514,12 +574,14 @@ function reportWritten(outPath, fields, sourcePath) {
   console.log('Not published. Human review next. Do not flip draft to false in this command.');
 }
 
-function validationContext({ facts, catalog, sourcePack, topic }) {
+function validationContext({ facts, catalog, sourcePack, topic, allowlist, allowedClaims }) {
   return {
     facts,
     catalog,
     sourcePack,
     topic: topic || null,
+    allowlist,
+    allowedClaims: allowedClaims || [],
     cmsCategories: CMS_CATEGORIES
   };
 }
@@ -565,6 +627,9 @@ async function generateFromTopic(topic, editorial) {
     model: config.model
   });
 
+  const allowlist = buildAllowlist(facts);
+  const allowedClaims = buildAllowedClaims(sourcePack);
+
   const prompt = buildGeneratePrompt({
     voiceGuide: editorial.voiceGuide,
     editorialStandard: editorial.editorialStandard,
@@ -573,37 +638,59 @@ async function generateFromTopic(topic, editorial) {
     topic,
     facts,
     catalog,
-    sourcePack
+    sourcePack,
+    allowlist,
+    allowedClaims
   });
 
   console.log(`Provider: ${config.provider}`);
   console.log(`Model: ${config.model}`);
+  console.log(`Approved first-party numbers: ${allowlist.moneyList.length} money / ${allowlist.percentList.length} percent / ${allowlist.countList.length} count.`);
+  console.log(`Allowed external claims: ${allowedClaims.length}.`);
 
-  const ctx = validationContext({ facts, catalog, sourcePack, topic });
+  const ctx = validationContext({ facts, catalog, sourcePack, topic, allowlist, allowedClaims });
   let parsed = parseModelJson(await completeChat({ ...config, prompt }));
-  let article = normalizeGenerated(parsed, topic);
+  let tokenized = normalizeGenerated(parsed, topic);
+  let article = assembleArticle(tokenized, allowedClaims);
   let problems = validateGeneratedArticle(article, ctx);
   if (problems.length) {
     console.log('First generation failed validation:');
     for (const problem of problems) {
-      console.log(`  - ${problem}`);
+      console.log(`  - ${formatProblem(problem)}`);
     }
     console.log('Running the single revision pass.');
     parsed = parseModelJson(
       await completeChat({
         ...config,
-        prompt: buildRevisionPrompt(article, problems, { facts, catalog, sourcePack, topic })
+        prompt: buildRevisionPrompt(tokenized, problems, {
+          facts,
+          catalog,
+          sourcePack,
+          topic,
+          allowlist,
+          allowedClaims
+        })
       })
     );
-    article = normalizeGenerated(parsed, topic);
+    const missingResolutions = assertRevisionResolutions(problems, parsed);
+    if (missingResolutions.length) {
+      fail(
+        `Revision rejected: missing or invalid resolutions. No draft written.\n- ${missingResolutions.join('\n- ')}`
+      );
+    }
+    tokenized = normalizeGenerated(parsed, topic);
+    article = assembleArticle(tokenized, allowedClaims);
     problems = validateGeneratedArticle(article, ctx);
   } else {
     console.log('First generation passed validation. No revision pass.');
   }
   if (problems.length) {
-    fail(`Draft failed validation after one revision:\n- ${problems.join('\n- ')}`);
+    fail(`Draft failed validation after one revision:\n- ${problems.map(formatProblem).join('\n- ')}`);
   }
   console.log('Draft passed validation.');
+  if (article.claim_tokens_used && article.claim_tokens_used.length) {
+    console.log(`Claim tokens used: ${article.claim_tokens_used.join(', ')}.`);
+  }
 
   const fields = {
     draft: true,
@@ -622,7 +709,10 @@ async function generateFromTopic(topic, editorial) {
     fields,
     facts,
     sourcePack,
-    claims: article.claims
+    claims: article.claims,
+    allowedClaims,
+    allowlist,
+    claimTokensUsed: article.claim_tokens_used
   });
   reportWritten(outPath, fields, sidecarPath);
   return outPath;

@@ -21,6 +21,8 @@ const MAX_FETCHES = 5;
 const MAX_FETCH_TOKENS = 8000;
 const MAX_SOURCES = 5;
 const MAX_EXCERPT = 2500;
+const MAX_EVIDENCE_SNIPPETS = 6;
+const MAX_EVIDENCE_QUOTE = 700;
 
 const PRODUCT_URL_HINTS = [
   { product: 'local_services_ads', test: /support\.google\.com\/localservices/i },
@@ -191,6 +193,27 @@ function sourceFitsTopic(source, topic) {
   return allowed.includes(product);
 }
 
+function normalizeEvidenceSnippets(item) {
+  const raw = Array.isArray(item && item.evidence) ? item.evidence : [];
+  const snippets = [];
+  const seen = new Set();
+  for (const entry of raw) {
+    const quote = String((entry && (entry.quote || entry.text || entry.passage)) || '')
+      .trim()
+      .slice(0, MAX_EVIDENCE_QUOTE);
+    if (!quote || seen.has(quote)) continue;
+    seen.add(quote);
+    snippets.push({
+      about: String((entry && (entry.about || entry.claim || entry.topic)) || '')
+        .trim()
+        .slice(0, 120),
+      quote
+    });
+    if (snippets.length >= MAX_EVIDENCE_SNIPPETS) break;
+  }
+  return snippets;
+}
+
 function normalizeSources(raw, harvestedUrls, topic) {
   const list = Array.isArray(raw) ? raw : [];
   const sources = [];
@@ -205,6 +228,7 @@ function normalizeSources(raw, harvestedUrls, topic) {
       excerpt: String((item && (item.excerpt || item.content || item.useful_passage)) || '')
         .trim()
         .slice(0, MAX_EXCERPT),
+      evidence: normalizeEvidenceSnippets(item),
       why_selected: String((item && item.why_selected) || '').trim(),
       product: inferSourceProduct({ ...item, url }),
       features: Array.isArray(item && item.features)
@@ -297,11 +321,15 @@ function researchPrompt(topic, topicProduct) {
     researchSearchPlan(topic, topicProduct),
     '',
     'After search, fetch only the strongest 2–5 primary pages with web_fetch. Do not fetch more.',
-    'Select pages whose stored excerpt can support the exact claims, not merely a related page from the same company.',
+    'Select pages whose stored text can support the exact claims, not merely a related page from the same company.',
     'A source being findable does not justify including it. Every source must help answer the owned question.',
     'Do not use Local Services Ads, Google Ads, or another product as evidence for organic Google Business Profile or Maps ranking unless the topic is explicitly about that other product.',
     'If a feature is deprecated or being replaced (for example traditional Business Profile Q&A after late 2025), include the first-party notice and set feature_status to "deprecated" or "changing". Do not treat a deprecated workflow as current setup advice.',
-    'Store verbatim useful passages in excerpt. Do not summarize the page into a stronger claim than the page makes.',
+    'After each web_fetch, copy verbatim passages from THAT page only.',
+    'excerpt: one short overview passage for compatibility. Do not pad it to cover every subsection.',
+    'evidence: additional verbatim quotes for distinct planned claims this page actually states (ranking, categories, completeness, reviews, crawl/index timing, hours, photos, and similar). Each quote must appear on the fetched page.',
+    'If the page does not contain a passage for a planned subsection, omit that evidence item. Do not paraphrase, summarize, or invent a stronger sentence so a later claim can pass.',
+    'why_selected is a planning note only. It is not evidence. Never copy it into excerpt or evidence.',
     'Do not invent URLs, titles, or quotations.',
     '',
     `Topic product/surface to prefer: ${topicProduct || 'infer from the topic'}`,
@@ -311,7 +339,7 @@ function researchPrompt(topic, topicProduct) {
     topic.detail || `${topic.id} ${topic.title}`,
     '',
     'Return JSON only:',
-    '{ "queries": ["..."], "sources": [{ "id": "S1", "url": "", "title": "", "publisher": "", "product": "google_ads|google_search|google_business_profile|google_maps|local_services_ads|meta", "features": ["ad_rank","auction","conversion_tracking","organic_search","ranking"], "feature_status": "current|deprecated|changing|unknown", "excerpt": "verbatim useful passage from the page", "why_selected": "how this answers the owned question" }] }'
+    '{ "queries": ["..."], "sources": [{ "id": "S1", "url": "", "title": "", "publisher": "", "product": "google_ads|google_search|google_business_profile|google_maps|local_services_ads|meta", "features": ["ad_rank","auction","conversion_tracking","organic_search","ranking"], "feature_status": "current|deprecated|changing|unknown", "excerpt": "verbatim overview passage from the page", "evidence": [{ "about": "ranking|categories|indexing|completeness|reviews|hours|photos", "quote": "verbatim passage from this page that actually states that point" }], "why_selected": "planning note only; not evidence" }] }'
   ].join('\n');
 }
 
@@ -340,7 +368,7 @@ async function runAnthropicResearch({ apiKey, model, topic }) {
     model,
     messages,
     tools,
-    maxTokens: 4096
+    maxTokens: 8192
   });
 
   let guard = 0;
@@ -356,7 +384,7 @@ async function runAnthropicResearch({ apiKey, model, topic }) {
       model,
       messages,
       tools,
-      maxTokens: 4096
+      maxTokens: 8192
     });
   }
 
@@ -412,7 +440,10 @@ async function buildSourcePack({ topic, provider, apiKey, model }) {
 
 function sourceEvidenceText(source) {
   if (!source) return '';
-  return [source.excerpt, source.content].filter(Boolean).join('\n');
+  const quotes = Array.isArray(source.evidence)
+    ? source.evidence.map((item) => (item && item.quote) || '').filter(Boolean)
+    : [];
+  return [source.excerpt, source.content, ...quotes].filter(Boolean).join('\n');
 }
 
 function sourcePackForPrompt(pack) {
@@ -427,12 +458,12 @@ function sourcePackForPrompt(pack) {
     pack.owned_question
       ? `Owned question: ${pack.owned_question}. Cite ONLY these sources, and only when they help answer that question. A source being available does not justify using it.`
       : 'You may cite ONLY these sources for external facts.',
-    'A source supports a claim only if the stored excerpt/content actually says it.',
+    'A source supports a claim only if the stored excerpt or evidence quotes actually say it. why_selected is not evidence. Do not use page titles or memory.',
     'Do not use a related page from the same company as a substitute for the exact claim.',
     'Do not use evidence about one product/surface to make claims about another.',
-    'If the excerpt does not support the specificity, comparison, ranking statement, or causal claim, drop it or rewrite it as mechanism, opinion, or a labeled hypothetical.',
+    'If the stored excerpt and evidence quotes do not support the specificity, comparison, ranking statement, or causal claim, drop it or rewrite it as mechanism, opinion, or a labeled hypothetical.',
     'Do not instruct readers to use a platform feature unless a current first-party source in this pack shows that feature still exists.',
-    'If you write factual guidance on categories, services, reviews, description limits, photos, hours, or similar, this pack must contain a source for that feature. If it does not, omit the instruction.',
+    'If you write factual guidance on categories, services, reviews, description limits, photos, hours, or similar, this pack must contain a stored quote for that feature. If it does not, omit the instruction.',
     'Do not introduce Google Business Profile field how-tos or Local Services Ads unless a source in this pack is for that product and the owned question requires it.',
     ''
   ];
@@ -444,8 +475,14 @@ function sourcePackForPrompt(pack) {
     }
     if (source.feature_status) lines.push(`   Feature status: ${source.feature_status}`);
     if (source.publisher) lines.push(`   Publisher: ${source.publisher}`);
-    const excerpt = sourceEvidenceText(source);
-    if (excerpt) lines.push(`   Excerpt: ${excerpt}`);
+    if (source.excerpt) lines.push(`   Excerpt: ${source.excerpt}`);
+    if (Array.isArray(source.evidence) && source.evidence.length) {
+      lines.push('   Evidence quotes:');
+      for (const item of source.evidence) {
+        const about = item.about ? `[${item.about}] ` : '';
+        lines.push(`   - ${about}${item.quote}`);
+      }
+    }
     lines.push('');
   }
   return lines.join('\n');
