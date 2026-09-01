@@ -666,18 +666,23 @@ function checkLinkedSentences(body, sourcePack, articleProduct) {
     const sourceProduct = inferSourceProduct(source);
     const sentenceProduct = claimProduct(sentence) || articleProduct;
     if (sourceProduct === 'local_services_ads' && sentenceProduct === 'google_business_profile') {
-      problems.push(
-        `Citation product mismatch: the sentence is about Google Business Profile / local ranking but the linked source is Local Services Ads (${url}).`
-      );
+      problems.push({
+        code: 'V3_SOURCE_ENTAILMENT',
+        message: `Citation product mismatch: the sentence is about Google Business Profile / local ranking but the linked source is Local Services Ads (${url}).`
+      });
     } else if (sentenceProduct && sourceProduct !== 'unknown' && !productsCompatible(sentenceProduct, sourceProduct)) {
-      problems.push(
-        `Citation product mismatch: sentence appears to discuss ${sentenceProduct} but the linked source is ${sourceProduct} (${url}).`
-      );
+      problems.push({
+        code: 'V3_SOURCE_ENTAILMENT',
+        message: `Citation product mismatch: sentence appears to discuss ${sentenceProduct} but the linked source is ${sourceProduct} (${url}).`
+      });
     }
     const linkedText = match[1];
     const stronger = claimStrongerThanSource(linkedText, sourceEvidenceText(source));
     if (stronger) {
-      problems.push(`Linked sentence is stronger than the stored source excerpt (${source.id}): ${stronger}`);
+      problems.push({
+        code: 'V6_ABSOLUTE_WORDING',
+        message: `Linked factual text “${linkedText}” is stronger than the stored source excerpt (${source.id}): ${stronger}`
+      });
     }
   }
   return problems;
@@ -1310,12 +1315,7 @@ function validateGeneratedArticle(article, context) {
       message
     }))
   );
-  problems.push(
-    ...checkLinkedSentences(article.body, sourcePack, articleProduct).map((message) => ({
-      code: /Absolute/i.test(message) ? 'V6_ABSOLUTE_WORDING' : 'V3_SOURCE_ENTAILMENT',
-      message
-    }))
-  );
+  problems.push(...checkLinkedSentences(article.body, sourcePack, articleProduct));
   problems.push(
     ...checkMaterialSubsections(article.body, sourcePack, articleProduct).map((message) => ({
       code: 'V3_SOURCE_ENTAILMENT',

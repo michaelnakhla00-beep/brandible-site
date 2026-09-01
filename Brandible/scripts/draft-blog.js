@@ -14,8 +14,8 @@ const { buildCatalog, catalogForPrompt } = require('./blog-draft/catalog');
 const { parseQueueTopics, findTopic: findQueuedTopic } = require('./blog-draft/queue');
 const { buildSourcePack, sourcePackForPrompt } = require('./blog-draft/research');
 const { buildAllowedClaims, allowedClaimsForPrompt } = require('./blog-draft/allowed-claims');
-const { assembleArticle, refreshAssemblyState } = require('./blog-draft/assemble');
-const { applySafetyFallback } = require('./blog-draft/safety-fallback');
+const { assembleArticle } = require('./blog-draft/assemble');
+const { runDeterministicRepairsToFixedPoint } = require('./blog-draft/safety-fallback');
 const {
   PHASE1_HARD_CHECKS,
   PHASE2_GROUNDING_CHECKS,
@@ -695,28 +695,47 @@ async function generateFromTopic(topic, editorial, options) {
     } else {
       console.log('Skipping model revision. Running deterministic repair compiler.');
     }
-    if (problems.length) {
-      const fallback = applySafetyFallback(article, problems, { allowedClaims, catalog });
-      if (fallback.refused) {
-        fail(`Deterministic repair compiler refused: ${fallback.reason}. No draft written.`);
-      }
-      repairs = Array.isArray(fallback.repairs) ? fallback.repairs : [];
-      if (fallback.applied.length) {
-        console.log(`Deterministic repair compiler: ${fallback.applied.join(', ')}.`);
-        article = fallback.article;
-        if (fallback.needsAssemble) {
-          article = assembleArticle(article, allowedClaims);
-        }
-        article = refreshAssemblyState(article, allowedClaims);
-        problems = validateGeneratedArticle(article, ctx);
-      }
-    }
   } else {
     console.log(
       deterministic
         ? 'First generation passed validation. No model revision.'
         : 'First generation passed validation. No revision pass.'
     );
+  }
+  if (deterministic) {
+    const repaired = runDeterministicRepairsToFixedPoint({
+      article,
+      ctx,
+      allowedClaims,
+      catalog
+    });
+    if (repaired.refused) {
+      fail(`Deterministic repair compiler refused: ${repaired.reason}. No draft written.`);
+    }
+    if (repaired.rounds) {
+      console.log(
+        `Deterministic repair compiler: ${repaired.rounds} round(s), ${repaired.repairs.length} repair(s).`
+      );
+    }
+    article = repaired.article;
+    repairs = Array.isArray(repaired.repairs) ? repaired.repairs : [];
+    problems = repaired.problems || [];
+  } else if (problems.length) {
+    const repaired = runDeterministicRepairsToFixedPoint({
+      article,
+      ctx,
+      allowedClaims,
+      catalog
+    });
+    if (repaired.refused) {
+      fail(`Deterministic repair compiler refused: ${repaired.reason}. No draft written.`);
+    }
+    if (repaired.applied && repaired.applied.length) {
+      console.log(`Deterministic repair compiler: ${repaired.applied.join(', ')}.`);
+    }
+    article = repaired.article;
+    repairs = Array.isArray(repaired.repairs) ? repaired.repairs : [];
+    problems = repaired.problems || [];
   }
   if (problems.length) {
     const v4Diagnostics = formatV4Diagnostics(article, problems, allowedClaims);

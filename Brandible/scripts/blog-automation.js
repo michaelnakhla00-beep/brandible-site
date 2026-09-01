@@ -367,7 +367,8 @@ function repairLines(repairs) {
     const code = item.code || 'repair';
     const action = item.action || 'applied';
     const reason = item.reason || '';
-    return reason ? `- **${code}:** ${action} — ${reason}` : `- **${code}:** ${action}`;
+    const round = item.round ? `round ${item.round}, ` : '';
+    return reason ? `- **${code}:** ${round}${action} — ${reason}` : `- **${code}:** ${round}${action}`;
   });
 }
 

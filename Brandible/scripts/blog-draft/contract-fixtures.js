@@ -19,7 +19,7 @@ const {
   stampProblems,
   splitSentences
 } = require('./validate');
-const { applySafetyFallback, collectSafetyRepairs, dedupeInternalLink, MAX_DELETED_SEGMENTS } = require('./safety-fallback');
+const { applySafetyFallback, collectSafetyRepairs, dedupeInternalLink, MAX_DELETED_SEGMENTS, MAX_DETERMINISTIC_ROUNDS, runDeterministicRepairsToFixedPoint } = require('./safety-fallback');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const {
   GENERATION_TOOL_NAME,
@@ -325,6 +325,11 @@ async function structuredOutputFixtures() {
     global.fetch = previousFetch;
   }
 
+  assert(
+    'fixed-point runner allows at most 8 deterministic rounds',
+    MAX_DETERMINISTIC_ROUNDS === 8
+  );
+
   const draftSrc = fs.readFileSync(path.join(__dirname, '../draft-blog.js'), 'utf8');
   const completeArticleSrc = draftSrc.slice(
     draftSrc.indexOf('async function completeArticle'),
@@ -358,6 +363,11 @@ async function structuredOutputFixtures() {
     'deterministic generateFromTopic skips the revision model call',
     /Skipping model revision/.test(generateFromTopicSrc) &&
       /if \(!deterministic\)/.test(generateFromTopicSrc)
+  );
+  assert(
+    'deterministic generateFromTopic uses the fixed-point repair runner',
+    /runDeterministicRepairsToFixedPoint/.test(generateFromTopicSrc) &&
+      !/applySafetyFallback\(/.test(generateFromTopicSrc)
   );
   const automationSrc = fs.readFileSync(path.join(__dirname, '../blog-automation.js'), 'utf8');
   assert(
@@ -1821,6 +1831,16 @@ async function run() {
     hasCode(overstrongLinkedProblems, 'V6_ABSOLUTE_WORDING'),
     overstrongLinkedProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
+  assert(
+    'V6 linked diagnostic quotes the linked factual text and preserves the source id',
+    overstrongProblems.some(
+      (item) =>
+        item.code === 'V6_ABSOLUTE_WORDING' &&
+        /Linked factual text “There's no way your ad is eligible to show\.”/.test(item.message) &&
+        /\(S\d+\)/.test(item.message)
+    ),
+    overstrongProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
 
   const malformedV7Article = assembleArticle(
     ac3Draft(
@@ -2377,6 +2397,287 @@ async function run() {
     'CI-path final validation has zero problems',
     ciFinal.length === 0,
     ciFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const stagedS2Url = 'https://support.google.com/business/answer/7091?hl=en';
+  const stagedPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: adsClaim.url,
+        title: 'About Ad Rank',
+        excerpt:
+          'Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears. Ad Rank is recalculated each time your ad is eligible to compete in an auction.'
+      },
+      {
+        id: 'S2',
+        url: stagedS2Url,
+        title: 'Tips to improve your local ranking on Google',
+        excerpt: 'Businesses with complete and accurate info are more likely to show up in local search results.'
+      }
+    ]
+  };
+  const stagedClaims = buildAllowedClaims(stagedPack);
+  const stagedAdsClaim = stagedClaims.find((item) => item.url === adsClaim.url) || stagedClaims[0];
+  const stagedLeftover =
+    'Ad Rank to determine whether your ad is eligible to show and where it appears.';
+  const stagedPad = [
+    OPERATIONAL_PADDING,
+    OPERATIONAL_PADDING,
+    OPERATIONAL_PADDING,
+    OPERATIONAL_PADDING,
+    'A shop can keep the same practical checklist for months without inventing a new platform rule.',
+    'Write down who answers, how fast they answer, and whether the page matches the promise in the ad.',
+    'None of that requires a ranking guarantee or a new Google assertion in the close of the article.'
+  ].join(' ');
+  const stagedDraft = neverDraft(
+    [
+      '## How the auction works',
+      '',
+      stagedPad,
+      '',
+      stagedLeftover,
+      '',
+      `Start with [There's no way to request or pay for a better local ranking on Google.]Everyone assumes the listing fixes itself {{${stagedAdsClaim.id}}}(${stagedS2Url})`,
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  );
+  const stagedAssembled = assembleArticle(stagedDraft, stagedClaims);
+  const stagedCtx = ctx(stagedPack, stagedClaims);
+  const stagedRoundCodes = [];
+  const stagedResult = runDeterministicRepairsToFixedPoint({
+    article: stagedAssembled,
+    ctx: stagedCtx,
+    allowedClaims: stagedClaims,
+    catalog,
+    validate: (article, context) => {
+      const problems = validateGeneratedArticle(article, context);
+      stagedRoundCodes.push(problems.map((item) => item.code));
+      return problems;
+    }
+  });
+  assert(
+    'staged emergence round 1 is only V9',
+    stagedRoundCodes[0] &&
+      stagedRoundCodes[0].length === 1 &&
+      stagedRoundCodes[0][0] === 'V9_QUANTIFIER',
+    JSON.stringify(stagedRoundCodes)
+  );
+  assert(
+    'staged emergence round 2 surfaces V6 and V7 that round 1 did not know',
+    stagedRoundCodes[1] &&
+      stagedRoundCodes[1].includes('V6_ABSOLUTE_WORDING') &&
+      stagedRoundCodes[1].includes('V7_CLAIM_LEDGER') &&
+      !stagedRoundCodes[0].includes('V6_ABSOLUTE_WORDING') &&
+      !stagedRoundCodes[0].includes('V7_CLAIM_LEDGER'),
+    JSON.stringify(stagedRoundCodes)
+  );
+  assert(
+    'staged emergence round 3 is zero problems',
+    stagedResult.refused === false &&
+      stagedResult.rounds === 2 &&
+      stagedRoundCodes[2] &&
+      stagedRoundCodes[2].length === 0 &&
+      stagedResult.problems.length === 0,
+    JSON.stringify({
+      refused: stagedResult.refused,
+      reason: stagedResult.reason,
+      rounds: stagedResult.rounds,
+      codes: stagedRoundCodes,
+      repairs: stagedResult.repairs
+    })
+  );
+  assert(
+    'staged emergence audit includes both rounds and counts deletions against the original body',
+    stagedResult.repairs.some((item) => item.round === 1 && item.code === 'V9_QUANTIFIER') &&
+      stagedResult.repairs.some((item) => item.round === 2 && item.code === 'V6_ABSOLUTE_WORDING') &&
+      stagedResult.repairs.some((item) => item.round === 2 && item.code === 'V7_CLAIM_LEDGER') &&
+      stagedResult.originalBodyChars === stagedAssembled.body.length &&
+      stagedResult.deletedChars <= Math.floor(stagedAssembled.body.length * 0.2) &&
+      stagedResult.deletedSegments <= MAX_DELETED_SEGMENTS,
+    JSON.stringify({
+      repairs: stagedResult.repairs,
+      originalBodyChars: stagedResult.originalBodyChars,
+      assembledChars: stagedAssembled.body.length,
+      deletedChars: stagedResult.deletedChars,
+      deletedSegments: stagedResult.deletedSegments
+    })
+  );
+
+  const lossA =
+    'Google Ads runs an auction every time a search happens and that sentence is written long enough to take just over eleven percent of this body once the rest of the article is kept compact for the cumulative-loss check.';
+  const lossB =
+    'Conversion tracking lets you track whether clicks become calls after the visit and that sentence is also written long enough to take just over eleven percent on the second deterministic round.';
+  const lossTarget = Math.ceil(Math.max(lossA.length, lossB.length) / 0.12);
+  let lossPad = 'Keep the notes in one place and look at the phone log afterward.';
+  const lossShell = () =>
+    ['## How the auction works', '', lossPad, '', lossA, '', lossB, '', tokenArticle.body].join('\n');
+  while (lossShell().length < lossTarget) {
+    lossPad += ' Keep the notes in one place and look at the phone log afterward.';
+  }
+  const lossArticle = {
+    ...tokenArticle,
+    body: lossShell()
+  };
+  const lossOriginal = lossArticle.body.length;
+  assert(
+    'cumulative 11% + 11% sentences exceed 20% of the original body',
+    lossA.length / lossOriginal > 0.1 &&
+      lossB.length / lossOriginal > 0.1 &&
+      (lossA.length + lossB.length) / lossOriginal > 0.2,
+    JSON.stringify({ a: lossA.length, b: lossB.length, original: lossOriginal })
+  );
+  let lossCalls = 0;
+  const lossResult = runDeterministicRepairsToFixedPoint({
+    article: lossArticle,
+    ctx: adsCtx,
+    allowedClaims: adsAllowed,
+    catalog,
+    validate: (article) => {
+      lossCalls += 1;
+      const body = String(article.body || '');
+      if (lossCalls === 1 && body.includes(lossA)) {
+        return stampProblems([
+          {
+            code: 'V7_CLAIM_LEDGER',
+            message: `Factual platform assertion is not an approved claim token: “${lossA}” Replace it with an approved {{AC#}} token or delete it. Do not invent a new sourced sentence.`
+          }
+        ]);
+      }
+      if (body.includes(lossB)) {
+        return stampProblems([
+          {
+            code: 'V7_CLAIM_LEDGER',
+            message: `Factual platform assertion is not an approved claim token: “${lossB}” Replace it with an approved {{AC#}} token or delete it. Do not invent a new sourced sentence.`
+          }
+        ]);
+      }
+      return [];
+    }
+  });
+  assert(
+    'round 1 11% plus round 2 11% refuses the cumulative 20% budget',
+    lossResult.refused === true &&
+      /20%/.test(String(lossResult.reason || '')) &&
+      lossResult.originalBodyChars === lossOriginal &&
+      lossResult.deletedChars > Math.floor(lossOriginal * 0.2),
+    JSON.stringify({
+      refused: lossResult.refused,
+      reason: lossResult.reason,
+      originalBodyChars: lossResult.originalBodyChars,
+      deletedChars: lossResult.deletedChars,
+      calls: lossCalls
+    })
+  );
+
+  const sevenV7 = [
+    'Google Ads runs an auction every time a search happens.',
+    'Conversion tracking lets you track whether clicks become calls after the visit.',
+    'Google Search ads use bidding for a position instead of a reserved placement.',
+    'Google Ads determines whether a click is tracked after the auction finishes.',
+    'Google Ads recalculates Ad Rank to determine whether your ad is eligible to show.',
+    "Google doesn't accept payment to rank a site higher in the organic results.",
+    'Google Search ads let you track whether the auction produced a click.'
+  ];
+  const sevenArticle = insertBeforeCta(
+    {
+      ...tokenArticle,
+      body: `${tokenArticle.body.trim()}\n\n${OPERATIONAL_PADDING}\n\n${OPERATIONAL_PADDING}\n\n${OPERATIONAL_PADDING}\n\n${OPERATIONAL_PADDING}\n`
+    },
+    sevenV7.join('\n\n')
+  );
+  let sevenCalls = 0;
+  const sevenResult = runDeterministicRepairsToFixedPoint({
+    article: sevenArticle,
+    ctx: adsCtx,
+    allowedClaims: adsAllowed,
+    catalog,
+    validate: (article) => {
+      sevenCalls += 1;
+      const remaining = sevenV7.filter((sentence) => String(article.body || '').includes(sentence));
+      const slice = sevenCalls === 1 ? remaining.slice(0, 4) : remaining.slice(0, 3);
+      return stampProblems(
+        slice.map((sentence) => ({
+          code: 'V7_CLAIM_LEDGER',
+          message: `Factual platform assertion is not an approved claim token: “${sentence}” Replace it with an approved {{AC#}} token or delete it. Do not invent a new sourced sentence.`
+        }))
+      );
+    }
+  });
+  assert(
+    'round 1 four deletions plus round 2 three more refuses at 7 total segments',
+    sevenResult.refused === true &&
+      /7 Markdown segments/.test(String(sevenResult.reason || '')) &&
+      sevenResult.deletedSegments > MAX_DELETED_SEGMENTS,
+    JSON.stringify({
+      refused: sevenResult.refused,
+      reason: sevenResult.reason,
+      deletedSegments: sevenResult.deletedSegments,
+      calls: sevenCalls
+    })
+  );
+
+  let noProgressCalls = 0;
+  const noProgressResult = runDeterministicRepairsToFixedPoint({
+    article: tokenArticle,
+    ctx: adsCtx,
+    allowedClaims: adsAllowed,
+    catalog,
+    validate: () => {
+      noProgressCalls += 1;
+      return stampProblems([{ code: 'V10_OTHER', message: 'Contains an em dash.' }]);
+    }
+  });
+  assert(
+    'repeated identical validation state after a no-op repair refuses',
+    noProgressResult.refused === true &&
+      /no article change|identical validation state/i.test(String(noProgressResult.reason || '')),
+    JSON.stringify({
+      refused: noProgressResult.refused,
+      reason: noProgressResult.reason,
+      calls: noProgressCalls
+    })
+  );
+
+  let v4RoundCalls = 0;
+  const v4RoundArticle = insertBeforeCta(tokenArticle, 'Everyone assumes the listing fixes itself.');
+  const v4RoundResult = runDeterministicRepairsToFixedPoint({
+    article: v4RoundArticle,
+    ctx: adsCtx,
+    allowedClaims: adsAllowed,
+    catalog,
+    validate: () => {
+      v4RoundCalls += 1;
+      if (v4RoundCalls === 1) {
+        return stampProblems([
+          {
+            code: 'V9_QUANTIFIER',
+            message: 'Unsupported quantifier in body: “everyone”.'
+          }
+        ]);
+      }
+      return stampProblems([
+        {
+          code: 'V4_MISSING_SOURCE_LINK',
+          message:
+            'Approved claim AC1 is missing its reader-facing source link: “Ad Rank is recalculated.” Code should insert a markdown link to https://support.google.com/google-ads/answer/1722122.'
+        }
+      ]);
+    }
+  });
+  assert(
+    'V4 appearing in round 2 hard fails immediately',
+    v4RoundResult.refused === true &&
+      /V4_MISSING_SOURCE_LINK/.test(String(v4RoundResult.reason || '')) &&
+      v4RoundResult.repairs.some((item) => item.round === 1 && item.code === 'V9_QUANTIFIER'),
+    JSON.stringify({
+      refused: v4RoundResult.refused,
+      reason: v4RoundResult.reason,
+      repairs: v4RoundResult.repairs,
+      calls: v4RoundCalls
+    })
   );
 
   if (failed) {

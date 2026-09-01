@@ -2,10 +2,12 @@
 
 const { toPlainDisplayText, findAllowedClaim } = require('./allowed-claims');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
-const { assembleCta } = require('./assemble');
+const { assembleCta, assembleArticle, refreshAssemblyState } = require('./assemble');
+const { validateGeneratedArticle } = require('./validate');
 
 const MAX_DELETED_SEGMENTS = 6;
 const MAX_DELETED_CHAR_RATIO = 0.2;
+const MAX_DETERMINISTIC_ROUNDS = 8;
 const EM_DASH = '\u2014';
 const CLAIM_TOKEN_RE = /\{\{\s*AC\d+\s*\}\}/;
 const APPLY_ORDER = [
@@ -79,6 +81,33 @@ function findSentenceInBody(body, test) {
     if (test(sentence)) return sentence;
   }
   return null;
+}
+
+function isHostPeriod(text, index) {
+  const prev = text[index - 1] || '';
+  const next = text[index + 1] || '';
+  return /[A-Za-z0-9]/.test(prev) && /[A-Za-z0-9]/.test(next);
+}
+
+function isSentenceBoundary(text, index) {
+  const ch = text[index];
+  if (ch !== '.' && ch !== '!' && ch !== '?') return false;
+  if (ch === '.' && isHostPeriod(text, index)) return false;
+  return true;
+}
+
+function innerQuantifierClause(segment, hit) {
+  const text = String(segment || '');
+  const token = String(hit || '').trim();
+  if (!token) return null;
+  const match = text.match(new RegExp(`\\b${escapeRegExp(token)}\\b`, 'i'));
+  if (!match) return null;
+  const start = match.index;
+  let end = start + match[0].length;
+  while (end < text.length && text[end] !== '\n' && !isSentenceBoundary(text, end)) end += 1;
+  if (end < text.length && isSentenceBoundary(text, end)) end += 1;
+  const clause = text.slice(start, end).trim();
+  return clause || null;
 }
 
 function findShortestSegmentContaining(body, quoted) {
@@ -283,7 +312,8 @@ function repairForProblem(article, problem, options) {
       );
     });
     if (!sentence) return refuse(message);
-    return deletionRepair('v9_body', problem, sentence, 'unsupported quantifier');
+    const clause = innerQuantifierClause(sentence, hit);
+    return deletionRepair('v9_body', problem, clause || sentence, 'unsupported quantifier');
   }
 
   if (code === 'V1_UNAPPROVED_FIRST_PARTY_NUMBER') {
@@ -453,8 +483,8 @@ function applySafetyFallback(article, problems, options) {
       refused: true,
       reason: compiled.reason,
       needsAssemble: false,
-      deletedSegments: 0,
-      deletedChars: 0
+      deletedSegments: (options && options.priorDeletedSegments) || 0,
+      deletedChars: (options && options.priorDeletedChars) || 0
     };
   }
   if (!compiled.repairs.length) {
@@ -464,12 +494,17 @@ function applySafetyFallback(article, problems, options) {
       repairs: [],
       refused: false,
       needsAssemble: false,
-      deletedSegments: 0,
-      deletedChars: 0
+      deletedSegments: (options && options.priorDeletedSegments) || 0,
+      deletedChars: (options && options.priorDeletedChars) || 0
     };
   }
 
-  const originalBody = String((article && article.body) || '');
+  const originalBodyChars =
+    options && Number.isFinite(options.originalBodyChars)
+      ? options.originalBodyChars
+      : String((article && article.body) || '').length;
+  const priorDeletedSegments = (options && options.priorDeletedSegments) || 0;
+  const priorDeletedChars = (options && options.priorDeletedChars) || 0;
   let next = { ...article };
   const applied = [];
   const audit = [];
@@ -559,29 +594,31 @@ function applySafetyFallback(article, problems, options) {
     }
   }
 
-  if (deletedSegments > MAX_DELETED_SEGMENTS) {
+  const totalDeletedSegments = priorDeletedSegments + deletedSegments;
+  const totalDeletedChars = priorDeletedChars + deletedChars;
+  if (totalDeletedSegments > MAX_DELETED_SEGMENTS) {
     return {
       article,
       applied: [],
       repairs: [],
       refused: true,
-      reason: `Deleted ${deletedSegments} Markdown segments; max ${MAX_DELETED_SEGMENTS}`,
+      reason: `Deleted ${totalDeletedSegments} Markdown segments; max ${MAX_DELETED_SEGMENTS}`,
       needsAssemble: false,
-      deletedSegments,
-      deletedChars
+      deletedSegments: totalDeletedSegments,
+      deletedChars: totalDeletedChars
     };
   }
-  const budget = Math.floor(originalBody.length * MAX_DELETED_CHAR_RATIO);
-  if (originalBody.length && deletedChars > budget) {
+  const budget = Math.floor(originalBodyChars * MAX_DELETED_CHAR_RATIO);
+  if (originalBodyChars && totalDeletedChars > budget) {
     return {
       article,
       applied: [],
       repairs: [],
       refused: true,
-      reason: `Deleted ${deletedChars} body characters (${Math.round((deletedChars / originalBody.length) * 100)}%); max 20%`,
+      reason: `Deleted ${totalDeletedChars} body characters (${Math.round((totalDeletedChars / originalBodyChars) * 100)}%); max 20%`,
       needsAssemble: false,
-      deletedSegments,
-      deletedChars
+      deletedSegments: totalDeletedSegments,
+      deletedChars: totalDeletedChars
     };
   }
   if (!structurallyComplete(next)) {
@@ -592,8 +629,8 @@ function applySafetyFallback(article, problems, options) {
       refused: true,
       reason: 'Repair left the article without required structure',
       needsAssemble: false,
-      deletedSegments,
-      deletedChars
+      deletedSegments: totalDeletedSegments,
+      deletedChars: totalDeletedChars
     };
   }
 
@@ -603,16 +640,175 @@ function applySafetyFallback(article, problems, options) {
     repairs: audit,
     refused: false,
     needsAssemble: needsAssemble || CLAIM_TOKEN_RE.test(String(next.body || '')),
-    deletedSegments,
-    deletedChars
+    deletedSegments: totalDeletedSegments,
+    deletedChars: totalDeletedChars
   };
+}
+
+function fingerprintProblems(problems) {
+  return (problems || [])
+    .map((item) => `${item && item.code ? item.code : ''}\t${item && item.message ? item.message : ''}`)
+    .sort()
+    .join('\n');
+}
+
+function snapshotArticle(article) {
+  return JSON.stringify({
+    title: article && article.title,
+    meta_title: article && article.meta_title,
+    meta_description: article && article.meta_description,
+    excerpt: article && article.excerpt,
+    body: article && article.body,
+    cta: article && article.cta,
+    claims: article && article.claims
+  });
+}
+
+function refuseFixedPoint(inputArticle, audit, reason, extras) {
+  return {
+    article: inputArticle,
+    applied: [],
+    repairs: audit,
+    refused: true,
+    reason,
+    needsAssemble: false,
+    rounds: extras && extras.rounds ? extras.rounds : 0,
+    deletedSegments: extras && extras.deletedSegments ? extras.deletedSegments : 0,
+    deletedChars: extras && extras.deletedChars ? extras.deletedChars : 0,
+    originalBodyChars: extras && extras.originalBodyChars ? extras.originalBodyChars : 0,
+    problems: extras && extras.problems ? extras.problems : []
+  };
+}
+
+function runDeterministicRepairsToFixedPoint(input) {
+  const article0 = input && input.article;
+  const ctx = (input && input.ctx) || {};
+  const allowedClaims = (input && input.allowedClaims) || [];
+  const catalog = input && input.catalog;
+  const validate = input && input.validate ? input.validate : validateGeneratedArticle;
+  const originalBodyChars = String((article0 && article0.body) || '').length;
+  let article = article0;
+  let totalDeletedSegments = 0;
+  let totalDeletedChars = 0;
+  const audit = [];
+  const seenFingerprints = new Set();
+  let problems = validate(article, ctx);
+
+  if (!problems.length) {
+    return {
+      article,
+      applied: [],
+      repairs: [],
+      refused: false,
+      reason: null,
+      needsAssemble: false,
+      rounds: 0,
+      deletedSegments: 0,
+      deletedChars: 0,
+      originalBodyChars,
+      problems
+    };
+  }
+
+  for (let round = 1; round <= MAX_DETERMINISTIC_ROUNDS; round += 1) {
+    const fingerprint = fingerprintProblems(problems);
+    if (seenFingerprints.has(fingerprint)) {
+      return refuseFixedPoint(article0, audit, 'Repeated identical validation state after a repair', {
+        rounds: round,
+        deletedSegments: totalDeletedSegments,
+        deletedChars: totalDeletedChars,
+        originalBodyChars,
+        problems
+      });
+    }
+    seenFingerprints.add(fingerprint);
+
+    const before = snapshotArticle(article);
+    const fallback = applySafetyFallback(article, problems, {
+      allowedClaims,
+      catalog,
+      originalBodyChars,
+      priorDeletedSegments: totalDeletedSegments,
+      priorDeletedChars: totalDeletedChars
+    });
+    if (fallback.refused) {
+      return refuseFixedPoint(article0, audit, fallback.reason, {
+        rounds: round,
+        deletedSegments: fallback.deletedSegments,
+        deletedChars: fallback.deletedChars,
+        originalBodyChars,
+        problems
+      });
+    }
+    if (!fallback.applied.length && !fallback.repairs.length) {
+      return refuseFixedPoint(article0, audit, 'No deterministic repair produced for current problems', {
+        rounds: round,
+        deletedSegments: totalDeletedSegments,
+        deletedChars: totalDeletedChars,
+        originalBodyChars,
+        problems
+      });
+    }
+    if (snapshotArticle(fallback.article) === before) {
+      return refuseFixedPoint(article0, audit, 'Repair round made no article change', {
+        rounds: round,
+        deletedSegments: totalDeletedSegments,
+        deletedChars: totalDeletedChars,
+        originalBodyChars,
+        problems
+      });
+    }
+
+    article = fallback.article;
+    totalDeletedSegments = fallback.deletedSegments;
+    totalDeletedChars = fallback.deletedChars;
+    for (const item of fallback.repairs || []) {
+      audit.push({ round, code: item.code, action: item.action, reason: item.reason });
+    }
+    if (fallback.needsAssemble) {
+      article = assembleArticle(article, allowedClaims);
+    }
+    article = refreshAssemblyState(article, allowedClaims);
+    problems = validate(article, ctx);
+    if (!problems.length) {
+      return {
+        article,
+        applied: fallback.applied,
+        repairs: audit,
+        refused: false,
+        reason: null,
+        needsAssemble: false,
+        rounds: round,
+        deletedSegments: totalDeletedSegments,
+        deletedChars: totalDeletedChars,
+        originalBodyChars,
+        problems
+      };
+    }
+  }
+
+  return refuseFixedPoint(
+    article0,
+    audit,
+    `Exceeded ${MAX_DETERMINISTIC_ROUNDS} deterministic repair rounds`,
+    {
+      rounds: MAX_DETERMINISTIC_ROUNDS,
+      deletedSegments: totalDeletedSegments,
+      deletedChars: totalDeletedChars,
+      originalBodyChars,
+      problems
+    }
+  );
 }
 
 module.exports = {
   MAX_DELETED_SEGMENTS,
   MAX_DELETED_CHAR_RATIO,
+  MAX_DETERMINISTIC_ROUNDS,
   collectSafetyRepairs,
   applySafetyFallback,
+  runDeterministicRepairsToFixedPoint,
+  fingerprintProblems,
   dedupeInternalLink,
   compileRepairs
 };
