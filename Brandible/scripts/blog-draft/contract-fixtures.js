@@ -19,7 +19,7 @@ const {
   stampProblems,
   splitSentences
 } = require('./validate');
-const { applySafetyFallback, collectSafetyRepairs } = require('./safety-fallback');
+const { applySafetyFallback, collectSafetyRepairs, dedupeInternalLink } = require('./safety-fallback');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const {
   GENERATION_TOOL_NAME,
@@ -396,10 +396,10 @@ async function run() {
 
   const emptyTopic = { title: 'Why local businesses struggle to get found', service: 'Digital Marketing', type: 'evergreen' };
 
-  function ctx(sourcePack, allowedClaims) {
+  function ctx(sourcePack, allowedClaims, catalogOverride) {
     return {
       facts,
-      catalog,
+      catalog: catalogOverride || catalog,
       sourcePack,
       topic: emptyTopic,
       allowlist,
@@ -2057,6 +2057,117 @@ async function run() {
     'latest-run final validation has zero problems',
     latestFinal.length === 0,
     latestFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const webDesignCatalog = {
+    posts: [],
+    services: [
+      { title: 'Web Design', url: '/services/web-design/' },
+      { title: 'Digital Marketing', url: '/services/digital-marketing/' }
+    ],
+    core: []
+  };
+  const latestTripleCtx = ctx(latestPack, latestClaims, webDesignCatalog);
+  const latestTripleDraft = neverDraft(
+    [
+      'That depends on what the site actually has.',
+      '',
+      '### No Reviews, or Reviews That Never Get a Response',
+      '',
+      '{{AC5}}',
+      '',
+      'Everyone assumes the listing fixes itself.',
+      '',
+      "[There's no way to request or pay for a better local ranking on Google.",
+      '',
+      'Start with [website design](/services/web-design/) if the site is the leak.',
+      '',
+      'Brandible also does [digital marketing](/services/digital-marketing/) when search is the gap.',
+      '',
+      'A [web design service](/services/web-design/) is only useful after the listing is honest.',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  );
+  const latestTripleAssembled = assembleArticle(latestTripleDraft, latestClaims);
+  const latestTripleProblems = validateGeneratedArticle(latestTripleAssembled, latestTripleCtx);
+  const latestTripleFallback = applySafetyFallback(latestTripleAssembled, latestTripleProblems);
+  let latestTripleArticle = latestTripleAssembled;
+  if (latestTripleFallback.applied.length && !latestTripleFallback.refused) {
+    latestTripleArticle = latestTripleFallback.article;
+    if (latestTripleFallback.needsAssemble) {
+      latestTripleArticle = assembleArticle(latestTripleArticle, latestClaims);
+    }
+    latestTripleArticle = refreshAssemblyState(latestTripleArticle, latestClaims);
+  }
+  const latestTripleFinal = validateGeneratedArticle(latestTripleArticle, latestTripleCtx);
+  const latestTripleHrefs = [...String(latestTripleArticle.body).matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(
+    (item) => item[1]
+  );
+  const webDesignHrefs = latestTripleHrefs.filter((href) => href === '/services/web-design/');
+  assert(
+    'latest-run triple fallback applies v9, v7, and duplicate_internal_link',
+    !latestTripleFallback.refused &&
+      latestTripleFallback.applied.includes('v9_body') &&
+      latestTripleFallback.applied.includes('v7_body') &&
+      latestTripleFallback.applied.includes('duplicate_internal_link') &&
+      latestTripleFallback.applied.length === 3,
+    JSON.stringify({
+      applied: latestTripleFallback.applied,
+      problems: latestTripleProblems.map((item) => `${item.id}: ${item.message}`)
+    })
+  );
+  assert(
+    'latest-run first /services/web-design/ link remains and second becomes plain text',
+    latestTripleArticle.body.includes('[website design](/services/web-design/)') &&
+      !latestTripleArticle.body.includes('[web design service](/services/web-design/)') &&
+      /A web design service is only useful after the listing is honest/.test(latestTripleArticle.body),
+    latestTripleArticle.body
+  );
+  assert(
+    'latest-run exactly one /services/web-design/ href remains and other internals are unchanged',
+    webDesignHrefs.length === 1 &&
+      latestTripleHrefs.filter((href) => href === '/services/digital-marketing/').length === 1 &&
+      latestTripleArticle.body.includes('[digital marketing](/services/digital-marketing/)'),
+    JSON.stringify({ hrefs: latestTripleHrefs, body: latestTripleArticle.body })
+  );
+  assert(
+    'latest-run triple final validation has zero problems',
+    latestTripleFinal.length === 0 &&
+      !/\beveryone\b/i.test(latestTripleArticle.body) &&
+      !/There's no way to request or pay for a better local ranking on Google/.test(latestTripleArticle.body) &&
+      latestTripleArticle.body.includes(ac5Cited),
+    latestTripleFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const externalRepeatBody = [
+    `See [Ad Rank](${adsClaim.url}) once.`,
+    '',
+    `See [Ad Rank again](${adsClaim.url}) twice.`,
+    '',
+    'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+  ].join('\n');
+  const externalRepeatArticle = {
+    ...tokenArticle,
+    body: `${tokenArticle.body.trim()}\n\n${externalRepeatBody}\n`
+  };
+  const externalRepeatProblems = [
+    { code: 'V10_OTHER', message: `Internal link repeated: ${adsClaim.url}` },
+    { code: 'V10_OTHER', message: 'Internal link repeated: https://example.com/repeat/' }
+  ];
+  const externalRepeatRepairs = collectSafetyRepairs(externalRepeatArticle, externalRepeatProblems);
+  const externalRepeatDeduped = dedupeInternalLink(externalRepeatArticle.body, adsClaim.url);
+  assert(
+    'repeated external URL is not collected as duplicate_internal_link',
+    externalRepeatRepairs.every((item) => item.type !== 'duplicate_internal_link'),
+    JSON.stringify(externalRepeatRepairs)
+  );
+  assert(
+    'repeated external URL is not modified by duplicate_internal_link repair',
+    externalRepeatDeduped === externalRepeatArticle.body &&
+      (externalRepeatArticle.body.match(new RegExp(`\\]\\(${adsClaim.url.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\)`, 'g')) || [])
+        .length >= 2,
+    externalRepeatDeduped
   );
 
   if (failed) {

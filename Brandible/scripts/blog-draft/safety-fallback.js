@@ -82,9 +82,20 @@ function replaceEmDashes(value) {
   return String(value || '').split(EM_DASH).join('-');
 }
 
+function dedupeInternalLink(body, targetHref) {
+  let seen = 0;
+  return String(body || '').replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, (full, label, href) => {
+    if (href !== targetHref) return full;
+    seen += 1;
+    if (seen === 1) return full;
+    return label;
+  });
+}
+
 function collectSafetyRepairs(article, problems) {
   const repairs = [];
   let emDashQueued = false;
+  const seenInternalHrefs = new Set();
   for (const problem of problems || []) {
     const code = problem && problem.code;
     const message = String((problem && problem.message) || '');
@@ -92,6 +103,17 @@ function collectSafetyRepairs(article, problems) {
       if (!emDashQueued) {
         repairs.push({ type: 'em_dash' });
         emDashQueued = true;
+      }
+      continue;
+    }
+    if (code === 'V10_OTHER') {
+      const repeated = message.match(/Internal link repeated:\s+(\/\S+)/);
+      if (repeated) {
+        const href = repeated[1];
+        if (!seenInternalHrefs.has(href)) {
+          seenInternalHrefs.add(href);
+          repairs.push({ type: 'duplicate_internal_link', href });
+        }
       }
       continue;
     }
@@ -157,6 +179,14 @@ function applySafetyFallback(article, problems) {
     if (repair.type === 'v9_body' || repair.type === 'v7_body') {
       next = { ...next, body: deleteSentenceFromBody(next.body, repair.sentence) };
       applied.push(repair.type);
+      continue;
+    }
+    if (repair.type === 'duplicate_internal_link') {
+      next = {
+        ...next,
+        body: dedupeInternalLink(next.body, repair.href)
+      };
+      applied.push('duplicate_internal_link');
     }
   }
   return {
@@ -170,5 +200,6 @@ function applySafetyFallback(article, problems) {
 module.exports = {
   MAX_SAFETY_REPAIRS,
   collectSafetyRepairs,
-  applySafetyFallback
+  applySafetyFallback,
+  dedupeInternalLink
 };
