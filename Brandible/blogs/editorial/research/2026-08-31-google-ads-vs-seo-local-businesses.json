@@ -1,0 +1,145 @@
+{
+  "post": "2026-08-31-google-ads-vs-seo-local-businesses.md",
+  "topic_id": "05",
+  "generated_at": "2026-08-31T22:28:31.377Z",
+  "facts_last_verified": "2026-08-31",
+  "research": {
+    "needed": true,
+    "skipped_reason": null,
+    "queries": [
+      "Google Ads auction Ad Rank how ads are selected site:support.google.com OR site:ads.google.com",
+      "Google Search Central how Google Search works ranking organic results",
+      "Google Ads campaign types conversion tracking 2024 site:support.google.com"
+    ],
+    "retrieved_at": "2026-08-31T22:26:57.458Z"
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://support.google.com/google-ads/answer/6366577?hl=en",
+      "title": "How the Google Ads auction works",
+      "publisher": "Google Ads Help",
+      "excerpt": "Google Ads determines which ads should show with a lightning-fast ad auction, that takes place every time someone searches on Google or visits a site that shows ads. When someone searches on Google, we run different auctions for each ad location. There are 6 main factors in the ad auction that determine which ads appear, and in what order: Your bid: When you set your bid, you're telling Google Ads the maximum amount you're willing to pay for a click on your ad. How much you actually end up paying is often less, and you can change your bid at any time. The quality of your ads and landing page… So even if your competition has higher bids, you can still win a higher position at a lower price by using highly relevant keywords, ads, and assets. Together, these 6 factors determine when and if your ad will appear to potential customers.",
+      "why_selected": "Directly explains the per-auction, pay-to-play mechanics of Google Ads Search campaigns — the core reason ads stop the moment spend stops — and lists all 6 Ad Rank factors including bid, quality score, ad assets, and context (location, device, time). Essential for the Ads vs SEO comparison on how ads appear and what controls placement.",
+      "product": "google_ads",
+      "features": [
+        "ad_rank",
+        "auction"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S2",
+      "url": "https://support.google.com/google-ads/answer/1722122?hl=en",
+      "title": "About Ad Rank",
+      "publisher": "Google Ads Help",
+      "excerpt": "Ad Rank is a set of values that are used to determine whether your ads are eligible to show and if eligible, where on the page your ads are shown (if at all) relative to other advertisers' ads. In each auction, your Ad Rank is calculated first to determine whether your ad is eligible to show, and a second time to determine where your ad is ranked relative to other eligible advertisers' ads. These Ad Rank values are calculated based on several factors, including your competition, the context of the person's search, and your ad quality at that moment. Your Ad Rank is recalculated each time your ad is eligible to appear and competes in an auction, so your ad position can fluctuate each time depending on your competition, the context of the person's search, and your quality at that moment.",
+      "why_selected": "Confirms that Ad Rank is recalculated fresh at every single auction — ad position is never permanent or 'owned' — directly supporting the contrast with SEO rankings that persist independently of ongoing spend. Pairs with S1 to give a complete picture of paid search visibility mechanics.",
+      "product": "google_ads",
+      "features": [
+        "ad_rank",
+        "auction"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S3",
+      "url": "https://developers.google.com/search/docs/fundamentals/how-search-works",
+      "title": "In-Depth Guide to How Google Search Works",
+      "publisher": "Google Search Central (developers.google.com)",
+      "excerpt": "Google Search is a fully-automated search engine that uses software known as web crawlers that explore the web regularly to find pages to add to our index. In fact, the vast majority of pages listed in our results aren't manually submitted for inclusion, but are found and added automatically when our web crawlers explore the web. Before we get into the details of how Search works, it's important to note that Google doesn't accept payment to crawl a site more frequently, or rank it higher. If anyone tells you otherwise, they're wrong. Google Search works in three stages: Crawling, Indexing, and Serving search results.",
+      "why_selected": "Authoritative Google Search Central statement that organic ranking cannot be purchased — Google explicitly says 'Google doesn't accept payment to crawl a site more frequently, or rank it higher.' This is the foundational proof point for the SEO side of the Ads vs SEO comparison: organic rankings, once earned, persist without per-click spend.",
+      "product": "google_search",
+      "features": [
+        "organic_search",
+        "ranking"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S4",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "title": "SEO Starter Guide: The Basics",
+      "publisher": "Google Search Central (developers.google.com)",
+      "excerpt": "SEO—short for search engine optimization—is about helping search engines understand your content, and helping users find your site and make a decision about whether they should visit your site through a search engine. There are no secrets here that'll automatically rank your site first in Google (sorry!). Every change you make will take some time to be reflected on Google's end. Some changes might take effect in a few hours, others could take several months. In general, you likely want to wait a few weeks to assess whether your work had beneficial effects in Google Search results. Creating content that people find compelling and useful will likely influence your website's presence in search results more than any of the other suggestions in this guide.",
+      "why_selected": "Official Google source confirming that SEO results are slow (weeks to months) and are driven by content quality and relevance — not payment. Directly supports the blog's planned contrast: ads give immediate visibility while spend lasts; SEO builds compounding, unpaid presence over time. Also supports the 'fix the site first' sequencing advice.",
+      "product": "google_search",
+      "features": [
+        "organic_search",
+        "ranking"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S5",
+      "url": "https://support.google.com/google-ads/answer/1722054?hl=en",
+      "title": "Different ways to track conversions",
+      "publisher": "Google Ads Help",
+      "excerpt": "When you run ads with Google Ads, you may want to know whether clicks on your ad led customers to take certain actions such as making a purchase on your website, calling your business, or downloading your app. Track multiple types of conversions from the list above by creating a separate conversion action for each type. For example, set up one conversion action to track purchases on your website and another to track calls from your ads. If you want to track: Website purchases, newsletter signups, button clicks, or other website actions → Set up your web conversions. Phone calls → Set up your phone call conversions. Offline conversions, such as store visits or phone calls after your ad ran → Set up your offline conversions.",
+      "why_selected": "Current official Google Ads conversion tracking taxonomy showing that local-business-relevant conversions — phone calls, website actions, store visits, and offline conversions — are all trackable. Directly supports the blog's recommendation to run ads with tracking before scaling spend, and the statement that ads are measurable in a way that raw organic traffic is not.",
+      "product": "google_ads",
+      "features": [
+        "conversion_tracking"
+      ],
+      "feature_status": "current"
+    }
+  ],
+  "claims": [
+    {
+      "claim": "Google runs an auction each time someone searches, evaluating factors that include bid and the quality of the ad and landing page.",
+      "kind": "sourced_fact",
+      "source_id": "S1"
+    },
+    {
+      "claim": "Ad Rank determines whether an ad is eligible to show and where it appears relative to other advertisers, and is recalculated each time the ad competes in an auction, so position can fluctuate depending on competition, the context of the search, and ad quality at that moment.",
+      "kind": "sourced_fact",
+      "source_id": "S2"
+    },
+    {
+      "claim": "Google Ads lets you track whether clicks led to actions such as website purchases, phone calls, or other goals.",
+      "kind": "sourced_fact",
+      "source_id": "S5"
+    },
+    {
+      "claim": "Google doesn't accept payment to rank a site higher or crawl it more frequently.",
+      "kind": "sourced_fact",
+      "source_id": "S3"
+    },
+    {
+      "claim": "Changes to a site may take a few hours to reflect in Google's results, or several months.",
+      "kind": "sourced_fact",
+      "source_id": "S4"
+    },
+    {
+      "claim": "Brandible charges a setup fee of $600 and manages ads at 15% of ad spend, with ad spend billed directly to the platform, and recommends a minimum spend of around $400 to $500 per month.",
+      "kind": "first_party",
+      "source_id": null
+    },
+    {
+      "claim": "Brandible's digital marketing engagements typically run $750 to $3,500 or more per month depending on what's included.",
+      "kind": "first_party",
+      "source_id": null
+    },
+    {
+      "claim": "Brandible's published results for the PEAC Learning Google Ads work show cost-per-click dropping from $4.02 to $0.19 between Q2 2023 and Q2 2025, impressions going from 1,963 to 72,309, and clicks from 74 to 968.",
+      "kind": "first_party",
+      "source_id": null
+    },
+    {
+      "claim": "Ads running to a slow site with no clear call to action will underperform, and SEO on a site that hasn't given Google anything useful to index will stall.",
+      "kind": "opinion",
+      "source_id": null
+    },
+    {
+      "claim": "Getting the site sorted first benefits every other channel.",
+      "kind": "opinion",
+      "source_id": null
+    },
+    {
+      "claim": "Ads and SEO solve different timing problems and are not competing choices.",
+      "kind": "opinion",
+      "source_id": null
+    }
+  ],
+  "internal_links_catalog_note": "Internal URLs in the article must come from the approved catalog of live posts, services, and core pages."
+}

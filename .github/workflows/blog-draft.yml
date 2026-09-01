@@ -1,0 +1,77 @@
+name: Brandible blog draft
+
+on:
+  # Enable after the first successful workflow_dispatch review:
+  # schedule:
+  #   - cron: '0 14 * * 2'
+  workflow_dispatch:
+    inputs:
+      topic_id:
+        description: 'Optional queue ID (e.g. 02). Must already be eligible.'
+        required: false
+        type: string
+
+concurrency:
+  group: blog-draft
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate draft package
+        id: generate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BLOG_DRAFT_PROVIDER: ${{ vars.BLOG_DRAFT_PROVIDER || 'anthropic' }}
+          BLOG_DRAFT_MODEL: ${{ vars.BLOG_DRAFT_MODEL || 'claude-sonnet-4-5' }}
+          BLOG_AUTOMATION_ENABLED: ${{ vars.BLOG_AUTOMATION_ENABLED || 'true' }}
+          BLOG_FACTS_MAX_AGE_DAYS: ${{ vars.BLOG_FACTS_MAX_AGE_DAYS || '90' }}
+          BLOG_IMAGE_MODEL: ${{ vars.BLOG_IMAGE_MODEL }}
+          BLOG_IMAGE_BRIEF_MODEL: ${{ vars.BLOG_IMAGE_BRIEF_MODEL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOPIC="${{ github.event.inputs.topic_id }}"
+          ARGS=(--out-dir "$RUNNER_TEMP/blog-automation")
+          if [ -n "${TOPIC}" ]; then
+            ARGS+=(--topic "${TOPIC}")
+          fi
+          node Brandible/scripts/blog-automation.js "${ARGS[@]}"
+
+      - name: Open draft pull request
+        if: ${{ steps.generate.outputs.skipped != 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/blog-automation"
+          BRANCH="$(node -e "console.log(require(process.argv[1]).branch)" "$OUT/result.json")"
+          TITLE="$(node -e "console.log(require(process.argv[1]).pr_title)" "$OUT/result.json")"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          node -e "for (const file of require(process.argv[1]).paths) console.log(file)" "$OUT/result.json" | while IFS= read -r file; do
+            git add -- "$file"
+          done
+          git commit -m "$TITLE" -m "Prepared by Phase 4 automation. Remains draft: true. Not published."
+          git push -u origin "HEAD:refs/heads/${BRANCH}"
+          gh pr create --draft --title "$TITLE" --body-file "$OUT/pr-body.md"

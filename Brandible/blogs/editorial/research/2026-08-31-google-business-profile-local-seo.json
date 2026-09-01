@@ -1,0 +1,92 @@
+{
+  "post": "2026-08-31-google-business-profile-local-seo.md",
+  "topic_id": "03",
+  "generated_at": "2026-08-31T21:33:42.096Z",
+  "facts_last_verified": "2026-08-31",
+  "research": {
+    "needed": true,
+    "skipped_reason": null,
+    "queries": [
+      "Google Business Profile optimization ranking factors",
+      "Google Maps local search ranking how Google determines results"
+    ],
+    "retrieved_at": "2026-08-31T21:32:25.141Z"
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "title": "Tips to improve your local ranking on Google",
+      "publisher": "Google Business Profile Help (support.google.com)",
+      "excerpt": "Local results are mainly based on relevance, distance, and popularity. Together, these factors help Google find the best match for customers' searches. Businesses with complete and accurate info are more likely to show up in local search results.",
+      "why_selected": "This is the single most authoritative Google-official page on GBP local ranking. It defines the three ranking pillars (relevance, distance, prominence), names every optimisation lever a business owner controls (verification, complete info, hours, category, photos, reviews), and explicitly states no ranking can be bought. Direct source for the blog's core argument and action list."
+    },
+    {
+      "id": "S2",
+      "url": "https://support.google.com/business/answer/9918094?hl=en",
+      "title": "Understand your Business Profile performance & insights",
+      "publisher": "Google Business Profile Help (support.google.com)",
+      "excerpt": "Performance data gives you insight into how people discover your Business Profile. It highlights how customers use Search and Maps to find your profile, and what actions they take once they do. Business Profile owners and managers can check the number of views, clicks, and other customer interactions with your profile on Search and Maps.",
+      "why_selected": "Official Google source detailing every measurable GBP interaction metric: views, direction requests, calls, website clicks, messages, bookings, and product views. Provides the concrete proof-of-work data points that show the GBP is actively driving customer actions—supporting the blog's central claim that the profile 'does more work than the website.'"
+    },
+    {
+      "id": "S3",
+      "url": "https://support.google.com/maps/answer/3092445?hl=en&co=GENIE.Platform%3DDesktop",
+      "title": "Search locations on Google Maps – Computer",
+      "publisher": "Google Maps Help (support.google.com)",
+      "excerpt": "Local results appear for people who search for businesses and places near their location. They're shown in various places across Maps and Search. Several factors, primarily relevance, distance, and prominence, influences the local results.",
+      "why_selected": "Google Maps Help corroborates the ranking-factor triad from the Maps product side, and confirms that payment does not influence organic Maps results ('Paid content in Google Maps is labeled'). Useful for citing how the Maps surface specifically works, distinct from the Search/GBP help page."
+    },
+    {
+      "id": "S4",
+      "url": "https://support.google.com/localservices/answer/7527305?hl=en",
+      "title": "About ad rankings – Local Services",
+      "publisher": "Google Local Services Help (support.google.com)",
+      "excerpt": "Profile quality: Your rating, number of reviews, average response time, use of high-quality images, the verification checks you have completed, and any other information about your business that may influence user preferences factor into profile quality. Higher quality profiles, including those with images, may rank higher and may also pay lower costs per lead.",
+      "why_selected": "Official Google source confirming that profile quality signals—reviews, response time, high-quality images, verification—directly affect ranking and cost-per-lead in Local Services Ads, the paid layer above the organic local pack. Adds nuance for a section on why GBP completeness matters beyond organic: it lowers ad costs too."
+    }
+  ],
+  "claims": [
+    {
+      "claim": "Businesses with complete and accurate information are more likely to show up in local search results.",
+      "kind": "sourced_fact",
+      "source_id": "S1"
+    },
+    {
+      "claim": "Google Business Profile performance data tracks views, clicks, calls, and direction requests.",
+      "kind": "sourced_fact",
+      "source_id": "S2"
+    },
+    {
+      "claim": "Higher-quality images on a Google Business Profile can influence profile quality and may affect ranking.",
+      "kind": "sourced_fact",
+      "source_id": "S4"
+    },
+    {
+      "claim": "Local results on Google are based on relevance, distance, and prominence.",
+      "kind": "sourced_fact",
+      "source_id": "S1"
+    },
+    {
+      "claim": "A local search showing three map pack results where profile completeness influences which business gets called is a realistic scenario for local service businesses.",
+      "kind": "hypothetical",
+      "source_id": null
+    },
+    {
+      "claim": "GBP work is part of Brandible's digital marketing service.",
+      "kind": "first_party",
+      "source_id": null
+    },
+    {
+      "claim": "Responding to reviews is a signal of engagement that can distinguish an active business from one that ignores feedback.",
+      "kind": "opinion",
+      "source_id": null
+    },
+    {
+      "claim": "Seeding your own Q&A on a Google Business Profile is a practical way to answer common customer questions before they call.",
+      "kind": "opinion",
+      "source_id": null
+    }
+  ],
+  "internal_links_catalog_note": "Internal URLs in the article must come from the approved catalog of live posts, services, and core pages."
+}

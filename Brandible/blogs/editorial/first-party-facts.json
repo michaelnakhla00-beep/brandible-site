@@ -1,0 +1,128 @@
+{
+  "last_verified": "2026-08-31",
+  "company": {
+    "name": "Brandible",
+    "legal_name": "Brandible Marketing Group",
+    "location": "Hunterdon County and Central New Jersey",
+    "positioning": "Make it easy to choose you.",
+    "contracts": "No long contracts. Month-to-month agreements with 30 days’ notice.",
+    "author_default": "Brandible Team"
+  },
+  "amounts": [400, 500, 600, 750, 1500, 2000, 3500, 5000, 10000],
+  "services": {
+    "web-design": {
+      "name": "Web Design & Development",
+      "url": "/services/web-design/",
+      "cms_category": "Web Design",
+      "price_display": "$2,000–$10,000+",
+      "price_note": "Brandible typical range for custom sites, based on scope. Not a national average.",
+      "timeline": "Typically 2–4 weeks from start to launch. Landing pages can be faster. Stores or complex sites may take longer. Waiting on copy, photos, or feedback can extend the timeline.",
+      "includes": [
+        "Custom design, mobile-responsive build, and fast load times",
+        "SEO-ready structure and metadata",
+        "Analytics and optional CRM/email integrations",
+        "Accessibility considered (keyboard nav, clear structure)",
+        "Optional CMS and hosting/maintenance"
+      ],
+      "summary": "Custom sites for local service businesses, shops, and consultants, built to get calls and bookings."
+    },
+    "digital-marketing": {
+      "name": "Digital Marketing",
+      "url": "/services/digital-marketing/",
+      "cms_category": "Marketing",
+      "price_display": "$750–$3,000+/month",
+      "price_note": "Brandible typical monthly engagement range depending on services, ad spend, and scope. Not a national average.",
+      "includes": [
+        "Strategy and a roadmap aligned to goals and audiences",
+        "Campaign management, copy, and creative across chosen channels",
+        "Monthly reporting on the metrics that matter",
+        "Ongoing optimization and testing"
+      ],
+      "ads": {
+        "setup_fee": "$600",
+        "management": "15% of ad spend",
+        "min_spend": "about $400–$500/month",
+        "note": "Ad spend is billed to the platform and is separate from Brandible’s management fee."
+      },
+      "email_from": "$400/month",
+      "summary": "SEO, paid ads, and growth work for local businesses that need traffic to convert."
+    },
+    "branding": {
+      "name": "Branding & Identity",
+      "url": "/services/branding/",
+      "cms_category": "Business Tips",
+      "price_display": "$1,500–$5,000+",
+      "price_note": "Brandible typical range depending on scope and deliverables. Not a national average.",
+      "includes": [
+        "Brand discovery and positioning",
+        "Logo design (primary and alternate concepts)",
+        "Color palette and typography system",
+        "Voice, tone, and visual guidelines",
+        "Brand style guide PDF; optional business cards, stationery, and social profile graphics"
+      ],
+      "summary": "More than a logo. A system people can recognize."
+    },
+    "media-management": {
+      "name": "Media Management",
+      "url": "/services/media-management/",
+      "cms_category": "Social Media",
+      "price_display": "$400–$1,500+/month",
+      "price_note": "Brandible typical monthly range depending on posting frequency, platforms, and add-ons. Not a national average.",
+      "includes": [
+        "Monthly content calendar and planning",
+        "Post design and caption copywriting",
+        "Scheduling, publishing, and optional engagement support",
+        "Monthly performance reporting; optional reels, stories, and hashtag strategy"
+      ],
+      "typical_volume": "Typically up to 12 posts/month across 2 platforms, when that is the scoped plan.",
+      "summary": "Done-for-you social content so the presence stays consistent."
+    },
+    "ai": {
+      "name": "AI & Automation",
+      "url": "/services/ai/",
+      "cms_category": "Business Tips",
+      "price_display": "$750–$3,500+",
+      "price_note": "Brandible typical one-time setup range depending on complexity, with optional monthly support. Not a national average.",
+      "includes": [
+        "Discovery call to map where AI or automation will save time or catch leads",
+        "Tool selection and setup (chat, forms, email/SMS follow-up, or workflow tools)",
+        "Custom prompts, scripts, and routing rules",
+        "Team walkthrough",
+        "Optional monthly support"
+      ],
+      "distinguish": "Missed-call texts, form auto-replies, and reminder sequences are automation. A chat that answers common questions can be AI. Do not call ordinary automation AI.",
+      "summary": "Practical after-hours catch and follow-up. Not a science project."
+    }
+  },
+  "core_pages": [
+    { "url": "/about/", "label": "About", "use_when": "Origin, operator-founded, Doorstep Detailer story." },
+    { "url": "/contact/#book-call", "label": "Book a call", "use_when": "Consult CTA when a service page is not the right next step." },
+    { "url": "/portfolio/", "label": "Portfolio", "use_when": "Reader needs to see the work." },
+    { "url": "/faqs/", "label": "FAQs", "use_when": "The article goes deeper than a FAQ already on the site." }
+  ],
+  "examples": {
+    "doorstep_detailer": {
+      "name": "The Doorstep Detailer",
+      "url": "https://thedoorstepdetailer.com",
+      "facts": [
+        "Brandible built the website, branding, customer experience, and Google presence from scratch.",
+        "It grew to 250+ customers.",
+        "Five-star feedback.",
+        "Hunterdon County, NJ.",
+        "Reached the top of relevant local searches. Do not invent a specific ranking number unless it is listed here."
+      ],
+      "use_when": "First-party origin or local visibility. Named. Must teach the point, not decorate."
+    },
+    "peac_learning": {
+      "name": "PEAC Learning",
+      "facts": [
+        "Facebook, Instagram, and Google Ads with geo-targeting and UTM tracking, built to generate qualified franchise leads.",
+        "Published portfolio metrics: Google Ads CPC from $4.02 to $0.19 (Q2 2023 to Q2 2025), a 95% decrease.",
+        "Published portfolio metrics: Google Ads impressions from 1,963 to 72,309.",
+        "Published portfolio metrics: Google Ads clicks from 74 to 968.",
+        "Published portfolio metrics: LinkedIn Ads CPC down 95% vs campaign baseline; impressions x37; clicks x13."
+      ],
+      "use_when": "Named ads/lead-gen proof only. Use only these published numbers. Label them as Brandible’s published PEAC work."
+    }
+  }
+}

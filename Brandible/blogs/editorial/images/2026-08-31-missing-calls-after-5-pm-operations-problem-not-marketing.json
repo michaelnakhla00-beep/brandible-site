@@ -1,0 +1,38 @@
+{
+  "source_post_path": "Brandible/blogs/posts/2026-08-31-missing-calls-after-5-pm-operations-problem-not-marketing.md",
+  "slug": "missing-calls-after-5-pm-operations-problem-not-marketing",
+  "visual_brief": {
+    "thesis": "Marketing successfully generates incoming leads after hours, but without an operational capture mechanism, those opportunities slip away in the dark; visual bridge between incoming energy and quiet off-hours.",
+    "subject": "A tactile, matte navy desk telephone resting on a dark workbench at twilight, its cradle illuminated with a focused orange accent glow while a sleek, electric-blue sculpted docking tray underneath catches and holds glowing ambient light.",
+    "composition": "Single focal subject centrally positioned on a dark matte plane. Generous navy negative space on all sides, shallow depth of field, with soft directional light casting gentle shadows across the surface.",
+    "mood": "Quiet, tactile, dusk, operationally precise, cool and still with warm accents.",
+    "avoid": [
+      "text",
+      "numbers",
+      "clock faces",
+      "logos",
+      "Brandible B mark",
+      "fake UI",
+      "digital screens",
+      "human faces",
+      "hands",
+      "stock office handshakes",
+      "split screen versus layouts"
+    ],
+    "color_notes": "Deep navy background field (#0A1633, #060D1F). Controlled orange accent glow (#F97316) on the phone cradle edge. Electric blue (#2563EB) highlights along the tray structure. Soft cool light fill (#F5F7FA).",
+    "center_safe": "The entire phone and dock assembly is strictly contained within the central 70% horizontal and vertical bounds of the 16:9 visual frame to accommodate a center 16:10 crop."
+  },
+  "final_generation_prompt": "Create one original Brandible blog featured image.\nQuiet tactile still-life. Slightly 3D physical objects. Matte materials. Soft directional light.\nNavy field (#0A1633 / #060D1F) with orange accent (#F97316). Electric blue only sparingly.\nNo typography. No logos. No fake UI. No stock photography tropes.\nGenerate as a 2K 16:9 landscape. Important subject stays in the center 70% horizontally and vertically, with breathing room on every edge, because the image will later be cropped to 16:10.\nThesis: Marketing successfully generates incoming leads after hours, but without an operational capture mechanism, those opportunities slip away in the dark; visual bridge between incoming energy and quiet off-hours.\nSubject: A tactile, matte navy desk telephone resting on a dark workbench at twilight, its cradle illuminated with a focused orange accent glow while a sleek, electric-blue sculpted docking tray underneath catches and holds glowing ambient light.\nComposition: Single focal subject centrally positioned on a dark matte plane. Generous navy negative space on all sides, shallow depth of field, with soft directional light casting gentle shadows across the surface.\nMood: Quiet, tactile, dusk, operationally precise, cool and still with warm accents.\nColor: Deep navy background field (#0A1633, #060D1F). Controlled orange accent glow (#F97316) on the phone cradle edge. Electric blue (#2563EB) highlights along the tray structure. Soft cool light fill (#F5F7FA).\nCenter-safe: The entire phone and dock assembly is strictly contained within the central 70% horizontal and vertical bounds of the 16:9 visual frame to accommodate a center 16:10 crop.\nDo not appear:\n- readable text, headlines, captions, watermarks, or typography\n- Brandible logo, wordmark, or letter B\n- fake Google, Meta, Ads, or Search UI and readable screenshots\n- generic corporate stock: handshakes, laptops on white desks, smiling teams\n- cyberpunk, cartoon, or glossy AI-glass people\n- text\n- numbers\n- clock faces\n- logos\n- Brandible B mark\n- fake UI\n- digital screens\n- human faces\n- hands\n- stock office handshakes\n- split screen versus layouts\nOutput the image only. Do not render words in the picture.",
+  "provider": "gemini",
+  "model": "gemini-3.1-flash-image",
+  "generated_at": "2026-09-01T00:34:41.531Z",
+  "generation_mode": "new",
+  "regeneration_notes": null,
+  "final_dimensions": {
+    "width": 1920,
+    "height": 1200
+  },
+  "final_byte_size": 49970,
+  "final_image_path": "Brandible/assets/blog-images/missing-calls-after-5-pm-operations-problem-not-marketing.webp",
+  "licensing": "Original AI-generated imagery created under the provider's API terms, with generation provenance recorded."
+}

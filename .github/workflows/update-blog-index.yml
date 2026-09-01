@@ -2,42 +2,38 @@ name: Update Blog Index
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'Brandible/blogs/posts/*.md'
+      - 'Brandible/scripts/generate-blog-index.js'
+      - 'Brandible/scripts/blog-draft/catalog.js'
       - '.github/workflows/update-blog-index.yml'
+
+permissions:
+  contents: write
 
 jobs:
   update-index:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      
+          node-version: '20'
+
       - name: Generate index.json
-        run: |
-          cd Brandible/blogs/posts
-          # Get all .md files, sort by name (newest first), format as JSON array
-          node -e "
-          const fs = require('fs');
-          const files = fs.readdirSync('.')
-            .filter(f => f.endsWith('.md'))
-            .sort()
-            .reverse();
-          fs.writeFileSync('index.json', JSON.stringify(files, null, 2) + '\n');
-          console.log('Generated index.json with', files.length, 'posts');
-          "
-      
+        run: node Brandible/scripts/generate-blog-index.js
+
       - name: Commit and push
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Brandible/blogs/posts/index.json
           if git diff --staged --quiet; then
             echo "No changes to commit"
@@ -45,4 +41,3 @@ jobs:
             git commit -m "Auto-update blog index [skip ci]"
             git push
           fi
-

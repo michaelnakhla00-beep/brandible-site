@@ -7,11 +7,18 @@
     "build:blog-index": "cd Brandible && node scripts/generate-blog-index.js",
     "build:blog-posts": "cd Brandible && node scripts/generate-blog-posts.js",
     "build:cms-site-id": "node Brandible/scripts/inject-cms-site-domain.js",
-    "build": "npm run build:cms-site-id && npm run build:css && npm run build:blog-index && npm run build:blog-posts && cd Brandible && node scripts/generate-sitemap.js"
+    "build": "npm run build:cms-site-id && npm run build:css && npm run build:blog-index && npm run build:blog-posts && cd Brandible && node scripts/generate-sitemap.js",
+    "blog:draft": "node Brandible/scripts/draft-blog.js",
+    "blog:image": "node Brandible/scripts/blog-image.js",
+    "blog:automation": "node Brandible/scripts/blog-automation.js",
+    "preview:blog": "node Brandible/scripts/preview-blog.js"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
-    "autoprefixer": "^10.4.17"
+    "tailwindcss": "^3.4.1"
   }
 }
