@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const { loadFacts, buildAllowlist, factsForPrompt, moneySetHas } = require('./facts');
 const { buildAllowedClaims, isAbsoluteUpgrade, toSafeWording, toPlainDisplayText } = require('./allowed-claims');
@@ -19,6 +20,16 @@ const {
   splitSentences
 } = require('./validate');
 const { applySafetyFallback, collectSafetyRepairs } = require('./safety-fallback');
+const {
+  GENERATION_TOOL_NAME,
+  REVISION_TOOL_NAME,
+  GENERATION_INPUT_SCHEMA,
+  REVISION_INPUT_SCHEMA,
+  CLAIM_KIND_ENUM,
+  extractAnthropicToolInput,
+  validateToolInput,
+  completeAnthropicStructured
+} = require('./anthropic-structured');
 
 const EDITORIAL_DIR = path.resolve(__dirname, '../../blogs/editorial');
 
@@ -79,7 +90,196 @@ function baseFields() {
   };
 }
 
-function run() {
+function validGenerationPayload() {
+  return {
+    title: 'Why local businesses struggle to get found',
+    slug: 'why-local-businesses-struggle-to-get-found',
+    meta_title: 'Why local businesses struggle to get found',
+    meta_description: 'A practical look at listing gaps that keep a local business from showing up.',
+    excerpt: 'Most of the work is on the listing and the site, not on a new campaign.',
+    category: 'SEO',
+    body: '## Local ranking\n\nFix the listing first.\n',
+    claims: [{ claim: 'Listings matter more than a new campaign.', kind: 'opinion' }],
+    cta: {
+      names_brandible: true,
+      fit_case: 'If tracking is not in place, Brandible can set it up.',
+      walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+    }
+  };
+}
+
+function validRevisionPayload() {
+  return {
+    ...validGenerationPayload(),
+    resolutions: [
+      {
+        failure_id: 'V9_QUANTIFIER_1',
+        action: 'deleted',
+        resulting_sentence: 'deleted'
+      }
+    ]
+  };
+}
+
+async function structuredOutputFixtures() {
+  const validInput = validGenerationPayload();
+  const malformedText =
+    '{"title": "broken", "body": "Expected \',\' or \'}\' after property value in JSON at position 1663"';
+
+  const mixedPayload = {
+    content: [
+      { type: 'text', text: malformedText },
+      { type: 'tool_use', name: GENERATION_TOOL_NAME, input: validInput }
+    ]
+  };
+  const mixed = extractAnthropicToolInput(mixedPayload, GENERATION_TOOL_NAME);
+  assert(
+    'malformed free-form text is ignored when tool_use is present',
+    mixed.ok === true && mixed.input === validInput,
+    JSON.stringify(mixed)
+  );
+
+  const correct = extractAnthropicToolInput(
+    {
+      content: [{ type: 'tool_use', name: GENERATION_TOOL_NAME, input: validInput }]
+    },
+    GENERATION_TOOL_NAME
+  );
+  assert(
+    'correct tool name with valid object succeeds',
+    correct.ok === true && correct.input === validInput,
+    JSON.stringify(correct)
+  );
+
+  const missing = extractAnthropicToolInput(
+    { content: [{ type: 'text', text: malformedText }] },
+    GENERATION_TOOL_NAME
+  );
+  assert(
+    'missing tool_use fails clearly',
+    missing.ok === false && /submit_blog_draft/.test(missing.error),
+    JSON.stringify(missing)
+  );
+
+  const wrongName = extractAnthropicToolInput(
+    {
+      content: [
+        { type: 'text', text: malformedText },
+        { type: 'tool_use', name: GENERATION_TOOL_NAME, input: validInput }
+      ]
+    },
+    REVISION_TOOL_NAME
+  );
+  assert(
+    'wrong tool name fails clearly',
+    wrongName.ok === false && /submit_blog_revision/.test(wrongName.error),
+    JSON.stringify(wrongName)
+  );
+
+  assert(
+    'generation schema does not permit sourced_fact',
+    !CLAIM_KIND_ENUM.includes('sourced_fact') &&
+      !(GENERATION_INPUT_SCHEMA.properties.claims.items.properties.kind.enum || []).includes('sourced_fact')
+  );
+  const sourcedFactErrors = validateToolInput(
+    {
+      ...validInput,
+      claims: [{ claim: 'Primary category is one of the most important ranking factors.', kind: 'sourced_fact' }]
+    },
+    GENERATION_INPUT_SCHEMA
+  );
+  assert(
+    'generation schema rejects sourced_fact',
+    sourcedFactErrors.some((item) => /kind/.test(item) && /sourced_fact|first_party|hypothetical|opinion/.test(item)),
+    sourcedFactErrors.join(' | ')
+  );
+
+  assert(
+    'revision schema requires resolutions',
+    (REVISION_INPUT_SCHEMA.required || []).includes('resolutions')
+  );
+  const missingResolutions = validateToolInput(validGenerationPayload(), REVISION_INPUT_SCHEMA);
+  assert(
+    'revision schema rejects a payload without resolutions',
+    missingResolutions.some((item) => /resolutions is required/.test(item)),
+    missingResolutions.join(' | ')
+  );
+  const validRevisionErrors = validateToolInput(validRevisionPayload(), REVISION_INPUT_SCHEMA);
+  assert(
+    'revision schema accepts a complete revision payload',
+    validRevisionErrors.length === 0,
+    validRevisionErrors.join(' | ')
+  );
+
+  const previousFetch = global.fetch;
+  let capturedBody = null;
+  global.fetch = async (url, options) => {
+    capturedBody = JSON.parse(options.body);
+    return {
+      ok: true,
+      json: async () => mixedPayload
+    };
+  };
+  try {
+    const structured = await completeAnthropicStructured({
+      model: 'claude-test',
+      apiKey: 'test-key',
+      prompt: 'Return the draft.',
+      toolName: GENERATION_TOOL_NAME,
+      inputSchema: GENERATION_INPUT_SCHEMA
+    });
+    assert(
+      'completeAnthropicStructured uses tool_use.input and ignores malformed text',
+      structured === validInput,
+      JSON.stringify(structured)
+    );
+    assert(
+      'completeAnthropicStructured forces strict tool_choice',
+      capturedBody &&
+        capturedBody.tools &&
+        capturedBody.tools[0] &&
+        capturedBody.tools[0].strict === true &&
+        capturedBody.tool_choice &&
+        capturedBody.tool_choice.type === 'tool' &&
+        capturedBody.tool_choice.name === GENERATION_TOOL_NAME,
+      JSON.stringify(capturedBody && { tools: capturedBody.tools, tool_choice: capturedBody.tool_choice })
+    );
+  } finally {
+    global.fetch = previousFetch;
+  }
+
+  const draftSrc = fs.readFileSync(path.join(__dirname, '../draft-blog.js'), 'utf8');
+  const completeArticleSrc = draftSrc.slice(
+    draftSrc.indexOf('async function completeArticle'),
+    draftSrc.indexOf('function askTopic')
+  );
+  const generateFromTopicSrc = draftSrc.slice(
+    draftSrc.indexOf('async function generateFromTopic'),
+    draftSrc.indexOf('async function main')
+  );
+  const anthropicBranch = completeArticleSrc.split("if (provider === 'anthropic')")[1] || '';
+  const anthropicOnly = anthropicBranch.split('return parseModelJson')[0] || '';
+  assert(
+    'Anthropic generation and revision do not call parseModelJson',
+    /completeAnthropicStructured/.test(anthropicOnly) && !/parseModelJson/.test(anthropicOnly),
+    anthropicOnly.slice(0, 400)
+  );
+  assert(
+    'generateFromTopic does not call parseModelJson',
+    /completeArticle\(/.test(generateFromTopicSrc) && !/parseModelJson/.test(generateFromTopicSrc),
+    generateFromTopicSrc.match(/let parsed[\s\S]{0,200}/)
+      ? generateFromTopicSrc.match(/let parsed[\s\S]{0,200}/)[0]
+      : 'generateFromTopic missing parsed assignment'
+  );
+  assert(
+    'generateFromTopic has exactly one revision completion',
+    (generateFromTopicSrc.match(/mode: 'revision'/g) || []).length === 1 &&
+      (generateFromTopicSrc.match(/mode: 'generation'/g) || []).length === 1,
+    generateFromTopicSrc.match(/mode: '[^']+'/g) && generateFromTopicSrc.match(/mode: '[^']+'/g).join(', ')
+  );
+}
+
+async function run() {
   const facts = loadFacts(EDITORIAL_DIR);
   const allowlist = buildAllowlist(facts);
   const catalog = { posts: [], services: [], core: [] };
@@ -1546,6 +1746,8 @@ function run() {
     JSON.stringify({ repairs: malformedV7Repairs, body: malformedV7Fallback.article.body })
   );
 
+  await structuredOutputFixtures();
+
   const numberedEvidence = [];
   for (let i = 1; i <= 21; i += 1) {
     if (i === 6) {
@@ -1650,4 +1852,7 @@ function run() {
   console.log('\nAll contract fixtures passed.');
 }
 
-run();
+run().catch((error) => {
+  console.error(error && error.stack ? error.stack : String(error));
+  process.exit(1);
+});

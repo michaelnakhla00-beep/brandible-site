@@ -26,6 +26,13 @@ const {
   allowedActionsForCode,
   formatV4Diagnostics
 } = require('./blog-draft/validate');
+const {
+  completeAnthropicStructured,
+  GENERATION_TOOL_NAME,
+  REVISION_TOOL_NAME,
+  GENERATION_INPUT_SCHEMA,
+  REVISION_INPUT_SCHEMA
+} = require('./blog-draft/anthropic-structured');
 
 const CMS_CATEGORIES = [
   'Marketing',
@@ -274,30 +281,7 @@ function resolveProvider() {
 
 async function completeChat({ provider, model, apiKey, prompt }) {
   if (provider === 'anthropic') {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 8000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      fail(`Anthropic request failed (${response.status}): ${JSON.stringify(payload).slice(0, 500)}`);
-    }
-    const text = (payload.content || [])
-      .filter((part) => part.type === 'text')
-      .map((part) => part.text)
-      .join('\n')
-      .trim();
-    if (!text) fail('Anthropic returned an empty response.');
-    return text;
+    fail('Anthropic generation and revision use structured tool output, not free-form JSON text.');
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -338,6 +322,24 @@ function parseModelJson(text) {
   } catch (error) {
     fail(`Could not parse model JSON: ${error.message}`);
   }
+}
+
+async function completeArticle({ provider, model, apiKey, prompt, mode }) {
+  if (provider === 'anthropic') {
+    try {
+      return await completeAnthropicStructured({
+        model,
+        apiKey,
+        prompt,
+        toolName: mode === 'revision' ? REVISION_TOOL_NAME : GENERATION_TOOL_NAME,
+        inputSchema: mode === 'revision' ? REVISION_INPUT_SCHEMA : GENERATION_INPUT_SCHEMA
+      });
+    } catch (error) {
+      fail(error.message || String(error));
+    }
+  }
+
+  return parseModelJson(await completeChat({ provider, model, apiKey, prompt }));
 }
 
 function askTopic(topics) {
@@ -651,7 +653,7 @@ async function generateFromTopic(topic, editorial) {
   console.log(`Allowed external claims: ${allowedClaims.length}.`);
 
   const ctx = validationContext({ facts, catalog, sourcePack, topic, allowlist, allowedClaims });
-  let parsed = parseModelJson(await completeChat({ ...config, prompt }));
+  let parsed = await completeArticle({ ...config, prompt, mode: 'generation' });
   let tokenized = normalizeGenerated(parsed, topic);
   let article = assembleArticle(tokenized, allowedClaims);
   let problems = validateGeneratedArticle(article, ctx);
@@ -661,19 +663,18 @@ async function generateFromTopic(topic, editorial) {
       console.log(`  - ${formatProblem(problem)}`);
     }
     console.log('Running the single revision pass.');
-    parsed = parseModelJson(
-      await completeChat({
-        ...config,
-        prompt: buildRevisionPrompt(tokenized, problems, {
-          facts,
-          catalog,
-          sourcePack,
-          topic,
-          allowlist,
-          allowedClaims
-        })
-      })
-    );
+    parsed = await completeArticle({
+      ...config,
+      prompt: buildRevisionPrompt(tokenized, problems, {
+        facts,
+        catalog,
+        sourcePack,
+        topic,
+        allowlist,
+        allowedClaims
+      }),
+      mode: 'revision'
+    });
     const missingResolutions = assertRevisionResolutions(problems, parsed);
     if (missingResolutions.length) {
       fail(
