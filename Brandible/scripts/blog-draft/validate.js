@@ -730,7 +730,7 @@ function checkTopicScope(article, topic) {
 function splitSentences(text) {
   return String(text || '')
     .replace(/\n+/g, ' ')
-    .split(/(?<=[.!?])\s+(?=[A-Z*"“])/)
+    .split(/(?<=[.!?])\s+(?=[A-Z*"“\[])/)
     .map((item) => item.trim())
     .filter((item) => item.length > 20);
 }
@@ -1341,5 +1341,6 @@ module.exports = {
   assertRevisionResolutions,
   allowedActionsForCode,
   formatProblem,
-  formatV4Diagnostics
+  formatV4Diagnostics,
+  splitSentences
 };

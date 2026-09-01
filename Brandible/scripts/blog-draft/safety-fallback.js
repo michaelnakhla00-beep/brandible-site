@@ -1,5 +1,7 @@
 'use strict';
 
+const { toPlainDisplayText } = require('./allowed-claims');
+
 const MAX_SAFETY_REPAIRS = 3;
 const EM_DASH = '\u2014';
 const CLAIM_TOKEN_RE = /\{\{\s*AC\d+\s*\}\}/;
@@ -9,7 +11,7 @@ function stripMarkdownLinks(text) {
 }
 
 function normalizeSnippet(text) {
-  return stripMarkdownLinks(text)
+  return toPlainDisplayText(stripMarkdownLinks(text))
     .toLowerCase()
     .replace(/['’]/g, "'")
     .replace(/\s+/g, ' ')

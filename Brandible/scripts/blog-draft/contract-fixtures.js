@@ -15,7 +15,8 @@ const {
 const {
   validateGeneratedArticle,
   assertRevisionResolutions,
-  stampProblems
+  stampProblems,
+  splitSentences
 } = require('./validate');
 const { applySafetyFallback, collectSafetyRepairs } = require('./safety-fallback');
 
@@ -1385,6 +1386,261 @@ function run() {
     'V4 still fails for a genuinely missing canonical link',
     hasCode(pipelineMissingLinkProblems, 'V4_MISSING_SOURCE_LINK'),
     pipelineMissingLinkProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const neverSplitPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: 'https://support.google.com/business/answer/7091?hl=en',
+        title: 'Tips to improve your local ranking on Google',
+        excerpt: '',
+        evidence: [
+          {
+            about: 'complete info',
+            quote:
+              'Businesses with complete and accurate info are more likely to show up in local search results.'
+          },
+          {
+            about: 'category edit',
+            quote: 'If you add or edit an existing category, you might be asked to verify the business again.'
+          }
+        ]
+      }
+    ]
+  };
+  const neverSplitClaims = buildAllowedClaims(neverSplitPack);
+  const moreLikelyClaim = neverSplitClaims[0];
+  const categoryClaim = neverSplitClaims[1];
+  const moreLikelyCited = renderCitedClaim(moreLikelyClaim, { cite: true });
+  const categoryCited = renderCitedClaim(categoryClaim, { cite: true });
+  const claimedNeverPara = `If you've claimed the profile but never finished setting it up, you're in a similar position. ${moreLikelyCited}`;
+  const categoryNeverPara = `If you've never looked at your category selection, that's worth doing this week. ${categoryCited}`;
+  const claimedNeverParts = splitSentences(claimedNeverPara);
+  const categoryNeverParts = splitSentences(categoryNeverPara);
+  assert(
+    'never + AC citation splits into two sentences',
+    claimedNeverParts.length === 2 &&
+      /never finished/.test(claimedNeverParts[0]) &&
+      /more likely/.test(claimedNeverParts[1]) &&
+      !/\bnever\b/i.test(claimedNeverParts[1]),
+    JSON.stringify(claimedNeverParts)
+  );
+  assert(
+    'never + category citation splits into two sentences',
+    categoryNeverParts.length === 2 &&
+      /never looked/.test(categoryNeverParts[0]) &&
+      /might be asked/.test(categoryNeverParts[1]) &&
+      !/\bnever\b/i.test(categoryNeverParts[1]),
+    JSON.stringify(categoryNeverParts)
+  );
+
+  function neverDraft(body) {
+    return {
+      ...baseFields(),
+      title: 'What to check before you raise ad spend',
+      slug: 'what-to-check-before-you-raise-ad-spend',
+      meta_title: 'What to check before you raise ad spend',
+      category: 'Marketing',
+      excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+      meta_description:
+        'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+      body,
+      claims: [],
+      cta: {
+        names_brandible: true,
+        fit_case: 'If it is not, Brandible can set it up.',
+        walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+      }
+    };
+  }
+
+  const claimedNeverArticle = assembleArticle(
+    neverDraft(
+      [
+        '## Local ranking',
+        '',
+        "If you've claimed the profile but never finished setting it up, you're in a similar position. {{" +
+          moreLikelyClaim.id +
+          '}}',
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    ),
+    neverSplitClaims
+  );
+  const claimedNeverProblems = validateGeneratedArticle(claimedNeverArticle, ctx(neverSplitPack, neverSplitClaims));
+  assert(
+    'never commentary before cited more-likely claim is not V6',
+    /never finished/.test(claimedNeverArticle.body) &&
+      claimedNeverArticle.body.includes(moreLikelyCited) &&
+      !hasCode(claimedNeverProblems, 'V6_ABSOLUTE_WORDING') &&
+      claimedNeverProblems.length === 0,
+    claimedNeverProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const categoryNeverArticle = assembleArticle(
+    neverDraft(
+      [
+        '## Local ranking',
+        '',
+        "If you've never looked at your category selection, that's worth doing this week. {{" +
+          categoryClaim.id +
+          '}}',
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    ),
+    neverSplitClaims
+  );
+  const categoryNeverProblems = validateGeneratedArticle(categoryNeverArticle, ctx(neverSplitPack, neverSplitClaims));
+  assert(
+    'never commentary before cited category claim is not V6',
+    /never looked/.test(categoryNeverArticle.body) &&
+      categoryNeverArticle.body.includes(categoryCited) &&
+      !hasCode(categoryNeverProblems, 'V6_ABSOLUTE_WORDING') &&
+      categoryNeverProblems.length === 0,
+    categoryNeverProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const overstrongLinkedAc = {
+    ...claimedNeverArticle,
+    body: claimedNeverArticle.body.replace(
+      moreLikelyCited,
+      `[Businesses with complete and accurate info will show up in local search results.](${moreLikelyClaim.url})`
+    )
+  };
+  const overstrongLinkedProblems = validateGeneratedArticle(overstrongLinkedAc, ctx(neverSplitPack, neverSplitClaims));
+  assert(
+    'genuinely overstrong linked AC fact still fails V6',
+    hasCode(overstrongLinkedProblems, 'V6_ABSOLUTE_WORDING'),
+    overstrongLinkedProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const malformedV7Article = assembleArticle(
+    ac3Draft(
+      [
+        '## Local ranking',
+        '',
+        "[There's no way to request or pay for a better local ranking on Google.",
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    ),
+    rankingClaims
+  );
+  const malformedV7Problems = validateGeneratedArticle(malformedV7Article, rankingCtx);
+  assert(
+    'malformed leading-bracket Google sentence is V7',
+    hasCode(malformedV7Problems, 'V7_CLAIM_LEDGER'),
+    malformedV7Problems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+  const malformedV7Repairs = collectSafetyRepairs(malformedV7Article, malformedV7Problems);
+  const malformedV7Fallback = applySafetyFallback(malformedV7Article, malformedV7Problems);
+  assert(
+    'malformed leading-bracket V7 is collected and deleted',
+    malformedV7Repairs.some((item) => item.type === 'v7_body') &&
+      malformedV7Fallback.applied.includes('v7_body') &&
+      !/There's no way to request or pay for a better local ranking on Google/.test(malformedV7Fallback.article.body),
+    JSON.stringify({ repairs: malformedV7Repairs, body: malformedV7Fallback.article.body })
+  );
+
+  const numberedEvidence = [];
+  for (let i = 1; i <= 21; i += 1) {
+    if (i === 6) {
+      numberedEvidence.push({
+        about: 'complete info',
+        quote: 'Businesses with complete and accurate info are more likely to show up in local search results.'
+      });
+    } else if (i === 21) {
+      numberedEvidence.push({
+        about: 'category edit',
+        quote: 'If you add or edit an existing category, you might be asked to verify the business again.'
+      });
+    } else {
+      numberedEvidence.push({
+        about: `filler ${i}`,
+        quote: `Google Business Profile filler claim number ${i} stays long enough for an evidence unit.`
+      });
+    }
+  }
+  const numberedPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: 'https://support.google.com/business/answer/7091?hl=en',
+        title: 'Tips to improve your local ranking on Google',
+        excerpt: '',
+        evidence: numberedEvidence
+      }
+    ]
+  };
+  const numberedClaims = buildAllowedClaims(numberedPack);
+  const ac6 = numberedClaims.find((item) => item.id === 'AC6');
+  const ac21 = numberedClaims.find((item) => item.id === 'AC21');
+  assert(
+    'numbered pack exposes AC6 and AC21',
+    Boolean(ac6 && ac21 && /more likely/.test(ac6.safe_wording) && /might be asked/.test(ac21.safe_wording)),
+    JSON.stringify(numberedClaims.map((item) => item.id + ':' + (item.safe_wording || '').slice(0, 40)))
+  );
+  const ac6Cited = renderCitedClaim(ac6, { cite: true });
+  const ac21Cited = renderCitedClaim(ac21, { cite: true });
+  const numberedCtx = ctx(numberedPack, numberedClaims);
+  const githubLikeDraft = neverDraft(
+    [
+      '## Local ranking',
+      '',
+      "If you've claimed the profile but never finished setting it up, you're in a similar position. {{AC6}}",
+      '',
+      "If you've never looked at your category selection, that's worth doing this week. {{AC21}}",
+      '',
+      'Everyone can get a listing to show up overnight.',
+      '',
+      "[There's no way to request or pay for a better local ranking on Google.",
+      '',
+      'Fix the listing first — then judge spend.',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  );
+  const githubAssembled = assembleArticle(githubLikeDraft, numberedClaims);
+  const githubMid = validateGeneratedArticle(githubAssembled, numberedCtx);
+  const githubFallback = applySafetyFallback(githubAssembled, githubMid);
+  let githubArticle = githubAssembled;
+  if (githubFallback.applied.length && !githubFallback.refused) {
+    githubArticle = githubFallback.article;
+    if (githubFallback.needsAssemble) {
+      githubArticle = assembleArticle(githubArticle, numberedClaims);
+    }
+    githubArticle = refreshAssemblyState(githubArticle, numberedClaims);
+  }
+  const githubFinal = validateGeneratedArticle(githubArticle, numberedCtx);
+  assert(
+    'GitHub-like pipeline applies em dash, V9, and V7 repairs',
+    githubFallback.applied.includes('em_dash') &&
+      githubFallback.applied.includes('v9_body') &&
+      githubFallback.applied.includes('v7_body') &&
+      githubFallback.applied.length === 3,
+    JSON.stringify({ applied: githubFallback.applied, mid: githubMid.map((item) => item.code) })
+  );
+  assert(
+    'GitHub-like pipeline preserves AC6 and AC21',
+    githubArticle.body.includes(ac6Cited) && githubArticle.body.includes(ac21Cited),
+    githubArticle.body
+  );
+  assert(
+    'GitHub-like pipeline removes em dash, everyone, and raw V7',
+    !githubArticle.body.includes('\u2014') &&
+      !/\beveryone\b/i.test(githubArticle.body) &&
+      !/\[There's no way to request or pay for a better local ranking on Google\.(?!])/m.test(githubArticle.body),
+    githubArticle.body
+  );
+  assert(
+    'GitHub-like pipeline has no false V6 and passes final validation',
+    !hasCode(githubFinal, 'V6_ABSOLUTE_WORDING') && githubFinal.length === 0,
+    githubFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   if (failed) {
