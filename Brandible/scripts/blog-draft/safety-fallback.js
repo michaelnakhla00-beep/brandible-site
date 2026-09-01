@@ -4,6 +4,7 @@ const { toPlainDisplayText, findAllowedClaim } = require('./allowed-claims');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const { assembleCta, assembleArticle, refreshAssemblyState } = require('./assemble');
 const { validateGeneratedArticle } = require('./validate');
+const { stripMarkdownLinks } = require('./markdown-links');
 
 const MAX_DELETED_SEGMENTS = 6;
 const MAX_DELETED_CHAR_RATIO = 0.2;
@@ -26,10 +27,6 @@ const APPLY_ORDER = [
   'limit_internal_destinations',
   'em_dash'
 ];
-
-function stripMarkdownLinks(text) {
-  return String(text || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-}
 
 function normalizeSnippet(text) {
   return toPlainDisplayText(stripMarkdownLinks(text))
@@ -171,14 +168,14 @@ function escapeRegExp(value) {
 
 function unwrapHref(body, targetHref) {
   if (!targetHref) return String(body || '');
-  const re = new RegExp(`\\[([^\\]]+)\\]\\(${escapeRegExp(targetHref)}\\)`, 'g');
+  const re = new RegExp(`\\[([^\\[\\]\\r\\n]+)\\]\\(${escapeRegExp(targetHref)}\\)`, 'g');
   return String(body || '').replace(re, '$1');
 }
 
 function dedupeInternalLink(body, targetHref) {
   let seen = 0;
-  return String(body || '').replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, (full, label, href) => {
-    if (href !== targetHref) return full;
+  return String(body || '').replace(/\[([^\[\]\r\n]+)\]\((\/[^()\r\n]+)\)/g, (full, label, href) => {
+    if (href.trim() !== targetHref) return full;
     seen += 1;
     if (seen === 1) return full;
     return label;
@@ -187,10 +184,11 @@ function dedupeInternalLink(body, targetHref) {
 
 function limitInternalDestinations(body, maxUnique) {
   const seen = [];
-  return String(body || '').replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, (full, label, href) => {
-    if (seen.indexOf(href) === -1) {
+  return String(body || '').replace(/\[([^\[\]\r\n]+)\]\((\/[^()\r\n]+)\)/g, (full, label, href) => {
+    const trimmed = href.trim();
+    if (seen.indexOf(trimmed) === -1) {
       if (seen.length >= maxUnique) return label;
-      seen.push(href);
+      seen.push(trimmed);
     }
     return full;
   });

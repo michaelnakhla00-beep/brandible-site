@@ -21,6 +21,7 @@ const {
 } = require('./validate');
 const { applySafetyFallback, collectSafetyRepairs, dedupeInternalLink, MAX_DELETED_SEGMENTS, MAX_DETERMINISTIC_ROUNDS, runDeterministicRepairsToFixedPoint } = require('./safety-fallback');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
+const { extractMarkdownLinks, extractMarkdownHrefs } = require('./markdown-links');
 const {
   GENERATION_TOOL_NAME,
   REVISION_TOOL_NAME,
@@ -189,12 +190,75 @@ function markdownSegmentFixtures() {
 
   const validateSrc = fs.readFileSync(path.join(__dirname, 'validate.js'), 'utf8');
   const fallbackSrc = fs.readFileSync(path.join(__dirname, 'safety-fallback.js'), 'utf8');
+  const catalogSrc = fs.readFileSync(path.join(__dirname, 'catalog.js'), 'utf8');
+  const linksSrc = fs.readFileSync(path.join(__dirname, 'markdown-links.js'), 'utf8');
   assert(
     'validator and fallback use the shared Markdown segmenter',
     /require\('\.\/segments'\)/.test(validateSrc) &&
       /require\('\.\/segments'\)/.test(fallbackSrc) &&
       !/function splitSentences/.test(validateSrc) &&
       !/function splitSentences/.test(fallbackSrc)
+  );
+  assert(
+    'catalog and validate use the bounded Markdown-link parser',
+    /require\('\.\/markdown-links'\)/.test(catalogSrc) &&
+      /require\('\.\/markdown-links'\)/.test(validateSrc) &&
+      /extractMarkdownLinks\(body\)/.test(validateSrc) &&
+      /INLINE_LINK_RE/.test(linksSrc) &&
+      !validateSrc.includes('[^\\]]+') &&
+      !catalogSrc.includes('[^\\]]*')
+  );
+
+  markdownLinkFixtures();
+}
+
+function markdownLinkFixtures() {
+  const valid = extractMarkdownLinks('[valid link](https://example.com)');
+  assert(
+    '[valid link](https://example.com) parses',
+    valid.length === 1 && valid[0].label === 'valid link' && valid[0].href === 'https://example.com',
+    JSON.stringify(valid)
+  );
+
+  const broken = extractMarkdownLinks('[broken link\n\nlater prose](https://example.com)');
+  assert(
+    'broken link spanning a blank line does not parse as one link',
+    broken.length === 0,
+    JSON.stringify(broken)
+  );
+
+  const nested = extractMarkdownLinks('[outer [nested] label](https://example.com)');
+  assert(
+    'nested brackets in a label do not parse as a valid canonical link',
+    nested.length === 0,
+    JSON.stringify(nested)
+  );
+
+  const twoInOne = extractMarkdownLinks(
+    'See [one](https://example.com/a) and [two](https://example.com/b) in the same sentence.'
+  );
+  assert(
+    'two valid links in one ordinary paragraph parse independently',
+    twoInOne.length === 2 &&
+      twoInOne[0].label === 'one' &&
+      twoInOne[0].href === 'https://example.com/a' &&
+      twoInOne[1].label === 'two' &&
+      twoInOne[1].href === 'https://example.com/b' &&
+      twoInOne[0].segment === twoInOne[1].segment,
+    JSON.stringify(twoInOne)
+  );
+
+  const internal = extractMarkdownLinks(
+    'Start with [website design](/services/web-design/) if the site is the leak.'
+  );
+  assert(
+    'internal catalog links continue to parse',
+    internal.length === 1 &&
+      internal[0].label === 'website design' &&
+      internal[0].href === '/services/web-design/' &&
+      extractMarkdownHrefs('Start with [website design](/services/web-design/) if the site is the leak.')[0] ===
+        '/services/web-design/',
+    JSON.stringify(internal)
   );
 }
 
@@ -1872,6 +1936,186 @@ async function run() {
     JSON.stringify({ repairs: malformedV7Repairs, body: malformedV7Fallback.article.body })
   );
 
+  const verifiedLabel = 'Only verified businesses can show their business info on Maps and Search';
+  const verifiedUrl = 'https://support.google.com/business/answer/7091?hl=en';
+  const verifiedHeading = '## Your Google Business Profile Might Be the First Problem';
+  const verifiedPathForward = 'So the path forward is giving Google more signal.';
+  const verifiedCommentary = 'For local searches, some commentary goes here.';
+  const verifiedCitation = `[${verifiedLabel}](${verifiedUrl})`;
+  const unmatchedGoogle = "[There's no way to request or pay for a better local ranking on Google.";
+  const githubSpanBody = [
+    unmatchedGoogle,
+    '',
+    verifiedPathForward,
+    '',
+    verifiedHeading,
+    '',
+    verifiedCommentary,
+    '',
+    verifiedCitation,
+    '',
+    OPERATIONAL_PADDING,
+    '',
+    'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+  ].join('\n');
+  const githubSpanLinks = extractMarkdownLinks(githubSpanBody);
+  assert(
+    'GitHub unmatched-bracket body parses exactly one Markdown link',
+    githubSpanLinks.length === 1,
+    JSON.stringify(githubSpanLinks)
+  );
+  assert(
+    'GitHub parsed link label is the verified-businesses citation',
+    githubSpanLinks[0].label === verifiedLabel,
+    githubSpanLinks[0] && githubSpanLinks[0].label
+  );
+  assert(
+    'GitHub unmatched opening bracket is not part of that link',
+    !githubSpanLinks[0].label.includes("There's no way") &&
+      !githubSpanLinks[0].segment.includes("There's no way") &&
+      githubSpanLinks[0].segment === verifiedCitation,
+    JSON.stringify(githubSpanLinks[0])
+  );
+  assert(
+    'GitHub parsed link does not span a blank line or heading',
+    !githubSpanLinks[0].segment.includes('\n') &&
+      !isMarkdownHeading(githubSpanLinks[0].segment) &&
+      !githubSpanLinks[0].segment.includes('Your Google Business Profile') &&
+      githubSpanLinks[0].href === verifiedUrl,
+    githubSpanLinks[0].segment
+  );
+
+  const verifiedPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: verifiedUrl,
+        title: 'Tips to improve your local ranking on Google',
+        excerpt: `${verifiedLabel}. Completing the profile helps customers find the right business.`
+      }
+    ]
+  };
+  const verifiedClaims = buildAllowedClaims(verifiedPack);
+  const githubSpanArticle = assembleArticle(neverDraft(githubSpanBody), verifiedClaims);
+  const githubSpanCtx = ctx(verifiedPack, verifiedClaims);
+  const githubSpanFirst = validateGeneratedArticle(githubSpanArticle, githubSpanCtx);
+  const githubSpanV6 = githubSpanFirst.filter((item) => item.code === 'V6_ABSOLUTE_WORDING');
+  assert(
+    'GitHub unmatched-bracket V6 quotes only the verified-businesses label',
+    githubSpanV6.every(
+      (item) =>
+        item.message.includes(`“${verifiedLabel}”`) &&
+        !/There's no way/.test(item.message) &&
+        !/So the path forward/.test(item.message) &&
+        !/Your Google Business Profile/.test(item.message) &&
+        !/some commentary goes here/.test(item.message)
+    ),
+    githubSpanV6.map((item) => item.message).join(' | ')
+  );
+  assert(
+    'GitHub unmatched-bracket V7 identifies the raw Google sentence',
+    githubSpanFirst.some(
+      (item) =>
+        item.code === 'V7_CLAIM_LEDGER' &&
+        /There's no way to request or pay for a better local ranking on Google/.test(item.message)
+    ),
+    githubSpanFirst.map((item) => `${item.code}: ${item.message}`).join(' | ')
+  );
+
+  const githubSpanFixed = runDeterministicRepairsToFixedPoint({
+    article: githubSpanArticle,
+    ctx: githubSpanCtx,
+    allowedClaims: verifiedClaims,
+    catalog,
+    validate: validateGeneratedArticle
+  });
+  assert(
+    'GitHub unmatched-bracket fixed-point does not refuse',
+    githubSpanFixed.refused === false,
+    JSON.stringify({
+      reason: githubSpanFixed.reason,
+      problems: (githubSpanFixed.problems || []).map((item) => `${item.code}: ${item.message}`),
+      repairs: githubSpanFixed.repairs
+    })
+  );
+  assert(
+    'GitHub unmatched-bracket V7 deletes only the raw Google sentence',
+    !/There's no way to request or pay for a better local ranking on Google/.test(githubSpanFixed.article.body) &&
+      githubSpanFixed.article.body.includes(verifiedHeading) &&
+      githubSpanFixed.article.body.includes(verifiedPathForward) &&
+      githubSpanFixed.article.body.includes(verifiedCommentary) &&
+      githubSpanFixed.article.body.includes(unmatchedGoogle) === false,
+    githubSpanFixed.article.body
+  );
+  if (!githubSpanV6.length) {
+    assert(
+      'GitHub verified-businesses citation survives when it does not exceed the source',
+      githubSpanFixed.article.body.includes(verifiedCitation),
+      githubSpanFixed.article.body
+    );
+  } else {
+    assert(
+      'GitHub V6 repair does not consume surrounding paragraphs or headings',
+      githubSpanFixed.article.body.includes(verifiedHeading) &&
+        githubSpanFixed.article.body.includes(verifiedPathForward) &&
+        githubSpanFixed.article.body.includes(verifiedCommentary) &&
+        !githubSpanFixed.article.body.includes(verifiedCitation),
+      githubSpanFixed.article.body
+    );
+  }
+  assert(
+    'GitHub unmatched-bracket final validation is clean',
+    githubSpanFixed.problems.length === 0,
+    (githubSpanFixed.problems || []).map((item) => `${item.code}: ${item.message}`).join(' | ')
+  );
+
+  const overstrongLabel = 'Only verified businesses can never lose their business info on Maps and Search';
+  const overstrongCitation = `[${overstrongLabel}](${verifiedUrl})`;
+  const overstrongBody = `${githubSpanBody.replace(verifiedCitation, overstrongCitation)}\n\n${OPERATIONAL_PADDING}\n`;
+  const overstrongLinks = extractMarkdownLinks(overstrongBody);
+  assert(
+    'overstrong verified-businesses citation still parses as one bounded link',
+    overstrongLinks.length === 1 && overstrongLinks[0].label === overstrongLabel,
+    JSON.stringify(overstrongLinks)
+  );
+  const overstrongArticle = assembleArticle(neverDraft(overstrongBody), verifiedClaims);
+  const overstrongFirst = validateGeneratedArticle(overstrongArticle, githubSpanCtx);
+  const overstrongV6 = overstrongFirst.filter((item) => item.code === 'V6_ABSOLUTE_WORDING');
+  assert(
+    'overstrong citation V6 quotes only that label',
+    overstrongV6.some((item) => item.message.includes(`“${overstrongLabel}”`)) &&
+      overstrongV6.every(
+        (item) =>
+          !/There's no way/.test(item.message) &&
+          !/So the path forward/.test(item.message) &&
+          !/Your Google Business Profile/.test(item.message)
+      ),
+    overstrongV6.map((item) => item.message).join(' | ')
+  );
+  const overstrongFixed = runDeterministicRepairsToFixedPoint({
+    article: overstrongArticle,
+    ctx: githubSpanCtx,
+    allowedClaims: verifiedClaims,
+    catalog,
+    validate: validateGeneratedArticle
+  });
+  assert(
+    'overstrong V6 deletes only the citation segment',
+    overstrongFixed.refused === false &&
+      !overstrongFixed.article.body.includes(overstrongCitation) &&
+      !/There's no way to request or pay for a better local ranking on Google/.test(overstrongFixed.article.body) &&
+      overstrongFixed.article.body.includes(verifiedHeading) &&
+      overstrongFixed.article.body.includes(verifiedPathForward) &&
+      overstrongFixed.article.body.includes(verifiedCommentary) &&
+      overstrongFixed.problems.length === 0,
+    JSON.stringify({
+      reason: overstrongFixed.reason,
+      body: overstrongFixed.article.body,
+      problems: (overstrongFixed.problems || []).map((item) => `${item.code}: ${item.message}`)
+    })
+  );
+
   markdownSegmentFixtures();
   await structuredOutputFixtures();
 
@@ -2160,9 +2404,7 @@ async function run() {
     latestTripleArticle = refreshAssemblyState(latestTripleArticle, latestClaims);
   }
   const latestTripleFinal = validateGeneratedArticle(latestTripleArticle, latestTripleCtx);
-  const latestTripleHrefs = [...String(latestTripleArticle.body).matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(
-    (item) => item[1]
-  );
+  const latestTripleHrefs = extractMarkdownHrefs(latestTripleArticle.body);
   const webDesignHrefs = latestTripleHrefs.filter((href) => href === '/services/web-design/');
   assert(
     'latest-run triple fallback applies v9, v7, and duplicate_internal_link',
@@ -2350,7 +2592,7 @@ async function run() {
     ciArticle = refreshAssemblyState(ciArticle, ciClaims);
   }
   const ciFinal = validateGeneratedArticle(ciArticle, ciCtx);
-  const ciHrefs = [...String(ciArticle.body).matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((item) => item[1]);
+  const ciHrefs = extractMarkdownHrefs(ciArticle.body);
   assert(
     'CI-path compiler does not invoke a model revision',
     /Skipping model revision/.test(fs.readFileSync(path.join(__dirname, '../draft-blog.js'), 'utf8'))

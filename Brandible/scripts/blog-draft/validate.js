@@ -1,7 +1,8 @@
 'use strict';
 
 const { checkSeoFields } = require('./seo');
-const { extractMarkdownHrefs, allowedUrlSet } = require('./catalog');
+const { allowedUrlSet } = require('./catalog');
+const { extractMarkdownHrefs, extractMarkdownLinks, stripMarkdownLinks } = require('./markdown-links');
 const { buildAllowlist, moneySetHas } = require('./facts');
 const { findAllowedClaim, isAbsoluteUpgrade } = require('./allowed-claims');
 const { matchingRenderedFact, isRenderedAllowedFact, extractClaimTokens, ctaNamesBrandible } = require('./assemble');
@@ -615,10 +616,6 @@ function checkClaims(article, sourcePack, articleProduct, allowedClaims) {
   return problems;
 }
 
-function stripMarkdownLinks(text) {
-  return String(text || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-}
-
 function checkUnsupportedComparatives(article, sourcePack) {
   const problems = [];
   const body = stripMarkdownLinks(article.body || '');
@@ -646,37 +643,27 @@ function checkUnsupportedComparatives(article, sourcePack) {
   return problems;
 }
 
-function surroundingSentence(body, index, length) {
-  const start = body.lastIndexOf('.', index);
-  const end = body.indexOf('.', index + length);
-  const from = start === -1 ? Math.max(0, index - 180) : start + 1;
-  const to = end === -1 ? Math.min(body.length, index + length + 180) : end + 1;
-  return body.slice(from, to).trim();
-}
-
 function checkLinkedSentences(body, sourcePack, articleProduct) {
   const problems = [];
-  const re = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
-  let match;
-  while ((match = re.exec(body)) !== null) {
-    const url = match[2];
-    const source = (sourcePack.sources || []).find((item) => item.url === url);
+  for (const link of extractMarkdownLinks(body)) {
+    if (!/^https?:\/\//i.test(link.href)) continue;
+    const source = (sourcePack.sources || []).find((item) => item.url === link.href);
     if (!source) continue;
-    const sentence = surroundingSentence(body, match.index, match[0].length);
+    const linkedText = link.label;
+    const sentence = link.segment;
     const sourceProduct = inferSourceProduct(source);
     const sentenceProduct = claimProduct(sentence) || articleProduct;
     if (sourceProduct === 'local_services_ads' && sentenceProduct === 'google_business_profile') {
       problems.push({
         code: 'V3_SOURCE_ENTAILMENT',
-        message: `Citation product mismatch: the sentence is about Google Business Profile / local ranking but the linked source is Local Services Ads (${url}).`
+        message: `Citation product mismatch: the sentence is about Google Business Profile / local ranking but the linked source is Local Services Ads (${link.href}).`
       });
     } else if (sentenceProduct && sourceProduct !== 'unknown' && !productsCompatible(sentenceProduct, sourceProduct)) {
       problems.push({
         code: 'V3_SOURCE_ENTAILMENT',
-        message: `Citation product mismatch: sentence appears to discuss ${sentenceProduct} but the linked source is ${sourceProduct} (${url}).`
+        message: `Citation product mismatch: sentence appears to discuss ${sentenceProduct} but the linked source is ${sourceProduct} (${link.href}).`
       });
     }
-    const linkedText = match[1];
     const stronger = claimStrongerThanSource(linkedText, sourceEvidenceText(source));
     if (stronger) {
       problems.push({
@@ -856,12 +843,7 @@ function renderedFactHasCanonicalCitation(renderedFact, allowed) {
   const text = String((renderedFact && renderedFact.text) || '');
   if (!allowed || !allowed.url || !text) return false;
   if (/\[\[/.test(text) || /\]\]/.test(text)) return false;
-  const links = [];
-  const re = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
-  let match;
-  while ((match = re.exec(text)) !== null) {
-    links.push({ label: match[1], href: match[2] });
-  }
+  const links = extractMarkdownLinks(text).filter((link) => /^https?:\/\//i.test(link.href));
   if (links.length !== 1) return false;
   if (links[0].href !== allowed.url) return false;
   if (/\[/.test(links[0].label) || /\]\(/.test(links[0].label)) return false;
@@ -880,12 +862,9 @@ function formatV4Diagnostics(article, problems, allowedClaims) {
     const allowed = claimId ? findAllowedClaim(allowedClaims, claimId) : null;
     const rendered = (article.rendered_facts || []).find((item) => item && item.id === claimId) || null;
     const renderedText = rendered ? String(rendered.text || '') : '';
-    const hrefs = [];
-    const re = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
-    let match;
-    while ((match = re.exec(renderedText)) !== null) {
-      hrefs.push(match[2]);
-    }
+    const hrefs = extractMarkdownLinks(renderedText)
+      .filter((link) => /^https?:\/\//i.test(link.href))
+      .map((link) => link.href);
     const body = String((article && article.body) || '');
     const inBody = Boolean(renderedText) && body.includes(renderedText);
     let fragment = '';

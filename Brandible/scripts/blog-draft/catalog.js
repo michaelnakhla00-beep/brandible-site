@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { extractMarkdownHrefs } = require('./markdown-links');
 
 function parseFrontmatter(content) {
   const match = String(content).match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
@@ -86,16 +87,6 @@ function catalogForPrompt(catalog) {
     }
   }
   return lines.join('\n');
-}
-
-function extractMarkdownHrefs(markdown) {
-  const hrefs = [];
-  const re = /\[[^\]]*\]\(([^)]+)\)/g;
-  let match;
-  while ((match = re.exec(String(markdown))) !== null) {
-    hrefs.push(match[1].trim());
-  }
-  return hrefs;
 }
 
 function allowedUrlSet(catalog) {
