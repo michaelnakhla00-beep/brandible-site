@@ -54,6 +54,19 @@ function uniqueIds(lists) {
   return ids;
 }
 
+function unwrapClaimTokenWrappers(text) {
+  let next = String(text || '');
+  for (let i = 0; i < 6; i += 1) {
+    const before = next;
+    next = next.replace(/\[(\{\{\s*AC\d+\s*\}\})\]\([^)]*\)/g, '$1');
+    next = next.replace(/\[(\{\{\s*AC\d+\s*\}\})\]/g, '$1');
+    next = next.replace(/["'\u201C\u201D\u2018\u2019](\{\{\s*AC\d+\s*\}\})["'\u201C\u201D\u2018\u2019]/g, '$1');
+    next = next.replace(/\*\*(\{\{\s*AC\d+\s*\}\})\*\*/g, '$1');
+    if (next === before) break;
+  }
+  return next;
+}
+
 function linkSafeWording(wording, url) {
   const text = toPlainDisplayText(wording);
   if (!text || !url) return text;
@@ -78,7 +91,8 @@ function resolveClaimTokens(text, allowedClaims, options) {
   const usedIds = [];
   const unknownIds = [];
   const rendered = [];
-  const resolved = String(text || '').replace(CLAIM_TOKEN_RE, (match, id) => {
+  const unwrapped = unwrapClaimTokenWrappers(text);
+  const resolved = String(unwrapped || '').replace(CLAIM_TOKEN_RE, (match, id) => {
     const claim = byId.get(id);
     if (!claim) {
       unknownIds.push(id);
@@ -170,6 +184,25 @@ function assembleArticle(article, allowedClaims) {
   return next;
 }
 
+function refreshAssemblyState(article, allowedClaims) {
+  const plan = allowedClaims || [];
+  const body = String(article.body || '');
+  const rendered_facts = [];
+  const usedIds = [];
+  for (const claim of plan) {
+    const cited = renderCitedClaim(claim, { cite: true });
+    if (!cited || !body.includes(cited)) continue;
+    if (!usedIds.includes(claim.id)) usedIds.push(claim.id);
+    rendered_facts.push({ id: claim.id, text: cited });
+  }
+  return {
+    ...article,
+    rendered_facts,
+    claim_tokens_used: usedIds,
+    claims: mergeNonSourcedClaims(article.claims, buildSourcedClaims(usedIds, plan))
+  };
+}
+
 function isRenderedAllowedFact(sentence, renderedFacts) {
   const plain = normalizeForMatch(sentence);
   if (!plain) return false;
@@ -195,12 +228,14 @@ function matchingRenderedFact(sentence, renderedFacts) {
 module.exports = {
   CLAIM_TOKEN_RE,
   extractClaimTokens,
+  unwrapClaimTokenWrappers,
   resolveClaimTokens,
   renderCitedClaim,
   buildSourcedClaims,
   mergeNonSourcedClaims,
   assembleCta,
   assembleArticle,
+  refreshAssemblyState,
   ctaNamesBrandible,
   isRenderedAllowedFact,
   matchingRenderedFact,

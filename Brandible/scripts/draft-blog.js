@@ -14,7 +14,7 @@ const { buildCatalog, catalogForPrompt } = require('./blog-draft/catalog');
 const { parseQueueTopics, findTopic: findQueuedTopic } = require('./blog-draft/queue');
 const { buildSourcePack, sourcePackForPrompt } = require('./blog-draft/research');
 const { buildAllowedClaims, allowedClaimsForPrompt } = require('./blog-draft/allowed-claims');
-const { assembleArticle } = require('./blog-draft/assemble');
+const { assembleArticle, refreshAssemblyState } = require('./blog-draft/assemble');
 const { applySafetyFallback } = require('./blog-draft/safety-fallback');
 const {
   PHASE1_HARD_CHECKS,
@@ -23,7 +23,8 @@ const {
   revisionRepairHints,
   assertRevisionResolutions,
   formatProblem,
-  allowedActionsForCode
+  allowedActionsForCode,
+  formatV4Diagnostics
 } = require('./blog-draft/validate');
 
 const CMS_CATEGORIES = [
@@ -694,6 +695,7 @@ async function generateFromTopic(topic, editorial) {
           // markdown would drop the sourced ledger.
           article = assembleArticle(article, allowedClaims);
         }
+        article = refreshAssemblyState(article, allowedClaims);
         problems = validateGeneratedArticle(article, ctx);
       }
     }
@@ -701,6 +703,13 @@ async function generateFromTopic(topic, editorial) {
     console.log('First generation passed validation. No revision pass.');
   }
   if (problems.length) {
+    const v4Diagnostics = formatV4Diagnostics(article, problems, allowedClaims);
+    if (v4Diagnostics.length) {
+      console.error('V4 citation diagnostic:');
+      for (const line of v4Diagnostics) {
+        console.error(`  ${line}`);
+      }
+    }
     fail(`Draft failed validation after one revision:\n- ${problems.map(formatProblem).join('\n- ')}`);
   }
   console.log('Draft passed validation.');

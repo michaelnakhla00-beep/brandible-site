@@ -8,7 +8,9 @@ const {
   resolveClaimTokens,
   renderCitedClaim,
   buildSourcedClaims,
-  mergeNonSourcedClaims
+  mergeNonSourcedClaims,
+  refreshAssemblyState,
+  unwrapClaimTokenWrappers
 } = require('./assemble');
 const {
   validateGeneratedArticle,
@@ -1160,6 +1162,229 @@ function run() {
     'source-entailment still fails after fallback',
     hasCode(entailmentAfter, 'V3_SOURCE_ENTAILMENT'),
     entailmentAfter.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const rankingPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: 'https://support.google.com/business/answer/7091?hl=en',
+        title: 'Tips to improve your local ranking on Google',
+        excerpt:
+          'Local results are mainly based on relevance, distance, and popularity. Together, these factors help Google find the best match for customers searches.',
+        evidence: [
+          {
+            about: 'paid ranking',
+            quote: "There's no way to request or pay for a better local ranking on Google."
+          }
+        ]
+      }
+    ]
+  };
+  const rankingClaims = buildAllowedClaims(rankingPack);
+  const ac3 = rankingClaims.find((item) => item.id === 'AC3');
+  assert('ranking pack exposes AC3', Boolean(ac3 && ac3.url && ac3.requires_citation), JSON.stringify(rankingClaims.map((item) => item.id)));
+  const ac3Cited = renderCitedClaim(ac3, { cite: true });
+  const rankingCtx = ctx(rankingPack, rankingClaims);
+
+  function ac3Draft(body) {
+    return {
+      ...baseFields(),
+      title: 'What to check before you raise ad spend',
+      slug: 'what-to-check-before-you-raise-ad-spend',
+      meta_title: 'What to check before you raise ad spend',
+      category: 'Marketing',
+      excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+      meta_description:
+        'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+      body,
+      claims: [
+        {
+          claim: 'If tracking is already in place, you may not need Brandible.',
+          kind: 'opinion',
+          source_id: null
+        }
+      ],
+      cta: {
+        names_brandible: true,
+        fit_case: 'If it is not, Brandible can set it up.',
+        walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+      }
+    };
+  }
+
+  function runPostRevisionPipeline(tokenized) {
+    const assembled = assembleArticle(tokenized, rankingClaims);
+    const mid = validateGeneratedArticle(assembled, rankingCtx);
+    const fallback = applySafetyFallback(assembled, mid);
+    let article = assembled;
+    if (fallback.applied.length && !fallback.refused) {
+      article = fallback.article;
+      if (fallback.needsAssemble) {
+        article = assembleArticle(article, rankingClaims);
+      }
+      article = refreshAssemblyState(article, rankingClaims);
+    }
+    const finalProblems = validateGeneratedArticle(article, rankingCtx);
+    return { assembled, mid, fallback, article, finalProblems };
+  }
+
+  function assertAc3Canonical(namePrefix, article, problems) {
+    const links = article.body.match(/\[[^\]]+\]\([^)]+\)/g) || [];
+    assert(
+      `${namePrefix}: V9 everyone is removed and AC3 remains`,
+      !/\beveryone\b/i.test(article.body) && article.body.includes(ac3Cited),
+      article.body
+    );
+    assert(
+      `${namePrefix}: exactly one canonical AC3 link`,
+      links.length === 1 && links[0] === ac3Cited.replace(/[.!?]$/, ''),
+      JSON.stringify(links)
+    );
+    assert(
+      `${namePrefix}: href equals allowed.url and has no nested brackets`,
+      article.body.includes(`](${ac3.url})`) &&
+        !article.body.includes('[[') &&
+        !/\[/.test(article.body.replace(/\[[^\]]+\]\([^)]+\)/g, '')),
+      article.body
+    );
+    assert(
+      `${namePrefix}: rendered_facts matches the final body`,
+      article.rendered_facts.length === 1 &&
+        article.rendered_facts[0].id === 'AC3' &&
+        article.body.includes(article.rendered_facts[0].text),
+      JSON.stringify(article.rendered_facts)
+    );
+    assert(
+      `${namePrefix}: sourced ledger contains AC3 because AC3 remains`,
+      article.claim_tokens_used.includes('AC3') &&
+        article.claims.some((item) => item.kind === 'sourced_fact' && item.allowed_claim_id === 'AC3') &&
+        article.claims.some((item) => item.kind === 'opinion'),
+      JSON.stringify(article.claims)
+    );
+    assert(
+      `${namePrefix}: V4 does not appear`,
+      !hasCode(problems, 'V4_MISSING_SOURCE_LINK') && problems.length === 0,
+      problems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+    );
+  }
+
+  const separatePipeline = runPostRevisionPipeline(
+    ac3Draft(
+      [
+        '## Local ranking',
+        '',
+        'Everyone can get a listing to show up overnight.',
+        '',
+        '{{AC3}}',
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    )
+  );
+  assert(
+    'separate-paragraph pipeline applies V9 body fallback',
+    separatePipeline.fallback.applied.join(',') === 'v9_body',
+    JSON.stringify(separatePipeline.fallback)
+  );
+  assertAc3Canonical('separate paragraphs', separatePipeline.article, separatePipeline.finalProblems);
+
+  const samePipeline = runPostRevisionPipeline(
+    ac3Draft(
+      [
+        '## Local ranking',
+        '',
+        'Everyone can get a listing to show up overnight. {{AC3}}',
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    )
+  );
+  assert(
+    'same-paragraph pipeline applies V9 body fallback',
+    samePipeline.fallback.applied.join(',') === 'v9_body',
+    JSON.stringify(samePipeline.fallback)
+  );
+  assertAc3Canonical('same paragraph', samePipeline.article, samePipeline.finalProblems);
+
+  const leftoverPipeline = runPostRevisionPipeline(
+    ac3Draft(
+      [
+        '## Local ranking',
+        '',
+        'Everyone can get a listing to show up overnight. {{AC3}}',
+        '',
+        "There's no way to request or pay for a better local ranking on Google if the listing is incomplete.",
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    )
+  );
+  assert(
+    'same-paragraph leftover pipeline keeps AC3 after V9 fallback',
+    leftoverPipeline.fallback.applied.includes('v9_body') && leftoverPipeline.article.body.includes(ac3Cited),
+    leftoverPipeline.article.body
+  );
+  assert(
+    'same-paragraph leftover pipeline does not fail V4',
+    !hasCode(leftoverPipeline.finalProblems, 'V4_MISSING_SOURCE_LINK'),
+    leftoverPipeline.finalProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const wrapperBodies = {
+    '{{AC3}}': '{{AC3}}',
+    '[{{AC3}}]': '[{{AC3}}]',
+    '"{{AC3}}"': '"{{AC3}}"',
+    '**{{AC3}}**': '**{{AC3}}**',
+    '[{{AC3}}](some-model-url)': '[{{AC3}}](https://example.com/not-the-approved-source)'
+  };
+  for (const [label, token] of Object.entries(wrapperBodies)) {
+    assert(
+      `wrapper ${label} unwraps to a bare token`,
+      unwrapClaimTokenWrappers(token).replace(/\s+/g, '') === '{{AC3}}' ||
+        unwrapClaimTokenWrappers(`Keep the profile complete. ${token}`).includes('{{AC3}}'),
+      unwrapClaimTokenWrappers(token)
+    );
+    const wrapped = assembleArticle(
+      ac3Draft(
+        [
+          '## Local ranking',
+          '',
+          token,
+          '',
+          'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+        ].join('\n')
+      ),
+      rankingClaims
+    );
+    const wrappedLinks = wrapped.body.match(/\[[^\]]+\]\([^)]+\)/g) || [];
+    const wrappedProblems = validateGeneratedArticle(wrapped, rankingCtx);
+    assert(
+      `wrapper ${label} renders one canonical AC3 link`,
+      wrapped.body.includes(ac3Cited) &&
+        wrappedLinks.length === 1 &&
+        wrappedLinks[0].includes(ac3.url) &&
+        !wrapped.body.includes('[[') &&
+        !wrapped.body.includes('example.com/not-the-approved-source'),
+      wrapped.body
+    );
+    assert(
+      `wrapper ${label} passes V4`,
+      !hasCode(wrappedProblems, 'V4_MISSING_SOURCE_LINK') && wrappedProblems.length === 0,
+      wrappedProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+    );
+  }
+
+  const pipelineMissingLink = {
+    ...separatePipeline.article,
+    body: separatePipeline.article.body.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+  };
+  const pipelineMissingLinkProblems = validateGeneratedArticle(pipelineMissingLink, rankingCtx);
+  assert(
+    'V4 still fails for a genuinely missing canonical link',
+    hasCode(pipelineMissingLinkProblems, 'V4_MISSING_SOURCE_LINK'),
+    pipelineMissingLinkProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   if (failed) {

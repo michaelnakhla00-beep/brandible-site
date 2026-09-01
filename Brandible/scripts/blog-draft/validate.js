@@ -863,6 +863,49 @@ function renderedFactHasCanonicalCitation(renderedFact, allowed) {
   return true;
 }
 
+function formatV4Diagnostics(article, problems, allowedClaims) {
+  const lines = [];
+  for (const problem of problems || []) {
+    if (!problem || problem.code !== 'V4_MISSING_SOURCE_LINK') continue;
+    const idMatch = String(problem.message || '').match(/Approved claim (AC\d+)/i);
+    const claimId = idMatch ? idMatch[1] : null;
+    const allowed = claimId ? findAllowedClaim(allowedClaims, claimId) : null;
+    const rendered = (article.rendered_facts || []).find((item) => item && item.id === claimId) || null;
+    const renderedText = rendered ? String(rendered.text || '') : '';
+    const hrefs = [];
+    const re = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+    let match;
+    while ((match = re.exec(renderedText)) !== null) {
+      hrefs.push(match[2]);
+    }
+    const body = String((article && article.body) || '');
+    const inBody = Boolean(renderedText) && body.includes(renderedText);
+    let fragment = '';
+    if (renderedText) {
+      const idx = body.indexOf(renderedText);
+      if (idx >= 0) {
+        fragment = body.slice(Math.max(0, idx - 40), idx + renderedText.length + 40);
+      }
+    }
+    if (!fragment) {
+      const idx = body.search(/there's no way|local ranking|AC\d+/i);
+      fragment = idx >= 0 ? body.slice(Math.max(0, idx - 40), idx + 80) : body.slice(0, 120);
+    }
+    lines.push(
+      JSON.stringify({
+        claim_id: claimId,
+        allowed_url: allowed ? allowed.url : null,
+        rendered_text: renderedText,
+        canonical_citation_check: renderedFactHasCanonicalCitation(rendered, allowed),
+        rendered_exactly_in_body: inBody,
+        hrefs_found_in_rendered_text: hrefs,
+        body_fragment: fragment
+      })
+    );
+  }
+  return lines;
+}
+
 function checkClaimLedger(article, sourcePack, allowedClaims) {
   const problems = [];
   const claims = Array.isArray(article.claims) ? article.claims : [];
@@ -1297,5 +1340,6 @@ module.exports = {
   classifyMessage,
   assertRevisionResolutions,
   allowedActionsForCode,
-  formatProblem
+  formatProblem,
+  formatV4Diagnostics
 };

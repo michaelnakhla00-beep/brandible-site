@@ -24,7 +24,7 @@ function quotedFromMessage(message) {
 function splitSentences(text) {
   return String(text || '')
     .replace(/\n+/g, ' ')
-    .split(/(?<=[.!?])\s+(?=[A-Z*"“])/)
+    .split(/(?<=[.!?])\s+(?=[A-Z*"“\[])/)
     .map((item) => item.trim())
     .filter((item) => item.length > 20);
 }
