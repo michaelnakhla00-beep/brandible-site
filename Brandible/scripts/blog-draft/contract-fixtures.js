@@ -639,20 +639,139 @@ function run() {
   });
   assert('V9 replaced_with_token is accepted', validV9.length === 0, validV9.join(' | '));
 
-  const reportedButMissing = assertRevisionResolutions(v9Problems, {
+  const rewrittenAuditParsed = {
+    ...everyoneArticle,
+    body: [
+      '## How the auction works',
+      '',
+      'Raising spend does not by itself make an ad eligible to show.',
+      '',
+      `Keeping spend honest matters because {{${adsClaim.id}}} That does not mean raising the bid first.`,
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n'),
+    resolutions: [
+      {
+        failure_id: v9Problems[0].id,
+        action: 'rewritten_to_evidence',
+        resulting_sentence: 'Raising budget alone does not make an ad eligible to show.'
+      }
+    ]
+  };
+  const rewrittenAuditGate = assertRevisionResolutions(v9Problems, rewrittenAuditParsed);
+  assert(
+    'V9 rewritten_to_evidence gate passes when audit sentence differs from revised prose',
+    rewrittenAuditGate.length === 0,
+    rewrittenAuditGate.join(' | ')
+  );
+  const rewrittenAssembled = assembleArticle(rewrittenAuditParsed, adsAllowed);
+  const rewrittenFinal = validateGeneratedArticle(rewrittenAssembled, ctx(adsPack(), adsAllowed));
+  assert(
+    'rewritten V9 with quantifier removed is decided by final validation',
+    rewrittenFinal.length === 0 && !/\beveryone\b/i.test(rewrittenAssembled.body),
+    rewrittenFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const claimedRewriteParsed = {
+    ...everyoneArticle,
+    resolutions: [
+      {
+        failure_id: v9Problems[0].id,
+        action: 'rewritten_to_evidence',
+        resulting_sentence: 'Raising spend does not by itself make an ad eligible to show.'
+      }
+    ]
+  };
+  const claimedRewriteGate = assertRevisionResolutions(v9Problems, claimedRewriteParsed);
+  assert(
+    'V9 rewrite claim still requires a resolution even if prose does not match',
+    claimedRewriteGate.length === 0,
+    claimedRewriteGate.join(' | ')
+  );
+  const claimedRewriteFinal = validateGeneratedArticle(
+    assembleArticle(claimedRewriteParsed, adsAllowed),
+    ctx(adsPack(), adsAllowed)
+  );
+  assert(
+    'V9 still fails final validation when everyone remains',
+    hasCode(claimedRewriteFinal, 'V9_QUANTIFIER') && /\beveryone\b/i.test(claimedRewriteParsed.body),
+    claimedRewriteFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const missingAc3 = assertRevisionResolutions(v9Problems, {
     ...everyoneArticle,
     resolutions: [
       {
         failure_id: v9Problems[0].id,
         action: 'replaced_with_token',
-        resulting_sentence: `{{${adsClaim.id}}}`
+        resulting_sentence: '{{AC3}}'
       }
     ]
   });
   assert(
-    'resolutions[] is invalid when resulting_sentence is missing from the revised article',
-    reportedButMissing.some((item) => /does not appear in the revised article/.test(item)),
-    reportedButMissing.join(' | ')
+    'replaced_with_token {{AC3}} is rejected when the token is absent',
+    missingAc3.some((item) => /\{\{AC3\}\}/.test(item) && /not present in the revised article/.test(item)),
+    missingAc3.join(' | ')
+  );
+
+  const presentAc3 = assertRevisionResolutions(v9Problems, {
+    ...everyoneArticle,
+    body: [
+      '## How the auction works',
+      '',
+      '{{AC3}}',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n'),
+    resolutions: [
+      {
+        failure_id: v9Problems[0].id,
+        action: 'replaced_with_token',
+        resulting_sentence: '{{AC3}}'
+      }
+    ]
+  });
+  assert('replaced_with_token gate passes when {{AC3}} is present', presentAc3.length === 0, presentAc3.join(' | '));
+
+  const v2Problems = ctaProblems.filter((item) => item.code === 'V2_CTA_SELF_QUALIFY');
+  const selfQualifiedParsed = {
+    ...baseFields(),
+    title: 'What to check before you raise ad spend',
+    slug: 'what-to-check-before-you-raise-ad-spend',
+    meta_title: 'What to check before you raise ad spend',
+    category: 'Marketing',
+    excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+    meta_description:
+      'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+    body: 'Fix the listing first.\n',
+    claims: [],
+    cta: {
+      names_brandible: true,
+      fit_case: 'If it is not, Brandible can set it up.',
+      walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+    },
+    resolutions: [
+      {
+        failure_id: v2Problems[0].id,
+        action: 'self_qualified',
+        resulting_sentence: 'Walk away if the shop already has tracking handled without Brandible.'
+      }
+    ]
+  };
+  const selfQualifiedGate = assertRevisionResolutions(v2Problems, selfQualifiedParsed);
+  assert(
+    'self_qualified gate passes when audit wording differs from the body',
+    selfQualifiedGate.length === 0,
+    selfQualifiedGate.join(' | ')
+  );
+  const selfQualifiedFinal = validateGeneratedArticle(
+    assembleArticle(selfQualifiedParsed, []),
+    ctx({ needed: false, sources: [] }, [])
+  );
+  assert(
+    'self_qualified structured CTA fields are decided by final validation',
+    !hasCode(selfQualifiedFinal, 'V2_CTA_SELF_QUALIFY'),
+    selfQualifiedFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   const repairedEveryone = assembleArticle(

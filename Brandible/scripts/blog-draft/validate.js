@@ -1090,8 +1090,9 @@ function revisionContainsText(parsed) {
   return Boolean(parsed.body || parsed.title || parsed.excerpt || parsed.meta_description);
 }
 
-function revisionIncludesSnippet(parsed, snippet) {
-  const blob = [
+function revisionTextBlob(parsed) {
+  if (!parsed || typeof parsed !== 'object') return '';
+  return [
     parsed.title,
     parsed.meta_title,
     parsed.meta_description,
@@ -1102,11 +1103,12 @@ function revisionIncludesSnippet(parsed, snippet) {
   ]
     .filter(Boolean)
     .join('\n');
-  const raw = String(blob);
-  if (raw.includes(snippet)) return true;
-  const compact = raw.replace(/\s+/g, ' ');
-  const needle = String(snippet).replace(/\s+/g, ' ').trim();
-  return compact.includes(needle);
+}
+
+function revisionHasClaimToken(parsed, tokenId) {
+  const blob = revisionTextBlob(parsed);
+  if (!blob || !tokenId) return false;
+  return new RegExp(`\\{\\{\\s*${tokenId}\\s*\\}\\}`).test(blob);
 }
 
 function assertRevisionResolutions(problems, parsed) {
@@ -1134,22 +1136,23 @@ function assertRevisionResolutions(problems, parsed) {
       missing.push(`${problem.id}: action must be ${allowed.join(' or ')}`);
       continue;
     }
-    if (action === 'replaced_with_token' && !/\{\{\s*AC\d+\s*\}\}/.test(String(resolution.resulting_sentence || ''))) {
-      missing.push(`${problem.id}: replaced_with_token requires a resulting_sentence containing an {{AC#}} token`);
+    if (action === 'replaced_with_token') {
+      const sentence = String(resolution.resulting_sentence || '');
+      if (!/\{\{\s*AC\d+\s*\}\}/.test(sentence)) {
+        missing.push(`${problem.id}: replaced_with_token requires a resulting_sentence containing an {{AC#}} token`);
+        continue;
+      }
+      if (revisionContainsText(parsed)) {
+        const tokenIds = extractClaimTokens(sentence);
+        const absent = tokenIds.find((id) => !revisionHasClaimToken(parsed, id));
+        if (absent) {
+          missing.push(`${problem.id}: replaced_with_token {{${absent}}} is not present in the revised article`);
+        }
+      }
       continue;
     }
     if (action !== 'deleted' && !String(resolution.resulting_sentence || '').trim()) {
       missing.push(`${problem.id}: resulting_sentence required unless action is deleted`);
-      continue;
-    }
-    if (
-      ['replaced_with_token', 'rewritten_to_evidence', 'attributed', 'self_qualified'].includes(action) &&
-      revisionContainsText(parsed)
-    ) {
-      const snippet = String(resolution.resulting_sentence || '').trim();
-      if (snippet && !revisionIncludesSnippet(parsed, snippet)) {
-        missing.push(`${problem.id}: resulting_sentence does not appear in the revised article`);
-      }
     }
   }
   return missing;
