@@ -54,10 +54,18 @@ function uniqueIds(lists) {
   return ids;
 }
 
+function stripExistingMarkdownLinks(text) {
+  return String(text || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+}
+
 function linkSafeWording(wording, url) {
-  const text = String(wording || '').trim();
+  let text = stripExistingMarkdownLinks(String(wording || '').trim());
+  if (text.startsWith('[') && !/\]\(/.test(text)) {
+    text = text.slice(1);
+    if (text.endsWith(']') && !text.includes('[')) text = text.slice(0, -1);
+  }
+  text = text.trim();
   if (!text || !url) return text;
-  if (/\[[^\]]+\]\(https?:\/\//.test(text)) return text;
   const ended = /[.!?]$/.test(text);
   const core = ended ? text.slice(0, -1) : text;
   const mark = ended ? text.slice(-1) : '';

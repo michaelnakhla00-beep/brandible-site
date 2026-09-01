@@ -2,7 +2,7 @@
 
 const path = require('path');
 const { loadFacts, buildAllowlist, factsForPrompt, moneySetHas } = require('./facts');
-const { buildAllowedClaims, isAbsoluteUpgrade } = require('./allowed-claims');
+const { buildAllowedClaims, isAbsoluteUpgrade, toSafeWording } = require('./allowed-claims');
 const {
   assembleArticle,
   resolveClaimTokens,
@@ -151,6 +151,90 @@ function run() {
     'renderer uses approved safe wording',
     resolved.text.includes((adsClaim.safe_wording || adsClaim.claim).replace(/[.!?]$/, '')),
     resolved.text
+  );
+
+  const foreignUrl = 'https://example.com/not-the-approved-source';
+  const linkedEvidencePack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: adsClaim.url,
+        title: 'About Ad Rank',
+        excerpt: 'Ad Rank is recalculated each time your ad is eligible to compete in an auction.',
+        evidence: [
+          {
+            about: 'ad rank',
+            quote: `[Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears.](${foreignUrl})`
+          }
+        ]
+      }
+    ]
+  };
+  const linkedEvidenceClaims = buildAllowedClaims(linkedEvidencePack);
+  const linkedEvidenceClaim = linkedEvidenceClaims.find((item) => /ad rank to determine/i.test(item.evidence));
+  assert('markdown evidence still stored verbatim', linkedEvidenceClaim && linkedEvidenceClaim.evidence.includes(foreignUrl));
+  assert(
+    'safe_wording strips research markdown links to plain claim text',
+    linkedEvidenceClaim &&
+      linkedEvidenceClaim.safe_wording ===
+        'Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears.' &&
+      !linkedEvidenceClaim.safe_wording.includes(foreignUrl) &&
+      !/\[/.test(linkedEvidenceClaim.safe_wording),
+    linkedEvidenceClaim && linkedEvidenceClaim.safe_wording
+  );
+
+  const citedFromMarkdown = resolveClaimTokens(`{{${linkedEvidenceClaim.id}}}`, linkedEvidenceClaims);
+  const citedLinks = citedFromMarkdown.text.match(/\[[^\]]+\]\([^)]+\)/g) || [];
+  assert(
+    'renderer ignores research URL and links with allowed.url',
+    citedFromMarkdown.text.includes(`](${adsClaim.url})`) && !citedFromMarkdown.text.includes(foreignUrl),
+    citedFromMarkdown.text
+  );
+  assert(
+    'rendered AC claim contains exactly one Markdown link',
+    citedLinks.length === 1 && citedLinks[0] === `[Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears](${adsClaim.url})`,
+    JSON.stringify(citedLinks)
+  );
+
+  assert(
+    'toSafeWording strips an unmatched leading citation bracket',
+    toSafeWording("[There's no way to request or pay for a better local ranking on Google.") ===
+      "There's no way to request or pay for a better local ranking on Google."
+  );
+
+  const unmatchedBracketPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: 'https://support.google.com/business/answer/7091?hl=en',
+        title: 'Tips to improve your local ranking on Google',
+        excerpt: 'Local results are mainly based on relevance, distance, and popularity.',
+        evidence: [
+          {
+            about: 'paid ranking',
+            quote: "[There's no way to request or pay for a better local ranking on Google."
+          }
+        ]
+      }
+    ]
+  };
+  const unmatchedClaims = buildAllowedClaims(unmatchedBracketPack);
+  const unmatchedClaim = unmatchedClaims.find((item) => /no way to request or pay/i.test(item.evidence));
+  const unmatchedRendered = resolveClaimTokens(`Start with the listing. {{${unmatchedClaim.id}}}`, unmatchedClaims);
+  assert(
+    'unmatched leading bracket does not survive in safe_wording',
+    unmatchedClaim && !unmatchedClaim.safe_wording.startsWith('[') && !unmatchedClaim.safe_wording.includes('[['),
+    unmatchedClaim && unmatchedClaim.safe_wording
+  );
+  assert(
+    'rendered sentence does not retain malformed Markdown',
+    unmatchedRendered.text.includes(`](${unmatchedClaim.url})`) &&
+      !unmatchedRendered.text.includes('[[') &&
+      !/^\s*\[There's no way/m.test(unmatchedRendered.text) &&
+      (unmatchedRendered.text.match(/\[[^\]]+\]\([^)]+\)/g) || []).length === 1,
+    unmatchedRendered.text
   );
 
   const fakeModelClaims = [
@@ -616,6 +700,63 @@ function run() {
     'tokenized allowed claim with assembled CTA can pass',
     passingProblems.length === 0,
     passingProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const markdownCitedArticle = assembleArticle(
+    {
+      ...baseFields(),
+      title: 'What to check before you raise ad spend',
+      slug: 'what-to-check-before-you-raise-ad-spend',
+      meta_title: 'What to check before you raise ad spend',
+      category: 'Marketing',
+      excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+      meta_description:
+        'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+      body: [
+        '## How the auction works',
+        '',
+        `Keeping spend honest matters because {{${linkedEvidenceClaim.id}}} That does not mean raising the bid first.`,
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n'),
+      claims: [],
+      cta: {
+        names_brandible: true,
+        fit_case: 'If it is not, Brandible can set it up.',
+        walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+      }
+    },
+    linkedEvidenceClaims
+  );
+  assert(
+    'assembled markdown-evidence claim uses the canonical URL once',
+    markdownCitedArticle.body.includes(`](${linkedEvidenceClaim.url})`) &&
+      !markdownCitedArticle.body.includes(foreignUrl) &&
+      (markdownCitedArticle.body.match(/\[[^\]]+\]\([^)]+\)/g) || []).length === 1,
+    markdownCitedArticle.body
+  );
+  const markdownCitedProblems = validateGeneratedArticle(
+    markdownCitedArticle,
+    ctx(linkedEvidencePack, linkedEvidenceClaims)
+  );
+  assert(
+    'V4 passes for the deterministic canonical link',
+    markdownCitedProblems.length === 0,
+    markdownCitedProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const missingCanonicalLink = {
+    ...markdownCitedArticle,
+    body: markdownCitedArticle.body.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+  };
+  const missingCanonicalProblems = validateGeneratedArticle(
+    missingCanonicalLink,
+    ctx(linkedEvidencePack, linkedEvidenceClaims)
+  );
+  assert(
+    'V4 still fails when the approved URL is genuinely absent',
+    hasCode(missingCanonicalProblems, 'V4_MISSING_SOURCE_LINK'),
+    missingCanonicalProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   const adsCtx = ctx(adsPack(), adsAllowed);

@@ -15,8 +15,23 @@ function isAbsoluteUpgrade(evidence, claim) {
   return ABSOLUTE_MARKERS.test(proposed) && !ABSOLUTE_MARKERS.test(stored);
 }
 
+function stripMarkdownLinks(text) {
+  return String(text || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+}
+
+function stripCitationWrappers(text) {
+  let next = stripMarkdownLinks(text).trim();
+  if (next.startsWith('[') && !/\]\(/.test(next)) {
+    next = next.slice(1);
+    if (next.endsWith(']') && !next.includes('[')) {
+      next = next.slice(0, -1);
+    }
+  }
+  return next.trim();
+}
+
 function toSafeWording(quote) {
-  let text = String(quote || '')
+  let text = stripCitationWrappers(quote)
     .replace(/\u2014/g, ', ')
     .replace(/\u2013/g, '-')
     .replace(/\s+/g, ' ')
