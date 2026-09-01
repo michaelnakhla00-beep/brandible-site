@@ -14,6 +14,7 @@ const {
   assertRevisionResolutions,
   stampProblems
 } = require('./validate');
+const { applySafetyFallback, collectSafetyRepairs } = require('./safety-fallback');
 
 const EDITORIAL_DIR = path.resolve(__dirname, '../../blogs/editorial');
 
@@ -509,6 +510,22 @@ function run() {
   });
   assert('V9 replaced_with_token is accepted', validV9.length === 0, validV9.join(' | '));
 
+  const reportedButMissing = assertRevisionResolutions(v9Problems, {
+    ...everyoneArticle,
+    resolutions: [
+      {
+        failure_id: v9Problems[0].id,
+        action: 'replaced_with_token',
+        resulting_sentence: `{{${adsClaim.id}}}`
+      }
+    ]
+  });
+  assert(
+    'resolutions[] is invalid when resulting_sentence is missing from the revised article',
+    reportedButMissing.some((item) => /does not appear in the revised article/.test(item)),
+    reportedButMissing.join(' | ')
+  );
+
   const repairedEveryone = assembleArticle(
     {
       ...everyoneArticle,
@@ -599,6 +616,178 @@ function run() {
     'tokenized allowed claim with assembled CTA can pass',
     passingProblems.length === 0,
     passingProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const adsCtx = ctx(adsPack(), adsAllowed);
+
+  function insertBeforeCta(article, markdown) {
+    const marker = 'If tracking is already in place';
+    const idx = article.body.indexOf(marker);
+    const extra = String(markdown).trim();
+    const body =
+      idx === -1
+        ? `${article.body.trim()}\n\n${extra}\n`
+        : `${article.body.slice(0, idx)}${extra}\n\n${article.body.slice(idx)}`;
+    return { ...article, body };
+  }
+
+  const emDashArticle = {
+    ...tokenArticle,
+    title: 'What to check before you raise ad spend — tracking',
+    excerpt: 'Get the tracking and the landing page honest before you add more budget — then judge spend.',
+    meta_description:
+      'A practical order of operations for local shops that want paid clicks to turn into calls — not just more spend.',
+    body: tokenArticle.body.replace(
+      'That does not mean raising the bid first.',
+      'That does not mean raising the bid first — start with tracking.'
+    )
+  };
+  const emDashProblems = validateGeneratedArticle(emDashArticle, adsCtx);
+  assert(
+    'revision em dash is V10_OTHER',
+    hasCode(emDashProblems, 'V10_OTHER') && emDashProblems.some((item) => /em dash/i.test(item.message)),
+    emDashProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+  const emDashFallback = applySafetyFallback(emDashArticle, emDashProblems);
+  assert(
+    'em dash fallback applies one deterministic repair',
+    !emDashFallback.refused && emDashFallback.applied.join(',') === 'em_dash',
+    JSON.stringify(emDashFallback.applied)
+  );
+  assert(
+    'em dash fallback normalizes title, meta, excerpt, and body',
+    ![
+      emDashFallback.article.title,
+      emDashFallback.article.meta_description,
+      emDashFallback.article.excerpt,
+      emDashFallback.article.body
+    ].some((value) => String(value).includes('\u2014')),
+    emDashFallback.article.body
+  );
+  const emDashFinal = validateGeneratedArticle(emDashFallback.article, adsCtx);
+  assert(
+    'em dash fallback passes V10 on final validation',
+    emDashFinal.length === 0,
+    emDashFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const everyoneBodyArticle = insertBeforeCta(
+    tokenArticle,
+    'Everyone should raise spend before the landing page is ready.'
+  );
+  const everyoneBodyProblems = validateGeneratedArticle(everyoneBodyArticle, adsCtx);
+  assert(
+    'revision everyone in body is V9_QUANTIFIER',
+    hasCode(everyoneBodyProblems, 'V9_QUANTIFIER') &&
+      everyoneBodyProblems.some((item) => /unsupported quantifier in body/i.test(item.message)),
+    everyoneBodyProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+  const everyoneFallback = applySafetyFallback(everyoneBodyArticle, everyoneBodyProblems);
+  assert(
+    'V9 body fallback deletes the containing sentence',
+    !everyoneFallback.refused &&
+      everyoneFallback.applied.join(',') === 'v9_body' &&
+      !/Everyone should raise spend before the landing page is ready/.test(everyoneFallback.article.body) &&
+      !/\beveryone\b/i.test(everyoneFallback.article.body),
+    everyoneFallback.article.body
+  );
+  const everyoneFinal = validateGeneratedArticle(everyoneFallback.article, adsCtx);
+  assert(
+    'V9 body deletion is removed on final validation',
+    everyoneFinal.length === 0,
+    everyoneFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const rawGoogleArticle = {
+    ...tokenArticle,
+    body: `${tokenArticle.body.trim()}\n\n## Extra fact\n\nGoogle Ads runs an auction every time a search happens.\n`
+  };
+  const rawGoogleProblems = validateGeneratedArticle(rawGoogleArticle, adsCtx);
+  assert(
+    'raw Google sentence surviving revision is V7_CLAIM_LEDGER',
+    hasCode(rawGoogleProblems, 'V7_CLAIM_LEDGER') &&
+      rawGoogleProblems.some((item) => /factual platform assertion is not an approved claim token/i.test(item.message)),
+    rawGoogleProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+  const rawGoogleFallback = applySafetyFallback(rawGoogleArticle, rawGoogleProblems);
+  assert(
+    'V7 fallback deletes the raw Google sentence and empty heading',
+    !rawGoogleFallback.refused &&
+      rawGoogleFallback.applied.join(',') === 'v7_body' &&
+      !/Google Ads runs an auction every time a search happens/.test(rawGoogleFallback.article.body) &&
+      !/## Extra fact/.test(rawGoogleFallback.article.body),
+    rawGoogleFallback.article.body
+  );
+  const rawGoogleFinal = validateGeneratedArticle(rawGoogleFallback.article, adsCtx);
+  assert(
+    'V7 body deletion is removed on final validation',
+    rawGoogleFinal.length === 0,
+    rawGoogleFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const tooManyArticle = insertBeforeCta(
+    tokenArticle,
+    [
+      'Google Ads runs an auction every time a search happens.',
+      '',
+      'Conversion tracking lets you track whether clicks become calls after the visit.',
+      '',
+      'Google Search ads use bidding for a position instead of a reserved placement.',
+      '',
+      'Google Ads determines whether a click is tracked after the auction finishes.'
+    ].join('\n')
+  );
+  const tooManyProblems = validateGeneratedArticle(tooManyArticle, adsCtx);
+  const tooManyCandidates = collectSafetyRepairs(tooManyArticle, tooManyProblems);
+  const tooManyFallback = applySafetyFallback(tooManyArticle, tooManyProblems);
+  assert(
+    'more than 3 deterministic repairs are required',
+    tooManyCandidates.length > 3,
+    `candidates=${tooManyCandidates.length} problems=${tooManyProblems.map((item) => item.code).join(',')}`
+  );
+  assert(
+    'fallback refuses when more than 3 repairs are required',
+    tooManyFallback.refused && tooManyFallback.applied.length === 0 && tooManyFallback.article === tooManyArticle,
+    JSON.stringify({ refused: tooManyFallback.refused, applied: tooManyFallback.applied, reason: tooManyFallback.reason })
+  );
+  assert(
+    'refused fallback still fails validation',
+    hasCode(tooManyProblems, 'V7_CLAIM_LEDGER'),
+    tooManyProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const metaEveryoneArticle = {
+    ...tokenArticle,
+    meta_description:
+      'Everyone needs a practical order of operations for local shops that want paid clicks to turn into calls.'
+  };
+  const metaEveryoneProblems = validateGeneratedArticle(metaEveryoneArticle, adsCtx);
+  const metaEveryoneFallback = applySafetyFallback(metaEveryoneArticle, metaEveryoneProblems);
+  assert(
+    'V9 in meta description is not deleted deterministically',
+    metaEveryoneFallback.applied.length === 0 &&
+      metaEveryoneFallback.refused === false &&
+      metaEveryoneFallback.article.meta_description === metaEveryoneArticle.meta_description,
+    JSON.stringify(metaEveryoneFallback.applied)
+  );
+  assert(
+    'V9 in meta description still fails validation',
+    hasCode(metaEveryoneProblems, 'V9_QUANTIFIER') &&
+      metaEveryoneProblems.some((item) => /unsupported quantifier in meta_description/i.test(item.message)),
+    metaEveryoneProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const entailmentFallback = applySafetyFallback(stronger, strongerProblems);
+  const entailmentAfter = validateGeneratedArticle(entailmentFallback.article, ctx(gbpPack(), gbpAllowed));
+  assert(
+    'source-entailment is outside the safety fallback allowlist',
+    entailmentFallback.applied.length === 0 && entailmentFallback.refused === false,
+    JSON.stringify(entailmentFallback.applied)
+  );
+  assert(
+    'source-entailment still fails after fallback',
+    hasCode(entailmentAfter, 'V3_SOURCE_ENTAILMENT'),
+    entailmentAfter.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   if (failed) {

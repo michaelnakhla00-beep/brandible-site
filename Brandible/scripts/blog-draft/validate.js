@@ -1055,6 +1055,30 @@ function allowedActionsForCode(code) {
   }
 }
 
+function revisionContainsText(parsed) {
+  if (!parsed || typeof parsed !== 'object') return false;
+  return Boolean(parsed.body || parsed.title || parsed.excerpt || parsed.meta_description);
+}
+
+function revisionIncludesSnippet(parsed, snippet) {
+  const blob = [
+    parsed.title,
+    parsed.meta_title,
+    parsed.meta_description,
+    parsed.excerpt,
+    parsed.body,
+    parsed.cta && parsed.cta.fit_case,
+    parsed.cta && parsed.cta.walk_away_case
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const raw = String(blob);
+  if (raw.includes(snippet)) return true;
+  const compact = raw.replace(/\s+/g, ' ');
+  const needle = String(snippet).replace(/\s+/g, ' ').trim();
+  return compact.includes(needle);
+}
+
 function assertRevisionResolutions(problems, parsed) {
   const missing = [];
   const resolutions = parsed && Array.isArray(parsed.resolutions) ? parsed.resolutions : [];
@@ -1086,6 +1110,16 @@ function assertRevisionResolutions(problems, parsed) {
     }
     if (action !== 'deleted' && !String(resolution.resulting_sentence || '').trim()) {
       missing.push(`${problem.id}: resulting_sentence required unless action is deleted`);
+      continue;
+    }
+    if (
+      ['replaced_with_token', 'rewritten_to_evidence', 'attributed', 'self_qualified'].includes(action) &&
+      revisionContainsText(parsed)
+    ) {
+      const snippet = String(resolution.resulting_sentence || '').trim();
+      if (snippet && !revisionIncludesSnippet(parsed, snippet)) {
+        missing.push(`${problem.id}: resulting_sentence does not appear in the revised article`);
+      }
     }
   }
   return missing;

@@ -15,6 +15,7 @@ const { parseQueueTopics, findTopic: findQueuedTopic } = require('./blog-draft/q
 const { buildSourcePack, sourcePackForPrompt } = require('./blog-draft/research');
 const { buildAllowedClaims, allowedClaimsForPrompt } = require('./blog-draft/allowed-claims');
 const { assembleArticle } = require('./blog-draft/assemble');
+const { applySafetyFallback } = require('./blog-draft/safety-fallback');
 const {
   PHASE1_HARD_CHECKS,
   PHASE2_GROUNDING_CHECKS,
@@ -681,6 +682,21 @@ async function generateFromTopic(topic, editorial) {
     tokenized = normalizeGenerated(parsed, topic);
     article = assembleArticle(tokenized, allowedClaims);
     problems = validateGeneratedArticle(article, ctx);
+    if (problems.length) {
+      const fallback = applySafetyFallback(article, problems);
+      if (fallback.refused) {
+        console.log(`Deterministic safety fallback refused: ${fallback.reason}`);
+      } else if (fallback.applied.length) {
+        console.log(`Deterministic safety fallback: ${fallback.applied.join(', ')}.`);
+        article = fallback.article;
+        if (fallback.needsAssemble) {
+          // Re-assemble only if claim tokens remain. Assembling already-rendered
+          // markdown would drop the sourced ledger.
+          article = assembleArticle(article, allowedClaims);
+        }
+        problems = validateGeneratedArticle(article, ctx);
+      }
+    }
   } else {
     console.log('First generation passed validation. No revision pass.');
   }
