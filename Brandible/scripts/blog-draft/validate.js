@@ -1046,7 +1046,7 @@ function allowedActionsForCode(code) {
     case 'V8_OUT_OF_SCOPE':
       return ['deleted'];
     case 'V9_QUANTIFIER':
-      return ['rewritten_to_evidence', 'deleted'];
+      return ['rewritten_to_evidence', 'replaced_with_token', 'deleted'];
     case 'V10_OTHER':
       return ['deleted', 'rewritten_to_evidence', 'attributed', 'self_qualified'];
     default: {
@@ -1112,7 +1112,7 @@ function revisionRepairHints(problems) {
   }
   if (hasCode('V9_QUANTIFIER')) {
     hints.push(
-      'V9_QUANTIFIER: rewrite the named field so it does not say “most people,” “most businesses,” or similar unless an approved source supports it.'
+      'V9_QUANTIFIER: rewrite the unsupported quantifier without the absolute wording, replace the factual sentence with an approved {{AC#}} token when appropriate, or delete it.'
     );
   }
   if (hasCode('V7_CLAIM_LEDGER')) {

@@ -452,6 +452,93 @@ function run() {
   });
   assert('complete valid resolutions accepted', okResolutions.length === 0, okResolutions.join(' | '));
 
+  const everyoneArticle = {
+    ...baseFields(),
+    title: 'What to check before you raise ad spend',
+    slug: 'what-to-check-before-you-raise-ad-spend',
+    meta_title: 'What to check before you raise ad spend',
+    category: 'Marketing',
+    excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+    meta_description:
+      'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+    body: [
+      '## How the auction works',
+      '',
+      'Everyone can get an ad to show if they raise spend.',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n'),
+    claims: [],
+    cta: {
+      names_brandible: true,
+      fit_case: 'If it is not, Brandible can set it up.',
+      walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+    }
+  };
+  const everyoneProblems = validateGeneratedArticle(everyoneArticle, ctx(adsPack(), adsAllowed));
+  const v9Problems = everyoneProblems.filter((item) => item.code === 'V9_QUANTIFIER');
+  assert(
+    'validator produces V9_QUANTIFIER for everyone',
+    v9Problems.length >= 1 && /\beveryone\b/i.test(everyoneArticle.body),
+    everyoneProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const invalidV9 = assertRevisionResolutions(v9Problems, {
+    resolutions: [
+      {
+        failure_id: v9Problems[0].id,
+        action: 'attributed',
+        resulting_sentence: 'Everyone can get an ad to show if they raise spend.'
+      }
+    ]
+  });
+  assert(
+    'invalid V9 resolution action is rejected',
+    invalidV9.some((item) => /V9_QUANTIFIER/.test(item)),
+    invalidV9.join(' | ')
+  );
+
+  const validV9 = assertRevisionResolutions(v9Problems, {
+    resolutions: [
+      {
+        failure_id: v9Problems[0].id,
+        action: 'replaced_with_token',
+        resulting_sentence: `{{${adsClaim.id}}}`
+      }
+    ]
+  });
+  assert('V9 replaced_with_token is accepted', validV9.length === 0, validV9.join(' | '));
+
+  const repairedEveryone = assembleArticle(
+    {
+      ...everyoneArticle,
+      body: [
+        '## How the auction works',
+        '',
+        `{{${adsClaim.id}}}`,
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    },
+    adsAllowed
+  );
+  assert(
+    'V9 token repair removes everyone from assembled body',
+    !/\beveryone\b/i.test(repairedEveryone.body),
+    repairedEveryone.body
+  );
+  const repairedEveryoneProblems = validateGeneratedArticle(repairedEveryone, ctx(adsPack(), adsAllowed));
+  assert(
+    'assembled V9 token repair is subjected to final validation',
+    Array.isArray(repairedEveryoneProblems),
+    'final validation did not run'
+  );
+  assert(
+    'assembled V9 token repair passes final validation',
+    repairedEveryoneProblems.length === 0,
+    repairedEveryoneProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
   const tokenArticle = assembleArticle(
     {
       ...baseFields(),
