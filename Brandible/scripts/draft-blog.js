@@ -52,6 +52,7 @@ function usage() {
   return [
     'Usage:',
     '  npm run blog:draft -- --topic 01',
+    '  npm run blog:draft -- --topic 01 --deterministic',
     '  npm run blog:draft -- --from-editorial Brandible/blogs/editorial/drafts/topic-19-human-edit.md',
     '',
     'AI generation requires:',
@@ -61,16 +62,19 @@ function usage() {
     '',
     'If both API keys are set, BLOG_DRAFT_PROVIDER is required.',
     'Phase 2 research (web search + web fetch) runs on the Anthropic path when the topic needs outside facts.',
+    '--deterministic skips the LLM revision pass and uses the repair compiler only. GitHub automation always uses this mode.',
     'Writes draft: true only. Does not publish, commit, or overwrite.'
   ].join('\n');
 }
 
 function parseArgs(argv) {
-  const args = { topic: null, fromEditorial: null, help: false };
+  const args = { topic: null, fromEditorial: null, help: false, deterministic: false };
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === '--help' || token === '-h') {
       args.help = true;
+    } else if (token === '--deterministic') {
+      args.deterministic = true;
     } else if (token === '--topic') {
       if (!argv[i + 1] || String(argv[i + 1]).startsWith('--')) {
         fail(`--topic requires a topic number.\n\n${usage()}`);
@@ -539,7 +543,7 @@ function writeDraft({ fields, body }) {
   return outPath;
 }
 
-function writeSourceRecord({ fields, facts, sourcePack, claims, allowedClaims, allowlist, claimTokensUsed }) {
+function writeSourceRecord({ fields, facts, sourcePack, claims, allowedClaims, allowlist, claimTokensUsed, repairs }) {
   const dir = path.join(EDITORIAL_DIR, 'research');
   fs.mkdirSync(dir, { recursive: true });
   const filename = `${dateStamp(fields.date)}-${fields.slug}.json`;
@@ -559,6 +563,7 @@ function writeSourceRecord({ fields, facts, sourcePack, claims, allowedClaims, a
     claim_tokens_used: Array.isArray(claimTokensUsed) ? claimTokensUsed : [],
     approved_first_party_numbers: allowlistSnapshot(allowlist),
     claims: Array.isArray(claims) ? claims : [],
+    repairs: Array.isArray(repairs) ? repairs : [],
     internal_links_catalog_note: 'Internal URLs in the article must come from the approved catalog of live posts, services, and core pages.'
   };
   const outPath = path.join(dir, filename);
@@ -620,7 +625,8 @@ async function fromEditorial(fileArg, topics) {
   return outPath;
 }
 
-async function generateFromTopic(topic, editorial) {
+async function generateFromTopic(topic, editorial, options) {
+  const deterministic = Boolean(options && options.deterministic);
   const config = resolveProvider();
   const facts = loadFacts(EDITORIAL_DIR);
   const catalog = buildCatalog({ postsDir: POSTS_DIR, facts });
@@ -657,43 +663,48 @@ async function generateFromTopic(topic, editorial) {
   let tokenized = normalizeGenerated(parsed, topic);
   let article = assembleArticle(tokenized, allowedClaims);
   let problems = validateGeneratedArticle(article, ctx);
+  let repairs = [];
   if (problems.length) {
     console.log('First generation failed validation:');
     for (const problem of problems) {
       console.log(`  - ${formatProblem(problem)}`);
     }
-    console.log('Running the single revision pass.');
-    parsed = await completeArticle({
-      ...config,
-      prompt: buildRevisionPrompt(tokenized, problems, {
-        facts,
-        catalog,
-        sourcePack,
-        topic,
-        allowlist,
-        allowedClaims
-      }),
-      mode: 'revision'
-    });
-    const missingResolutions = assertRevisionResolutions(problems, parsed);
-    if (missingResolutions.length) {
-      fail(
-        `Revision rejected: missing or invalid resolutions. No draft written.\n- ${missingResolutions.join('\n- ')}`
-      );
+    if (!deterministic) {
+      console.log('Running the single revision pass.');
+      parsed = await completeArticle({
+        ...config,
+        prompt: buildRevisionPrompt(tokenized, problems, {
+          facts,
+          catalog,
+          sourcePack,
+          topic,
+          allowlist,
+          allowedClaims
+        }),
+        mode: 'revision'
+      });
+      const missingResolutions = assertRevisionResolutions(problems, parsed);
+      if (missingResolutions.length) {
+        fail(
+          `Revision rejected: missing or invalid resolutions. No draft written.\n- ${missingResolutions.join('\n- ')}`
+        );
+      }
+      tokenized = normalizeGenerated(parsed, topic);
+      article = assembleArticle(tokenized, allowedClaims);
+      problems = validateGeneratedArticle(article, ctx);
+    } else {
+      console.log('Skipping model revision. Running deterministic repair compiler.');
     }
-    tokenized = normalizeGenerated(parsed, topic);
-    article = assembleArticle(tokenized, allowedClaims);
-    problems = validateGeneratedArticle(article, ctx);
     if (problems.length) {
-      const fallback = applySafetyFallback(article, problems);
+      const fallback = applySafetyFallback(article, problems, { allowedClaims, catalog });
       if (fallback.refused) {
-        console.log(`Deterministic safety fallback refused: ${fallback.reason}`);
-      } else if (fallback.applied.length) {
-        console.log(`Deterministic safety fallback: ${fallback.applied.join(', ')}.`);
+        fail(`Deterministic repair compiler refused: ${fallback.reason}. No draft written.`);
+      }
+      repairs = Array.isArray(fallback.repairs) ? fallback.repairs : [];
+      if (fallback.applied.length) {
+        console.log(`Deterministic repair compiler: ${fallback.applied.join(', ')}.`);
         article = fallback.article;
         if (fallback.needsAssemble) {
-          // Re-assemble only if claim tokens remain. Assembling already-rendered
-          // markdown would drop the sourced ledger.
           article = assembleArticle(article, allowedClaims);
         }
         article = refreshAssemblyState(article, allowedClaims);
@@ -701,7 +712,11 @@ async function generateFromTopic(topic, editorial) {
       }
     }
   } else {
-    console.log('First generation passed validation. No revision pass.');
+    console.log(
+      deterministic
+        ? 'First generation passed validation. No model revision.'
+        : 'First generation passed validation. No revision pass.'
+    );
   }
   if (problems.length) {
     const v4Diagnostics = formatV4Diagnostics(article, problems, allowedClaims);
@@ -711,7 +726,11 @@ async function generateFromTopic(topic, editorial) {
         console.error(`  ${line}`);
       }
     }
-    fail(`Draft failed validation after one revision:\n- ${problems.map(formatProblem).join('\n- ')}`);
+    fail(
+      deterministic
+        ? `Draft failed final validation after deterministic repair:\n- ${problems.map(formatProblem).join('\n- ')}`
+        : `Draft failed validation after one revision:\n- ${problems.map(formatProblem).join('\n- ')}`
+    );
   }
   console.log('Draft passed validation.');
   if (article.claim_tokens_used && article.claim_tokens_used.length) {
@@ -738,7 +757,8 @@ async function generateFromTopic(topic, editorial) {
     claims: article.claims,
     allowedClaims,
     allowlist,
-    claimTokensUsed: article.claim_tokens_used
+    claimTokensUsed: article.claim_tokens_used,
+    repairs
   });
   reportWritten(outPath, fields, sidecarPath);
   return outPath;
@@ -772,7 +792,7 @@ async function main() {
 
   const topicId = args.topic || (await askTopic(topics));
   const topic = findTopic(topics, topicId);
-  await generateFromTopic(topic, editorial);
+  await generateFromTopic(topic, editorial, { deterministic: args.deterministic });
 }
 
 main().catch((error) => {

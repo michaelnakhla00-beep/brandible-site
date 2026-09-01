@@ -359,6 +359,18 @@ function sourceLines(sidecar) {
   });
 }
 
+function repairLines(repairs) {
+  if (!Array.isArray(repairs) || repairs.length === 0) {
+    return ['None. First generation passed validation, or no deterministic cleanup was required.'];
+  }
+  return repairs.map((item) => {
+    const code = item.code || 'repair';
+    const action = item.action || 'applied';
+    const reason = item.reason || '';
+    return reason ? `- **${code}:** ${action} — ${reason}` : `- **${code}:** ${action}`;
+  });
+}
+
 function buildPrBody(payload) {
   const research = payload.research;
   const researchStatus = research.needed
@@ -371,11 +383,14 @@ function buildPrBody(payload) {
     `- **Article:** \`${payload.postRel}\``,
     `- **Category:** ${payload.category}`,
     `- **Research:** ${researchStatus}`,
-    `- **Revision pass:** ${payload.revisionRequired ? 'Yes, one revision was required' : 'No, first generation passed'}`,
+    '- **Model revision:** None. GitHub automation uses one structured generation plus deterministic cleanup.',
     `- **Image model:** ${payload.imageModel}`,
     `- **Image:** \`${payload.imageRel}\``,
     `- **Facts verified:** ${payload.factsLastVerified}`,
     `- **draft:** \`true\` — merging this PR does not publish or list the post. Flip \`draft: false\` only after human approval.`,
+    '',
+    '### Automated cleanup',
+    ...repairLines(payload.sidecar && payload.sidecar.repairs),
     '',
     '### Sources',
     ...sourceLines(payload.sidecar),
@@ -441,7 +456,7 @@ function selectTopic(args, topics, occupied) {
 function generatePackage(topic) {
   const created = [];
   try {
-    const draftOut = runNodeScript(path.join(__dirname, 'draft-blog.js'), ['--topic', topic.id]);
+    const draftOut = runNodeScript(path.join(__dirname, 'draft-blog.js'), ['--topic', topic.id, '--deterministic']);
     const postPath = resolveCreatedPath(firstLineMatch(draftOut, /^Wrote (.+)$/m));
     const researchPath = resolveCreatedPath(firstLineMatch(draftOut, /^Research sidecar: (.+)$/m));
     if (!postPath) throw new Error('blog:draft did not report a written post path.');
@@ -481,7 +496,6 @@ function generatePackage(topic) {
       imageSidecarPath,
       sidecar,
       imageSidecar,
-      revisionRequired: /Running the single revision pass/.test(draftOut),
       imageModel:
         firstLineMatch(imageOut, /^Image model: (.+)$/m) || imageSidecar.model || '',
       alt: post.featured_image_alt || '',
@@ -552,7 +566,6 @@ function main() {
     pr_title: `Draft blog ${topic.id}: ${topic.title}`,
     paths: generated.created.map(repoRelative),
     facts_last_verified: facts.last_verified,
-    revision_required: generated.revisionRequired,
     image_model: generated.imageModel,
     featured_image_alt: generated.alt,
     pr_body: buildPrBody({
@@ -562,7 +575,6 @@ function main() {
       research: generated.sidecar.research || {},
       sourceCount: (generated.sidecar.sources || []).length,
       sidecar: generated.sidecar,
-      revisionRequired: generated.revisionRequired,
       imageModel: generated.imageModel,
       imageRel: repoRelative(generated.imagePath),
       factsLastVerified: facts.last_verified

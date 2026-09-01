@@ -19,7 +19,7 @@ const {
   stampProblems,
   splitSentences
 } = require('./validate');
-const { applySafetyFallback, collectSafetyRepairs, dedupeInternalLink } = require('./safety-fallback');
+const { applySafetyFallback, collectSafetyRepairs, dedupeInternalLink, MAX_DELETED_SEGMENTS } = require('./safety-fallback');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const {
   GENERATION_TOOL_NAME,
@@ -90,6 +90,14 @@ function baseFields() {
     category: 'SEO'
   };
 }
+
+const OPERATIONAL_PADDING = [
+  'A shop can get the listing honest before it spends another dollar on ads.',
+  'The order of operations is still the listing, the site, then the campaign.',
+  'Keep notes on what you changed and look at the phone log afterward.',
+  'None of that requires a new slogan or a new platform rule.',
+  'Write down who answers the phone, how fast they answer, and whether the page matches the promise you made in the ad.'
+].join(' ');
 
 function validGenerationPayload() {
   return {
@@ -345,6 +353,19 @@ async function structuredOutputFixtures() {
     (generateFromTopicSrc.match(/mode: 'revision'/g) || []).length === 1 &&
       (generateFromTopicSrc.match(/mode: 'generation'/g) || []).length === 1,
     generateFromTopicSrc.match(/mode: '[^']+'/g) && generateFromTopicSrc.match(/mode: '[^']+'/g).join(', ')
+  );
+  assert(
+    'deterministic generateFromTopic skips the revision model call',
+    /Skipping model revision/.test(generateFromTopicSrc) &&
+      /if \(!deterministic\)/.test(generateFromTopicSrc)
+  );
+  const automationSrc = fs.readFileSync(path.join(__dirname, '../blog-automation.js'), 'utf8');
+  assert(
+    'GitHub automation makes zero revision-model calls',
+    /'--deterministic'/.test(automationSrc) &&
+      !/mode: 'revision'/.test(automationSrc) &&
+      !/Running the single revision pass/.test(automationSrc) &&
+      /one structured generation plus deterministic cleanup/.test(automationSrc)
   );
 }
 
@@ -790,6 +811,8 @@ async function run() {
     ...baseFields(),
     body: [
       '## Categories',
+      '',
+      OPERATIONAL_PADDING,
       '',
       'Choose the primary category that completes the ranking formula.',
       '',
@@ -1378,19 +1401,27 @@ async function run() {
       '',
       'Google Search ads use bidding for a position instead of a reserved placement.',
       '',
-      'Google Ads determines whether a click is tracked after the auction finishes.'
+      'Google Ads determines whether a click is tracked after the auction finishes.',
+      '',
+      'Google Ads recalculates Ad Rank to determine whether your ad is eligible to show.',
+      '',
+      'Google doesn\'t accept payment to rank a site higher in the organic results.',
+      '',
+      'Google Search ads let you track whether the auction produced a click.',
+      '',
+      'A local shop can look at last month\'s calls and decide whether the site is doing its job. That is a process question, not a platform rule. Repeat that check every month and keep the notes in one place so the team does not argue from memory. The work is operational: who answers, how fast, and whether the page matches the promise. None of that needs a new platform claim. Keep the same practical checklist for a second month, a third month, and a fourth month until the pattern is obvious to the owner. Then decide whether to spend. Then look again at the phone log. Then look at the form log. Then look at the hours someone actually covers. Then write down what changed. Then wait a week. Then look again. Then keep the notes. Then share them. Then decide.'
     ].join('\n')
   );
   const tooManyProblems = validateGeneratedArticle(tooManyArticle, adsCtx);
   const tooManyCandidates = collectSafetyRepairs(tooManyArticle, tooManyProblems);
   const tooManyFallback = applySafetyFallback(tooManyArticle, tooManyProblems);
   assert(
-    'more than 3 deterministic repairs are required',
-    tooManyCandidates.length > 3,
+    'more than 6 deleted segments are required',
+    tooManyCandidates.length > MAX_DELETED_SEGMENTS,
     `candidates=${tooManyCandidates.length} problems=${tooManyProblems.map((item) => item.code).join(',')}`
   );
   assert(
-    'fallback refuses when more than 3 repairs are required',
+    'fallback refuses when more than 6 deleted segments are required',
     tooManyFallback.refused && tooManyFallback.applied.length === 0 && tooManyFallback.article === tooManyArticle,
     JSON.stringify({ refused: tooManyFallback.refused, applied: tooManyFallback.applied, reason: tooManyFallback.reason })
   );
@@ -1410,9 +1441,9 @@ async function run() {
   assert(
     'V9 in meta description is not deleted deterministically',
     metaEveryoneFallback.applied.length === 0 &&
-      metaEveryoneFallback.refused === false &&
+      metaEveryoneFallback.refused === true &&
       metaEveryoneFallback.article.meta_description === metaEveryoneArticle.meta_description,
-    JSON.stringify(metaEveryoneFallback.applied)
+    JSON.stringify({ applied: metaEveryoneFallback.applied, refused: metaEveryoneFallback.refused, reason: metaEveryoneFallback.reason })
   );
   assert(
     'V9 in meta description still fails validation',
@@ -1421,16 +1452,20 @@ async function run() {
     metaEveryoneProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
-  const entailmentFallback = applySafetyFallback(stronger, strongerProblems);
-  const entailmentAfter = validateGeneratedArticle(entailmentFallback.article, ctx(gbpPack(), gbpAllowed));
-  assert(
-    'source-entailment is outside the safety fallback allowlist',
-    entailmentFallback.applied.length === 0 && entailmentFallback.refused === false,
-    JSON.stringify(entailmentFallback.applied)
+  const entailmentFallback = applySafetyFallback(stronger, strongerProblems, { allowedClaims: gbpAllowed });
+  const entailmentAfter = validateGeneratedArticle(
+    entailmentFallback.refused ? entailmentFallback.article : entailmentFallback.article,
+    ctx(gbpPack(), gbpAllowed)
   );
   assert(
-    'source-entailment still fails after fallback',
-    hasCode(entailmentAfter, 'V3_SOURCE_ENTAILMENT'),
+    'source-entailment is repaired by deleting or dropping the unsupported fact',
+    entailmentFallback.refused === false &&
+      entailmentFallback.applied.some((item) => item === 'v3_body' || item === 'drop_sourced_claim' || item === 'deleted_segment'),
+    JSON.stringify({ applied: entailmentFallback.applied, reason: entailmentFallback.reason, problems: strongerProblems.map((item) => item.code) })
+  );
+  assert(
+    'source-entailment does not remain after deterministic V3 repair',
+    !hasCode(entailmentAfter, 'V3_SOURCE_ENTAILMENT'),
     entailmentAfter.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
@@ -1792,6 +1827,8 @@ async function run() {
       [
         '## Local ranking',
         '',
+        OPERATIONAL_PADDING,
+        '',
         "[There's no way to request or pay for a better local ranking on Google.",
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
@@ -1954,6 +1991,8 @@ async function run() {
   const latestDraft = neverDraft(
     [
       'That depends on what the site actually has.',
+      '',
+      OPERATIONAL_PADDING,
       '',
       '### No Reviews, or Reviews That Never Get a Response',
       '',
@@ -2168,6 +2207,176 @@ async function run() {
       (externalRepeatArticle.body.match(new RegExp(`\\]\\(${adsClaim.url.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\)`, 'g')) || [])
         .length >= 2,
     externalRepeatDeduped
+  );
+
+  const v4Compiler = applySafetyFallback(missingCanonicalLink, missingCanonicalProblems, {
+    allowedClaims: linkedEvidenceClaims
+  });
+  assert(
+    'V4 still hard fails in the deterministic compiler',
+    v4Compiler.refused === true && v4Compiler.applied.length === 0,
+    JSON.stringify({ refused: v4Compiler.refused, reason: v4Compiler.reason, applied: v4Compiler.applied })
+  );
+
+  const percentLossArticle = {
+    ...tokenArticle,
+    body: [
+      '## How the auction works',
+      '',
+      'Google Ads runs an auction every time a search happens and that sentence is long enough to dominate this short draft body for the content-loss budget check.',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  };
+  const percentLossProblems = validateGeneratedArticle(percentLossArticle, adsCtx);
+  const percentLossFallback = applySafetyFallback(percentLossArticle, percentLossProblems, {
+    allowedClaims: adsAllowed
+  });
+  assert(
+    '20% deleted content refuses the draft',
+    percentLossFallback.refused === true && /20%/.test(String(percentLossFallback.reason || '')),
+    JSON.stringify({
+      refused: percentLossFallback.refused,
+      reason: percentLossFallback.reason,
+      deletedChars: percentLossFallback.deletedChars,
+      bodyChars: percentLossArticle.body.length,
+      problems: percentLossProblems.map((item) => item.code)
+    })
+  );
+
+  const ciPack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: 'https://support.google.com/business/answer/7091?hl=en',
+        title: 'Tips to improve your local ranking on Google',
+        excerpt: '',
+        evidence: [
+          {
+            about: 'complete info',
+            quote:
+              'Businesses with complete and accurate info are more likely to show up in local search results.'
+          },
+          {
+            about: 'prominence',
+            quote: 'Prominence means how well-known a business is.'
+          }
+        ]
+      }
+    ]
+  };
+  const ciClaims = buildAllowedClaims(ciPack);
+  const ciLikely = ciClaims.find((item) => /more likely/.test(item.safe_wording || item.claim));
+  const ciProminence = ciClaims.find((item) =>
+    /Prominence means how well-known a business is/.test(item.safe_wording || item.claim)
+  );
+  assert(
+    'CI-path pack exposes a more-likely claim and a prominence claim',
+    Boolean(ciLikely && ciProminence && ciLikely.id !== ciProminence.id),
+    JSON.stringify(ciClaims.map((item) => item.id + ':' + (item.safe_wording || '').slice(0, 40)))
+  );
+  const ciLikelyCited = renderCitedClaim(ciLikely, { cite: true });
+  const ciProminenceCited = renderCitedClaim(ciProminence, { cite: true });
+  const ciCatalog = {
+    posts: [],
+    services: [
+      { title: 'Web Design', url: '/services/web-design/' },
+      { title: 'Digital Marketing', url: '/services/digital-marketing/' }
+    ],
+    core: []
+  };
+  const ciCtx = ctx(ciPack, ciClaims, ciCatalog);
+  const ciDraft = neverDraft(
+    [
+      '## Local ranking',
+      '',
+      'That depends on what the site actually has.',
+      '',
+      'A shop can get the listing honest before it spends another dollar on ads. The order of operations is still the listing, the site, then the campaign. Keep notes on what you changed and look at the phone log afterward. None of that requires a new slogan.',
+      '',
+      'Businesses with complete and accurate info will show up in local search results.',
+      '',
+      `{{${ciProminence.id}}}`,
+      '',
+      'Everyone assumes the listing fixes itself.',
+      '',
+      "[There's no way to request or pay for a better local ranking on Google.",
+      '',
+      'Real photos perform better than stock on a listing.',
+      '',
+      'See [Doorstep Detailer](https://www.doorstepdetailer.com/) for a nearby example.',
+      '',
+      'Start with [website design](/services/web-design/) if the site is the leak.',
+      '',
+      'Brandible also does [digital marketing](/services/digital-marketing/) when search is the gap.',
+      '',
+      'A [web design service](/services/web-design/) is only useful after the listing is honest.',
+      '',
+      'Fix the listing first — then judge spend.',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  );
+  const ciAssembled = assembleArticle(ciDraft, ciClaims);
+  const ciMid = validateGeneratedArticle(ciAssembled, ciCtx);
+  const ciFallback = applySafetyFallback(ciAssembled, ciMid, { allowedClaims: ciClaims, catalog: ciCatalog });
+  let ciArticle = ciAssembled;
+  if (ciFallback.applied.length && !ciFallback.refused) {
+    ciArticle = ciFallback.article;
+    if (ciFallback.needsAssemble) {
+      ciArticle = assembleArticle(ciArticle, ciClaims);
+    }
+    ciArticle = refreshAssemblyState(ciArticle, ciClaims);
+  }
+  const ciFinal = validateGeneratedArticle(ciArticle, ciCtx);
+  const ciHrefs = [...String(ciArticle.body).matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((item) => item[1]);
+  assert(
+    'CI-path compiler does not invoke a model revision',
+    /Skipping model revision/.test(fs.readFileSync(path.join(__dirname, '../draft-blog.js'), 'utf8'))
+  );
+  assert(
+    'CI-path compiler applies safe repairs without paraphrasing',
+    !ciFallback.refused &&
+      ciFallback.applied.includes('v9_body') &&
+      ciFallback.applied.includes('v7_body') &&
+      ciFallback.applied.includes('em_dash') &&
+      ciFallback.applied.includes('duplicate_internal_link') &&
+      ciFallback.applied.includes('unwrap_link') &&
+      (ciFallback.applied.includes('v3_body') || ciFallback.applied.includes('deleted_segment')) &&
+      ciFallback.applied.includes('v6_replace_token'),
+    JSON.stringify({
+      applied: ciFallback.applied,
+      reason: ciFallback.reason,
+      mid: ciMid.map((item) => `${item.id}: ${item.message}`)
+    })
+  );
+  assert(
+    'CI-path unsupported content is deleted and AC claims remain cited',
+    !/\beveryone\b/i.test(ciArticle.body) &&
+      !/There's no way to request or pay for a better local ranking on Google/.test(ciArticle.body) &&
+      !/perform better than/.test(ciArticle.body) &&
+      !/will show up in local search results/.test(ciArticle.body) &&
+      ciArticle.body.includes(ciProminenceCited) &&
+      ciArticle.body.includes(ciLikelyCited),
+    ciArticle.body
+  );
+  assert(
+    'CI-path link anchor text survives unwrapping',
+    /See Doorstep Detailer for a nearby example/.test(ciArticle.body) &&
+      !ciArticle.body.includes('https://www.doorstepdetailer.com/') &&
+      ciArticle.body.includes('[website design](/services/web-design/)') &&
+      !ciArticle.body.includes('[web design service](/services/web-design/)') &&
+      /A web design service is only useful after the listing is honest/.test(ciArticle.body) &&
+      ciHrefs.filter((href) => href === '/services/web-design/').length === 1 &&
+      ciArticle.body.includes('[digital marketing](/services/digital-marketing/)') &&
+      !ciArticle.body.includes('\u2014'),
+    JSON.stringify({ hrefs: ciHrefs, body: ciArticle.body })
+  );
+  assert(
+    'CI-path final validation has zero problems',
+    ciFinal.length === 0,
+    ciFinal.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
   if (failed) {

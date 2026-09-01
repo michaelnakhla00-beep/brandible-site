@@ -1,11 +1,29 @@
 'use strict';
 
-const { toPlainDisplayText } = require('./allowed-claims');
+const { toPlainDisplayText, findAllowedClaim } = require('./allowed-claims');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
+const { assembleCta } = require('./assemble');
 
-const MAX_SAFETY_REPAIRS = 3;
+const MAX_DELETED_SEGMENTS = 6;
+const MAX_DELETED_CHAR_RATIO = 0.2;
 const EM_DASH = '\u2014';
 const CLAIM_TOKEN_RE = /\{\{\s*AC\d+\s*\}\}/;
+const APPLY_ORDER = [
+  'v6_replace_token',
+  'v5_attribute',
+  'v1_body',
+  'v3_body',
+  'v7_body',
+  'v8_body',
+  'v9_body',
+  'deleted_segment',
+  'drop_sourced_claim',
+  'v2_cta',
+  'unwrap_link',
+  'duplicate_internal_link',
+  'limit_internal_destinations',
+  'em_dash'
+];
 
 function stripMarkdownLinks(text) {
   return String(text || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
@@ -22,6 +40,37 @@ function normalizeSnippet(text) {
 function quotedFromMessage(message) {
   const match = String(message || '').match(/“([^”]+)”|"([^"]+)"/);
   return match ? match[1] || match[2] : null;
+}
+
+function extractAcId(message) {
+  const explicit = String(message || '').match(/\{\{\s*(AC\d+)\s*\}\}/);
+  if (explicit) return explicit[1];
+  const bare = String(message || '').match(/\b(AC\d+)\b/);
+  return bare ? bare[1] : null;
+}
+
+function extractInternalHref(message) {
+  const labeled = String(message || '').match(
+    /(?:Internal link repeated|Internal link is not in the approved catalog):\s+(\/\S+)/i
+  );
+  if (!labeled) return null;
+  const href = labeled[1];
+  if (!href.startsWith('/') || /^https?:/i.test(href)) return null;
+  return href;
+}
+
+function extractExternalHref(message) {
+  const match = String(message || '').match(/(https?:\/\/[^\s)]+)/i);
+  return match ? match[1].replace(/[.,;]+$/, '') : null;
+}
+
+function extractPriceToken(message) {
+  const price = String(message || '').match(/Price\s+(\$\s*[\d,]+(?:\.\d+)?)/i);
+  if (price) return price[1];
+  const percent = String(message || '').match(/Percentage\s+“([^”]+)”|Percentage\s+"([^"]+)"/i);
+  if (percent) return percent[1] || percent[2];
+  if (/in a week or two/i.test(message)) return 'in a week or two';
+  return quotedFromMessage(message);
 }
 
 function findSentenceInBody(body, test) {
@@ -45,14 +94,19 @@ function findShortestSegmentContaining(body, quoted) {
   return best;
 }
 
+function bodyHasText(article, text) {
+  if (!text) return false;
+  return String((article && article.body) || '').includes(text);
+}
+
 function cleanupEmptyHeadings(body) {
-  const chunks = String(body || '').split(/^(?=##\s)/m);
+  const chunks = String(body || '').split(/^(?=#{1,6}\s)/m);
   const kept = [];
   for (const chunk of chunks) {
     const trimmed = chunk.trim();
     if (!trimmed) continue;
     const lines = trimmed.split('\n');
-    if (/^##\s+/.test(lines[0])) {
+    if (/^#{1,6}\s+/.test(lines[0])) {
       const rest = lines.slice(1).join('\n').trim();
       if (!rest) continue;
     }
@@ -82,6 +136,16 @@ function replaceEmDashes(value) {
   return String(value || '').split(EM_DASH).join('-');
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function unwrapHref(body, targetHref) {
+  if (!targetHref) return String(body || '');
+  const re = new RegExp(`\\[([^\\]]+)\\]\\(${escapeRegExp(targetHref)}\\)`, 'g');
+  return String(body || '').replace(re, '$1');
+}
+
 function dedupeInternalLink(body, targetHref) {
   let seen = 0;
   return String(body || '').replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, (full, label, href) => {
@@ -92,49 +156,270 @@ function dedupeInternalLink(body, targetHref) {
   });
 }
 
-function collectSafetyRepairs(article, problems) {
-  const repairs = [];
-  let emDashQueued = false;
-  const seenInternalHrefs = new Set();
-  for (const problem of problems || []) {
-    const code = problem && problem.code;
-    const message = String((problem && problem.message) || '');
-    if (code === 'V10_OTHER' && /contains an em dash/i.test(message)) {
-      if (!emDashQueued) {
-        repairs.push({ type: 'em_dash' });
-        emDashQueued = true;
-      }
-      continue;
+function limitInternalDestinations(body, maxUnique) {
+  const seen = [];
+  return String(body || '').replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, (full, label, href) => {
+    if (seen.indexOf(href) === -1) {
+      if (seen.length >= maxUnique) return label;
+      seen.push(href);
     }
-    if (code === 'V10_OTHER') {
-      const repeated = message.match(/Internal link repeated:\s+(\/\S+)/);
-      if (repeated) {
-        const href = repeated[1];
-        if (!seenInternalHrefs.has(href)) {
-          seenInternalHrefs.add(href);
-          repairs.push({ type: 'duplicate_internal_link', href });
-        }
-      }
-      continue;
-    }
-    if (code === 'V9_QUANTIFIER' && /unsupported quantifier in body/i.test(message)) {
-      const hit = quotedFromMessage(message);
-      const sentence = findSentenceInBody(article.body, (item) => {
-        if (hit && new RegExp(`\\b${hit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(item)) return true;
-        return /\b(?:most|the majority of)\s+(?:(?:local|small|service)\s+)*(?:business\s+)?(?:people|businesses|owners|customers|callers|visitors|companies)\b|\bevery(?:one|body)\b/i.test(
-          item
-        );
-      });
-      if (sentence) repairs.push({ type: 'v9_body', sentence });
-      continue;
-    }
-    if (code === 'V7_CLAIM_LEDGER' && /factual platform assertion is not an approved claim token/i.test(message)) {
-      const quoted = quotedFromMessage(message);
-      const sentence = quoted ? findShortestSegmentContaining(article.body, quoted) : null;
-      if (sentence) repairs.push({ type: 'v7_body', sentence });
-    }
+    return full;
+  });
+}
+
+function structurallyComplete(article) {
+  const title = String((article && article.title) || '').trim();
+  const excerpt = String((article && article.excerpt) || '').trim();
+  const meta = String((article && article.meta_description) || '').trim();
+  const body = String((article && article.body) || '').trim();
+  return Boolean(title && excerpt && meta && body && body.replace(/\s+/g, ' ').length >= 40);
+}
+
+function auditFor(repair) {
+  const actionByType = {
+    em_dash: 'normalized_em_dash',
+    duplicate_internal_link: 'unwrapped_duplicate_internal_link',
+    unwrap_link: 'unwrapped_link',
+    limit_internal_destinations: 'unwrapped_extra_internal_destinations',
+    v2_cta: 'assembled_cta',
+    v5_attribute: 'attributed_first_party',
+    v6_replace_token: 'replaced_with_token',
+    drop_sourced_claim: 'dropped_sourced_claim',
+    v1_body: 'deleted_segment',
+    v3_body: 'deleted_segment',
+    v7_body: 'deleted_segment',
+    v8_body: 'deleted_segment',
+    v9_body: 'deleted_segment',
+    deleted_segment: 'deleted_segment'
+  };
+  return {
+    code: repair.code,
+    action: repair.action || actionByType[repair.type] || repair.type,
+    reason: repair.reason
+  };
+}
+
+function refuse(reason) {
+  return { type: 'refuse', reason };
+}
+
+function deletionRepair(type, problem, sentence, reason) {
+  return {
+    type,
+    code: problem.code,
+    action: 'deleted_segment',
+    reason,
+    sentence
+  };
+}
+
+function repairForProblem(article, problem, options) {
+  const code = problem && problem.code;
+  const message = String((problem && problem.message) || '');
+  const body = String((article && article.body) || '');
+  const allowedClaims = (options && options.allowedClaims) || [];
+
+  if (code === 'V4_MISSING_SOURCE_LINK') {
+    return refuse('V4_MISSING_SOURCE_LINK is code-owned and cannot be papered over');
   }
-  return repairs;
+
+  if (code === 'V10_OTHER' && /contains an em dash/i.test(message)) {
+    return { type: 'em_dash', code, action: 'normalized_em_dash', reason: 'em dash' };
+  }
+  if (code === 'V10_OTHER' && /Internal link repeated:/i.test(message)) {
+    const href = extractInternalHref(message);
+    if (!href) return refuse(message);
+    return {
+      type: 'duplicate_internal_link',
+      code,
+      action: 'unwrapped_duplicate_internal_link',
+      reason: `duplicate internal link ${href}`,
+      href
+    };
+  }
+  if (code === 'V10_OTHER' && /Internal link is not in the approved catalog:/i.test(message)) {
+    const href = extractInternalHref(message);
+    if (!href) return refuse(message);
+    return {
+      type: 'unwrap_link',
+      code,
+      action: 'unwrapped_link',
+      reason: `internal link not approved ${href}`,
+      href
+    };
+  }
+  if (code === 'V10_OTHER' && /Too many internal destinations/i.test(message)) {
+    return {
+      type: 'limit_internal_destinations',
+      code,
+      action: 'unwrapped_extra_internal_destinations',
+      reason: 'more than 3 internal destinations'
+    };
+  }
+  if (code === 'V10_OTHER' && /External link is not in the source pack:/i.test(message)) {
+    const href = extractExternalHref(message);
+    if (!href || !/^https?:\/\//i.test(href)) return refuse(message);
+    return {
+      type: 'unwrap_link',
+      code,
+      action: 'unwrapped_link',
+      reason: `external link not in source pack ${href}`,
+      href
+    };
+  }
+  if (code === 'V10_OTHER') {
+    return refuse(`Unrecognized V10 failure: ${message}`);
+  }
+
+  if (code === 'V9_QUANTIFIER') {
+    if (!/unsupported quantifier in body/i.test(message)) {
+      return refuse(`V9 in title/meta/excerpt cannot be repaired: ${message}`);
+    }
+    const hit = quotedFromMessage(message);
+    const sentence = findSentenceInBody(body, (item) => {
+      if (hit && new RegExp(`\\b${escapeRegExp(hit)}\\b`, 'i').test(item)) return true;
+      return /\b(?:most|the majority of)\s+(?:(?:local|small|service)\s+)*(?:business\s+)?(?:people|businesses|owners|customers|callers|visitors|companies)\b|\bevery(?:one|body)\b/i.test(
+        item
+      );
+    });
+    if (!sentence) return refuse(message);
+    return deletionRepair('v9_body', problem, sentence, 'unsupported quantifier');
+  }
+
+  if (code === 'V1_UNAPPROVED_FIRST_PARTY_NUMBER') {
+    const token = extractPriceToken(message);
+    const sentence = token ? findShortestSegmentContaining(body, token) : null;
+    if (!sentence) return refuse(`V1 is not in the body and cannot be repaired: ${message}`);
+    return deletionRepair('v1_body', problem, sentence, 'unauthorized first-party figure');
+  }
+
+  if (code === 'V2_CTA_SELF_QUALIFY') {
+    const cta = article.cta && typeof article.cta === 'object' ? article.cta : {};
+    if (!String(cta.fit_case || '').trim() || !String(cta.walk_away_case || '').trim()) {
+      return refuse('V2_CTA_SELF_QUALIFY: structured fit_case or walk_away_case is missing');
+    }
+    return { type: 'v2_cta', code, action: 'assembled_cta', reason: 'deterministic CTA assembly' };
+  }
+
+  if (code === 'V5_UNLABELED_FIRST_PARTY') {
+    const price = extractPriceToken(message);
+    const sentence = price ? findShortestSegmentContaining(body, price) : null;
+    if (!sentence || !price) return refuse(`V5 is not in the body and cannot be repaired: ${message}`);
+    return {
+      type: 'v5_attribute',
+      code,
+      action: 'attributed_first_party',
+      reason: 'label approved first-party figure as Brandible',
+      sentence,
+      price
+    };
+  }
+
+  if (code === 'V6_ABSOLUTE_WORDING') {
+    const quoted = quotedFromMessage(message);
+    const sentence = quoted ? findShortestSegmentContaining(body, quoted) : null;
+    const tokenId = extractAcId(message);
+    if (tokenId && findAllowedClaim(allowedClaims, tokenId) && sentence) {
+      return {
+        type: 'v6_replace_token',
+        code,
+        action: 'replaced_with_token',
+        reason: `replace upgraded wording with ${tokenId}`,
+        sentence,
+        tokenId
+      };
+    }
+    if (sentence) {
+      return deletionRepair('deleted_segment', problem, sentence, 'absolute wording without a proven AC mapping');
+    }
+    return refuse(message);
+  }
+
+  if (code === 'V3_SOURCE_ENTAILMENT') {
+    const quoted = quotedFromMessage(message);
+    const tokenId = extractAcId(message);
+    const sentence = quoted ? findShortestSegmentContaining(body, quoted) : null;
+    if (tokenId && findAllowedClaim(allowedClaims, tokenId) && sentence && /\{\{\s*AC\d+\s*\}\}/.test(message)) {
+      return {
+        type: 'v6_replace_token',
+        code,
+        action: 'replaced_with_token',
+        reason: `replace unsupported fact with ${tokenId}`,
+        sentence,
+        tokenId
+      };
+    }
+    if (sentence) {
+      return deletionRepair('v3_body', problem, sentence, /comparative|performance claim/i.test(message)
+        ? 'unsupported comparative'
+        : 'unsupported source entailment');
+    }
+    if (/factual categories guidance/i.test(message)) {
+      const hit = findSentenceInBody(body, (item) => /primary category|business categor/i.test(item));
+      if (hit) return deletionRepair('v3_body', problem, hit, 'unsupported category guidance');
+    }
+    if (quoted && Array.isArray(article.claims) && article.claims.some((item) => item.kind === 'sourced_fact' && normalizeSnippet(item.claim) === normalizeSnippet(quoted))) {
+      return {
+        type: 'drop_sourced_claim',
+        code,
+        action: 'dropped_sourced_claim',
+        reason: 'unsupported sourced_fact in claims[]',
+        quote: quoted
+      };
+    }
+    return refuse(message);
+  }
+
+  if (code === 'V7_CLAIM_LEDGER' && /factual platform assertion is not an approved claim token/i.test(message)) {
+    const quoted = quotedFromMessage(message);
+    const sentence = quoted ? findShortestSegmentContaining(body, quoted) : null;
+    if (!sentence) return refuse(message);
+    return deletionRepair('v7_body', problem, sentence, 'raw platform assertion');
+  }
+  if (code === 'V7_CLAIM_LEDGER') {
+    return refuse(`Unrecognized V7 failure: ${message}`);
+  }
+
+  if (code === 'V8_OUT_OF_SCOPE') {
+    const quoted = quotedFromMessage(message);
+    let sentence = quoted ? findShortestSegmentContaining(body, quoted) : null;
+    if (!sentence && /Local Services Ads/i.test(message)) {
+      sentence = findSentenceInBody(body, (item) => /local services ads|\bLSA\b/i.test(item));
+    }
+    if (!sentence && /Google Business Profile category/i.test(message)) {
+      sentence = findSentenceInBody(body, (item) => /categor/i.test(item));
+    }
+    if (!sentence) return refuse(message);
+    return deletionRepair('v8_body', problem, sentence, 'out-of-scope guidance');
+  }
+
+  return refuse(`Unrecognized problem ${code}: ${message}`);
+}
+
+function compileRepairs(article, problems, options) {
+  const repairs = [];
+  const seen = new Set();
+  function remember(key) {
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }
+  for (const problem of problems || []) {
+    const repair = repairForProblem(article, problem, options);
+    if (!repair || repair.type === 'refuse') {
+      return { repairs: [], refused: true, reason: (repair && repair.reason) || String((problem && problem.message) || 'unrepairable') };
+    }
+    const key = `${repair.type}:${repair.href || repair.tokenId || repair.sentence || repair.quote || repair.reason}`;
+    if (!remember(key)) continue;
+    repairs.push(repair);
+  }
+  return { repairs, refused: false, reason: null };
+}
+
+function collectSafetyRepairs(article, problems, options) {
+  const compiled = compileRepairs(article, problems, options);
+  if (compiled.refused) return [];
+  return compiled.repairs;
 }
 
 function applyEmDashRepair(article) {
@@ -154,52 +439,180 @@ function applyEmDashRepair(article) {
   };
 }
 
-function applySafetyFallback(article, problems) {
-  const repairs = collectSafetyRepairs(article, problems);
-  if (!repairs.length) {
-    return { article, applied: [], refused: false, needsAssemble: false };
-  }
-  if (repairs.length > MAX_SAFETY_REPAIRS) {
+function sortRepairs(repairs) {
+  return [...repairs].sort((a, b) => APPLY_ORDER.indexOf(a.type) - APPLY_ORDER.indexOf(b.type));
+}
+
+function applySafetyFallback(article, problems, options) {
+  const compiled = compileRepairs(article, problems, options);
+  if (compiled.refused) {
     return {
       article,
       applied: [],
+      repairs: [],
       refused: true,
-      reason: `${repairs.length} deterministic repairs required; max ${MAX_SAFETY_REPAIRS}`,
-      needsAssemble: false
+      reason: compiled.reason,
+      needsAssemble: false,
+      deletedSegments: 0,
+      deletedChars: 0
     };
   }
+  if (!compiled.repairs.length) {
+    return {
+      article,
+      applied: [],
+      repairs: [],
+      refused: false,
+      needsAssemble: false,
+      deletedSegments: 0,
+      deletedChars: 0
+    };
+  }
+
+  const originalBody = String((article && article.body) || '');
   let next = { ...article };
   const applied = [];
-  for (const repair of repairs) {
+  const audit = [];
+  let deletedSegments = 0;
+  let deletedChars = 0;
+  let needsAssemble = CLAIM_TOKEN_RE.test(String(next.body || ''));
+
+  for (const repair of sortRepairs(compiled.repairs)) {
     if (repair.type === 'em_dash') {
       next = applyEmDashRepair(next);
       applied.push('em_dash');
-      continue;
-    }
-    if (repair.type === 'v9_body' || repair.type === 'v7_body') {
-      next = { ...next, body: deleteSentenceFromBody(next.body, repair.sentence) };
-      applied.push(repair.type);
+      audit.push(auditFor(repair));
       continue;
     }
     if (repair.type === 'duplicate_internal_link') {
+      next = { ...next, body: dedupeInternalLink(next.body, repair.href) };
+      applied.push('duplicate_internal_link');
+      audit.push(auditFor(repair));
+      continue;
+    }
+    if (repair.type === 'unwrap_link') {
+      next = { ...next, body: unwrapHref(next.body, repair.href) };
+      applied.push('unwrap_link');
+      audit.push(auditFor(repair));
+      continue;
+    }
+    if (repair.type === 'limit_internal_destinations') {
+      next = { ...next, body: limitInternalDestinations(next.body, 3) };
+      applied.push('limit_internal_destinations');
+      audit.push(auditFor(repair));
+      continue;
+    }
+    if (repair.type === 'v2_cta') {
+      next = assembleCta(next);
+      applied.push('v2_cta');
+      audit.push(auditFor(repair));
+      continue;
+    }
+    if (repair.type === 'v5_attribute') {
+      if (bodyHasText(next, repair.sentence) && repair.price && !/Brandible/i.test(repair.sentence)) {
+        const labeled = repair.sentence.replace(repair.price, `Brandible's ${repair.price}`);
+        next = { ...next, body: String(next.body).replace(repair.sentence, labeled) };
+      }
+      applied.push('v5_attribute');
+      audit.push(auditFor(repair));
+      continue;
+    }
+    if (repair.type === 'v6_replace_token') {
+      if (bodyHasText(next, repair.sentence) && repair.tokenId) {
+        next = { ...next, body: String(next.body).replace(repair.sentence, `{{${repair.tokenId}}}`) };
+        needsAssemble = true;
+      }
+      applied.push('v6_replace_token');
+      audit.push(auditFor(repair));
+      continue;
+    }
+    if (repair.type === 'drop_sourced_claim') {
       next = {
         ...next,
-        body: dedupeInternalLink(next.body, repair.href)
+        claims: (next.claims || []).filter((item) => {
+          if (item.kind !== 'sourced_fact') return true;
+          if (!repair.quote) return false;
+          return normalizeSnippet(item.claim) !== normalizeSnippet(repair.quote);
+        })
       };
-      applied.push('duplicate_internal_link');
+      applied.push('drop_sourced_claim');
+      audit.push(auditFor(repair));
+      continue;
+    }
+    if (
+      repair.type === 'v9_body' ||
+      repair.type === 'v7_body' ||
+      repair.type === 'v1_body' ||
+      repair.type === 'v3_body' ||
+      repair.type === 'v8_body' ||
+      repair.type === 'deleted_segment'
+    ) {
+      const before = String(next.body || '');
+      const after = deleteSentenceFromBody(before, repair.sentence);
+      if (after !== before) {
+        deletedSegments += 1;
+        deletedChars += String(repair.sentence || '').length;
+        next = { ...next, body: after };
+      }
+      applied.push(repair.type);
+      audit.push(auditFor(repair));
     }
   }
+
+  if (deletedSegments > MAX_DELETED_SEGMENTS) {
+    return {
+      article,
+      applied: [],
+      repairs: [],
+      refused: true,
+      reason: `Deleted ${deletedSegments} Markdown segments; max ${MAX_DELETED_SEGMENTS}`,
+      needsAssemble: false,
+      deletedSegments,
+      deletedChars
+    };
+  }
+  const budget = Math.floor(originalBody.length * MAX_DELETED_CHAR_RATIO);
+  if (originalBody.length && deletedChars > budget) {
+    return {
+      article,
+      applied: [],
+      repairs: [],
+      refused: true,
+      reason: `Deleted ${deletedChars} body characters (${Math.round((deletedChars / originalBody.length) * 100)}%); max 20%`,
+      needsAssemble: false,
+      deletedSegments,
+      deletedChars
+    };
+  }
+  if (!structurallyComplete(next)) {
+    return {
+      article,
+      applied: [],
+      repairs: [],
+      refused: true,
+      reason: 'Repair left the article without required structure',
+      needsAssemble: false,
+      deletedSegments,
+      deletedChars
+    };
+  }
+
   return {
     article: next,
     applied,
+    repairs: audit,
     refused: false,
-    needsAssemble: CLAIM_TOKEN_RE.test(String(next.body || ''))
+    needsAssemble: needsAssemble || CLAIM_TOKEN_RE.test(String(next.body || '')),
+    deletedSegments,
+    deletedChars
   };
 }
 
 module.exports = {
-  MAX_SAFETY_REPAIRS,
+  MAX_DELETED_SEGMENTS,
+  MAX_DELETED_CHAR_RATIO,
   collectSafetyRepairs,
   applySafetyFallback,
-  dedupeInternalLink
+  dedupeInternalLink,
+  compileRepairs
 };
