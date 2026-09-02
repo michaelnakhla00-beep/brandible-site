@@ -264,6 +264,90 @@ function markdownLinkFixtures() {
   );
 }
 
+function extractNamedFunction(src, name) {
+  const needle = `function ${name}(`;
+  const start = src.indexOf(needle);
+  if (start === -1) throw new Error(`missing ${name}`);
+  const brace = src.indexOf('{', start);
+  let depth = 0;
+  for (let i = brace; i < src.length; i += 1) {
+    const ch = src[i];
+    if (ch === '{') depth += 1;
+    else if (ch === '}') {
+      depth -= 1;
+      if (depth === 0) return src.slice(start, i + 1);
+    }
+  }
+  throw new Error(`unclosed ${name}`);
+}
+
+function evalNamedFunction(src, name) {
+  const fnSrc = extractNamedFunction(src, name);
+  return new Function(`${fnSrc}\nreturn ${name};`)();
+}
+
+function featuredImageUrlFixtures() {
+  const rendererSrc = fs.readFileSync(
+    path.join(__dirname, '../../assets/js/blog-post-renderer.js'),
+    'utf8'
+  );
+  const visibleFeaturedImageUrl = evalNamedFunction(rendererSrc, 'visibleFeaturedImageUrl');
+  const socialImageUrl = evalNamedFunction(rendererSrc, 'socialImageUrl');
+  const imgSrcAssign = rendererSrc.match(/const imgSrc = ([^;]+);/);
+  const socialFnSrc = extractNamedFunction(rendererSrc, 'socialImageUrl');
+  const visibleFnSrc = extractNamedFunction(rendererSrc, 'visibleFeaturedImageUrl');
+  const postsGenSrc = fs.readFileSync(path.join(__dirname, '../generate-blog-posts.js'), 'utf8');
+  const getImageUrlSrc = extractNamedFunction(postsGenSrc, 'getImageUrl');
+
+  assert(
+    'article hero uses visibleFeaturedImageUrl, not a production-domain rewrite',
+    imgSrcAssign &&
+      imgSrcAssign[1].trim() === 'visibleFeaturedImageUrl(frontmatter.featured_image)' &&
+      !/`https:\/\/www\.brandiblemg\.com\$\{frontmatter\.featured_image\}`/.test(rendererSrc),
+    imgSrcAssign && imgSrcAssign[0]
+  );
+  assert(
+    'socialImageUrl still rewrites local paths to the Brandible production origin',
+    /https:\/\/www\.brandiblemg\.com/.test(socialFnSrc) &&
+      !/visibleFeaturedImageUrl/.test(socialFnSrc),
+    socialFnSrc
+  );
+  assert(
+    'visible featured image helper does not hardcode the production origin',
+    !/brandiblemg\.com/.test(visibleFnSrc),
+    visibleFnSrc
+  );
+  assert(
+    'static OG image helper still uses the Brandible production origin',
+    /https:\/\/www\.brandiblemg\.com/.test(getImageUrlSrc),
+    getImageUrlSrc
+  );
+
+  assert(
+    'local visible featured image remains root-relative',
+    visibleFeaturedImageUrl('/assets/blog-images/example.webp') === '/assets/blog-images/example.webp' &&
+      visibleFeaturedImageUrl('assets/blog-images/example.webp') === '/assets/blog-images/example.webp'
+  );
+  assert(
+    'absolute external featured image remains absolute',
+    visibleFeaturedImageUrl('https://cdn.example.com/cover.webp') === 'https://cdn.example.com/cover.webp' &&
+      visibleFeaturedImageUrl('http://cdn.example.com/cover.webp') === 'http://cdn.example.com/cover.webp'
+  );
+  assert(
+    'social/OG image remains absolute Brandible production URL',
+    socialImageUrl({ featured_image: '/assets/blog-images/example.webp' }) ===
+      'https://www.brandiblemg.com/assets/blog-images/example.webp' &&
+      socialImageUrl({ featured_image: 'assets/blog-images/example.webp' }) ===
+        'https://www.brandiblemg.com/assets/blog-images/example.webp' &&
+      socialImageUrl({
+        og_image: '/assets/blog-images/og.webp',
+        featured_image: '/assets/blog-images/example.webp'
+      }) === 'https://www.brandiblemg.com/assets/blog-images/og.webp' &&
+      socialImageUrl({ featured_image: 'https://cdn.example.com/cover.webp' }) ===
+        'https://cdn.example.com/cover.webp'
+  );
+}
+
 async function structuredOutputFixtures() {
   const validInput = validGenerationPayload();
   const malformedText =
@@ -2167,6 +2251,7 @@ async function run() {
   );
 
   markdownSegmentFixtures();
+  featuredImageUrlFixtures();
   await structuredOutputFixtures();
 
   const numberedEvidence = [];

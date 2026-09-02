@@ -52,6 +52,14 @@ function socialImageUrl(frontmatter) {
   return `https://www.brandiblemg.com${raw.startsWith('/') ? raw : `/${raw}`}`;
 }
 
+function visibleFeaturedImageUrl(raw) {
+  if (!raw) return '';
+  const value = String(raw).trim();
+  if (!value) return '';
+  if (value.startsWith('https://') || value.startsWith('http://')) return value;
+  return value.startsWith('/') ? value : `/${value}`;
+}
+
 // Format date
 function formatDate(dateString) {
   if (!dateString) return '';
@@ -525,13 +533,7 @@ function renderPost(frontmatter, body, container) {
     frontmatter.author ? `By ${escapeHtml(frontmatter.author)}` : ''
   ].filter(Boolean);
 
-  const imgSrc = frontmatter.featured_image
-    ? (frontmatter.featured_image.startsWith('http')
-      ? frontmatter.featured_image
-      : (frontmatter.featured_image.startsWith('/')
-        ? `https://www.brandiblemg.com${frontmatter.featured_image}`
-        : frontmatter.featured_image))
-    : '';
+  const imgSrc = visibleFeaturedImageUrl(frontmatter.featured_image);
   const imgAlt = escapeHtml(
     frontmatter.featured_image_alt ||
     (frontmatter.title ? `Featured image for ${frontmatter.title}` : 'Blog post featured image')

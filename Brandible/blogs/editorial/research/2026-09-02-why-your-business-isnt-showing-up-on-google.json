@@ -1,0 +1,814 @@
+{
+  "post": "2026-09-02-why-your-business-isnt-showing-up-on-google.md",
+  "topic_id": "02",
+  "generated_at": "2026-09-02T00:19:15.068Z",
+  "facts_last_verified": "2026-08-31",
+  "research": {
+    "needed": true,
+    "skipped_reason": null,
+    "queries": [
+      "Google Business Profile how local search ranking works",
+      "Google Business Profile categories services photos description setup",
+      "Google Business Profile Q&A deprecated 2025 features current"
+    ],
+    "retrieved_at": "2026-09-02T00:18:32.255Z"
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "title": "Tips to improve your local ranking on Google",
+      "publisher": "Google Business Profile Help",
+      "excerpt": "Local results are mainly based on relevance, distance, and popularity. Together, these factors help Google find the best match for customers' searches.",
+      "evidence": [
+        {
+          "about": "ranking",
+          "quote": "There's no way to request or pay for a better local ranking on Google. We do our best to keep the search algorithm details confidential to make the ranking system as fair as possible for everyone."
+        },
+        {
+          "about": "ranking",
+          "quote": "Relevance is how well a Business Profile matches what someone is searching for. To help Google better understand your business and match it to relevant searches, provide complete and detailed business info."
+        },
+        {
+          "about": "ranking",
+          "quote": "Prominence means how well-known a business is. Prominent places are more likely to show up in search results. This factor's also based on info like how many websites link to your business and how many reviews you have. More reviews and positive ratings can help your business's local ranking."
+        },
+        {
+          "about": "completeness",
+          "quote": "Businesses with complete and accurate info are more likely to show up in local search results. If your business info isn't accurate, your Business Profile might not show up for relevant searches in your area."
+        },
+        {
+          "about": "reviews",
+          "quote": "When you reply to customer reviews, it shows that you value their feedback. Positive reviews and helpful replies can help your business stand out."
+        },
+        {
+          "about": "photos",
+          "quote": "You can show customers what you offer and tell the story of your business with photos and videos."
+        }
+      ],
+      "why_selected": "Primary official source for all three local ranking signals (relevance, distance, prominence), the no-pay statement, completeness requirement, and the reviews/photos signals — directly answers why a business isn't showing up and what ranking factors to fix.",
+      "product": "google_business_profile",
+      "features": [
+        "ranking",
+        "organic_search"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S2",
+      "url": "https://support.google.com/business/answer/145585?hl=en",
+      "title": "Find your business on Google",
+      "publisher": "Google Business Profile Help",
+      "excerpt": "Only verified businesses can show their business info on Maps and Search.",
+      "evidence": [
+        {
+          "about": "ranking",
+          "quote": "Verify your business: Only verified businesses can show their business info on Maps and Search."
+        },
+        {
+          "about": "indexing",
+          "quote": "Rankings for new businesses can take up to a month to appear in search results."
+        },
+        {
+          "about": "indexing",
+          "quote": "Search results are based on algorithms that take a wide range of factors into account. When you edit your business info, it updates the search results, and changes can take up to 3 days to appear."
+        },
+        {
+          "about": "completeness",
+          "quote": "Keep your business info up-to-date: To improve your business visibility in local search results, make sure your business info is correct, complete, and up to date."
+        },
+        {
+          "about": "completeness",
+          "quote": "If your Business Profile violates our guidelines, it becomes disabled or suspended and won't show to other users on Google until you resolve the issue."
+        }
+      ],
+      "why_selected": "Official help page that directly addresses why a business can't be found — covers verification as a hard prerequisite, new-business ranking delay, edit propagation delay, suspension/guideline violations, and the completeness signal.",
+      "product": "google_business_profile",
+      "features": [
+        "ranking",
+        "organic_search"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "title": "Manage your business category",
+      "publisher": "Google Business Profile Help",
+      "excerpt": "Your business categories inform your customers about what your business does. It helps your business connect you with customers who search for your products or services.",
+      "evidence": [
+        {
+          "about": "categories",
+          "quote": "The categories you select affect your local ranking on Google."
+        },
+        {
+          "about": "categories",
+          "quote": "For example, if your primary category is \"Pizza restaurant,\" we might show your business in someone's local search result when they search for Restaurants, Italian Restaurants, or Pizza."
+        },
+        {
+          "about": "categories",
+          "quote": "Select a primary category that best describes your business. When you choose your category, select a specific category from the list that shows up. For example, instead of \"Salon,\" choose \"Nail salon.\""
+        },
+        {
+          "about": "categories",
+          "quote": "To inform your customers about special departments or services, select additional categories. Do not select a category for every product or service. Instead, use a few categories from the provided list to describe."
+        },
+        {
+          "about": "categories",
+          "quote": "If you add or edit an existing category, you might be asked to verify your business again. This helps Google confirm that your business info is accurate."
+        }
+      ],
+      "why_selected": "Only official source that explicitly states categories affect local ranking, provides the matching-search example, and gives the prescriptive guidance (pick specific over general, don't over-categorise) the blog article needs.",
+      "product": "google_business_profile",
+      "features": [
+        "ranking",
+        "organic_search"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "title": "Edit your Business Profile",
+      "publisher": "Google Business Profile Help",
+      "excerpt": "You can edit your verified Business Profile on Google to keep your business info accurate and up to date. You can update details like your address, hours, contact info, and photos to help customers find and learn more about your business.",
+      "evidence": [
+        {
+          "about": "completeness",
+          "quote": "To show your business on Search, Maps, and other Google services, you must add or claim your business then verify your Business Profile."
+        },
+        {
+          "about": "completeness",
+          "quote": "Business description — Enter a brief description of your business that shows in the \"From the business\" section of your Business Profile."
+        },
+        {
+          "about": "completeness",
+          "quote": "Do not exceed 750 characters in the description field."
+        },
+        {
+          "about": "completeness",
+          "quote": "Focus primarily on details about your business instead of details about promotions, prices, or sales."
+        },
+        {
+          "about": "photos",
+          "quote": "To help make your Business Profile more attractive to customers, you can add photos or videos of your storefront, products, and services. When you add an exterior photo, it helps customers recognize your business when they visit."
+        },
+        {
+          "about": "hours",
+          "quote": "To update your customers on when you're open, set your business's main hours or mark it closed."
+        }
+      ],
+      "why_selected": "Single authoritative how-to page covering the description character limit, photos, hours, service area, and the Q&A caveat — all profile fields the blog article teaches in one official source.",
+      "product": "google_business_profile",
+      "features": [
+        "organic_search"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S5",
+      "url": "https://developers.google.com/my-business/content/qanda/change-log",
+      "title": "Q&A API — Change Log",
+      "publisher": "Google for Developers (Google Business Profile APIs)",
+      "excerpt": "The My Business Q&A API was discontinued on November 3, 2025. You can no longer read or post questions and answers using the API.",
+      "evidence": [
+        {
+          "about": "completeness",
+          "quote": "On November 3, 2025, we will be discontinuing the My Business Q&A API as we are in the process of updating the Q&A functionality and user experience."
+        },
+        {
+          "about": "completeness",
+          "quote": "The My Business Q&A API was discontinued on November 3, 2025. You can no longer read or post questions and answers using the API."
+        }
+      ],
+      "why_selected": "First-party developer notice confirming the Q&A API was discontinued November 3 2025 and that functionality is being updated — required to set feature_status to deprecated and prevent the blog from teaching Q&A as a standard current setup step.",
+      "product": "google_business_profile",
+      "features": [
+        "organic_search"
+      ],
+      "feature_status": "deprecated"
+    }
+  ],
+  "allowed_claims": [
+    {
+      "id": "AC1",
+      "token": "{{AC1}}",
+      "claim": "Local results are mainly based on relevance, distance, and popularity.",
+      "safe_wording": "Local results are mainly based on relevance, distance, and popularity.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "Local results are mainly based on relevance, distance, and popularity.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC2",
+      "token": "{{AC2}}",
+      "claim": "Together, these factors help Google find the best match for customers' searches.",
+      "safe_wording": "Together, these factors help Google find the best match for customers' searches.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "Together, these factors help Google find the best match for customers' searches.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC3",
+      "token": "{{AC3}}",
+      "claim": "There's no way to request or pay for a better local ranking on Google. We do our best to keep the search algorithm details confidential to make the ranking system as fair as possible for everyone.",
+      "safe_wording": "There's no way to request or pay for a better local ranking on Google. We do our best to keep the search algorithm details confidential to make the ranking system as fair as possible for everyone.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "There's no way to request or pay for a better local ranking on Google. We do our best to keep the search algorithm details confidential to make the ranking system as fair as possible for everyone.",
+      "about": "ranking",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC4",
+      "token": "{{AC4}}",
+      "claim": "Relevance is how well a Business Profile matches what someone is searching for. To help Google better understand your business and match it to relevant searches, provide complete and detailed business info.",
+      "safe_wording": "Relevance is how well a Business Profile matches what someone is searching for. To help Google better understand your business and match it to relevant searches, provide complete and detailed business info.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "Relevance is how well a Business Profile matches what someone is searching for. To help Google better understand your business and match it to relevant searches, provide complete and detailed business info.",
+      "about": "ranking",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC5",
+      "token": "{{AC5}}",
+      "claim": "Prominence means how well-known a business is. Prominent places are more likely to show up in search results. This factor's also based on info like how many websites link to your business and how many reviews you have. More reviews and positive ratings can help your business's local ranking.",
+      "safe_wording": "Prominence means how well-known a business is. Prominent places are more likely to show up in search results. This factor's also based on info like how many websites link to your business and how many reviews you have. More reviews and positive ratings can help your business's local ranking.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "Prominence means how well-known a business is. Prominent places are more likely to show up in search results. This factor's also based on info like how many websites link to your business and how many reviews you have. More reviews and positive ratings can help your business's local ranking.",
+      "about": "ranking",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC6",
+      "token": "{{AC6}}",
+      "claim": "Businesses with complete and accurate info are more likely to show up in local search results. If your business info isn't accurate, your Business Profile might not show up for relevant searches in your area.",
+      "safe_wording": "Businesses with complete and accurate info are more likely to show up in local search results. If your business info isn't accurate, your Business Profile might not show up for relevant searches in your area.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "Businesses with complete and accurate info are more likely to show up in local search results. If your business info isn't accurate, your Business Profile might not show up for relevant searches in your area.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC7",
+      "token": "{{AC7}}",
+      "claim": "When you reply to customer reviews, it shows that you value their feedback. Positive reviews and helpful replies can help your business stand out.",
+      "safe_wording": "When you reply to customer reviews, it shows that you value their feedback. Positive reviews and helpful replies can help your business stand out.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "When you reply to customer reviews, it shows that you value their feedback. Positive reviews and helpful replies can help your business stand out.",
+      "about": "reviews",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC8",
+      "token": "{{AC8}}",
+      "claim": "You can show customers what you offer and tell the story of your business with photos and videos.",
+      "safe_wording": "You can show customers what you offer and tell the story of your business with photos and videos.",
+      "source_id": "S1",
+      "url": "https://support.google.com/business/answer/7091?hl=en",
+      "evidence": "You can show customers what you offer and tell the story of your business with photos and videos.",
+      "about": "photos",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC9",
+      "token": "{{AC9}}",
+      "claim": "Only verified businesses can show their business info on Maps and Search.",
+      "safe_wording": "Only verified businesses can show their business info on Maps and Search.",
+      "source_id": "S2",
+      "url": "https://support.google.com/business/answer/145585?hl=en",
+      "evidence": "Only verified businesses can show their business info on Maps and Search.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC10",
+      "token": "{{AC10}}",
+      "claim": "Verify your business: Only verified businesses can show their business info on Maps and Search.",
+      "safe_wording": "Verify your business: Only verified businesses can show their business info on Maps and Search.",
+      "source_id": "S2",
+      "url": "https://support.google.com/business/answer/145585?hl=en",
+      "evidence": "Verify your business: Only verified businesses can show their business info on Maps and Search.",
+      "about": "ranking",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC11",
+      "token": "{{AC11}}",
+      "claim": "Rankings for new businesses can take up to a month to appear in search results.",
+      "safe_wording": "Rankings for new businesses can take up to a month to appear in search results.",
+      "source_id": "S2",
+      "url": "https://support.google.com/business/answer/145585?hl=en",
+      "evidence": "Rankings for new businesses can take up to a month to appear in search results.",
+      "about": "indexing",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC12",
+      "token": "{{AC12}}",
+      "claim": "Search results are based on algorithms that take a wide range of factors into account. When you edit your business info, it updates the search results, and changes can take up to 3 days to appear.",
+      "safe_wording": "Search results are based on algorithms that take a wide range of factors into account. When you edit your business info, it updates the search results, and changes can take up to 3 days to appear.",
+      "source_id": "S2",
+      "url": "https://support.google.com/business/answer/145585?hl=en",
+      "evidence": "Search results are based on algorithms that take a wide range of factors into account. When you edit your business info, it updates the search results, and changes can take up to 3 days to appear.",
+      "about": "indexing",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC13",
+      "token": "{{AC13}}",
+      "claim": "Keep your business info up-to-date: To improve your business visibility in local search results, make sure your business info is correct, complete, and up to date.",
+      "safe_wording": "Keep your business info up-to-date: To improve your business visibility in local search results, make sure your business info is correct, complete, and up to date.",
+      "source_id": "S2",
+      "url": "https://support.google.com/business/answer/145585?hl=en",
+      "evidence": "Keep your business info up-to-date: To improve your business visibility in local search results, make sure your business info is correct, complete, and up to date.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC14",
+      "token": "{{AC14}}",
+      "claim": "If your Business Profile violates our guidelines, it becomes disabled or suspended and won't show to other users on Google until you resolve the issue.",
+      "safe_wording": "If your Business Profile violates our guidelines, it becomes disabled or suspended and won't show to other users on Google until you resolve the issue.",
+      "source_id": "S2",
+      "url": "https://support.google.com/business/answer/145585?hl=en",
+      "evidence": "If your Business Profile violates our guidelines, it becomes disabled or suspended and won't show to other users on Google until you resolve the issue.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC15",
+      "token": "{{AC15}}",
+      "claim": "Your business categories inform your customers about what your business does.",
+      "safe_wording": "Your business categories inform your customers about what your business does.",
+      "source_id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "evidence": "Your business categories inform your customers about what your business does.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC16",
+      "token": "{{AC16}}",
+      "claim": "It helps your business connect you with customers who search for your products or services.",
+      "safe_wording": "It helps your business connect you with customers who search for your products or services.",
+      "source_id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "evidence": "It helps your business connect you with customers who search for your products or services.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC17",
+      "token": "{{AC17}}",
+      "claim": "The categories you select affect your local ranking on Google.",
+      "safe_wording": "The categories you select affect your local ranking on Google.",
+      "source_id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "evidence": "The categories you select affect your local ranking on Google.",
+      "about": "categories",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC18",
+      "token": "{{AC18}}",
+      "claim": "For example, if your primary category is \"Pizza restaurant,\" we might show your business in someone's local search result when they search for Restaurants, Italian Restaurants, or Pizza.",
+      "safe_wording": "For example, if your primary category is \"Pizza restaurant,\" we might show your business in someone's local search result when they search for Restaurants, Italian Restaurants, or Pizza.",
+      "source_id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "evidence": "For example, if your primary category is \"Pizza restaurant,\" we might show your business in someone's local search result when they search for Restaurants, Italian Restaurants, or Pizza.",
+      "about": "categories",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC19",
+      "token": "{{AC19}}",
+      "claim": "Select a primary category that best describes your business. When you choose your category, select a specific category from the list that shows up. For example, instead of \"Salon,\" choose \"Nail salon.\".",
+      "safe_wording": "Select a primary category that best describes your business. When you choose your category, select a specific category from the list that shows up. For example, instead of \"Salon,\" choose \"Nail salon.\".",
+      "source_id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "evidence": "Select a primary category that best describes your business. When you choose your category, select a specific category from the list that shows up. For example, instead of \"Salon,\" choose \"Nail salon.\"",
+      "about": "categories",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC20",
+      "token": "{{AC20}}",
+      "claim": "To inform your customers about special departments or services, select additional categories. Do not select a category for every product or service. Instead, use a few categories from the provided list to describe.",
+      "safe_wording": "To inform your customers about special departments or services, select additional categories. Do not select a category for every product or service. Instead, use a few categories from the provided list to describe.",
+      "source_id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "evidence": "To inform your customers about special departments or services, select additional categories. Do not select a category for every product or service. Instead, use a few categories from the provided list to describe.",
+      "about": "categories",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC21",
+      "token": "{{AC21}}",
+      "claim": "If you add or edit an existing category, you might be asked to verify your business again. This helps Google confirm that your business info is accurate.",
+      "safe_wording": "If you add or edit an existing category, you might be asked to verify your business again. This helps Google confirm that your business info is accurate.",
+      "source_id": "S3",
+      "url": "https://support.google.com/business/answer/7249669?hl=en",
+      "evidence": "If you add or edit an existing category, you might be asked to verify your business again. This helps Google confirm that your business info is accurate.",
+      "about": "categories",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC22",
+      "token": "{{AC22}}",
+      "claim": "You can edit your verified Business Profile on Google to keep your business info accurate and up to date.",
+      "safe_wording": "You can edit your verified Business Profile on Google to keep your business info accurate and up to date.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "You can edit your verified Business Profile on Google to keep your business info accurate and up to date.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC23",
+      "token": "{{AC23}}",
+      "claim": "You can update details like your address, hours, contact info, and photos to help customers find and learn more about your business.",
+      "safe_wording": "You can update details like your address, hours, contact info, and photos to help customers find and learn more about your business.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "You can update details like your address, hours, contact info, and photos to help customers find and learn more about your business.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC24",
+      "token": "{{AC24}}",
+      "claim": "To show your business on Search, Maps, and other Google services, you must add or claim your business then verify your Business Profile.",
+      "safe_wording": "To show your business on Search, Maps, and other Google services, you must add or claim your business then verify your Business Profile.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "To show your business on Search, Maps, and other Google services, you must add or claim your business then verify your Business Profile.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC25",
+      "token": "{{AC25}}",
+      "claim": "Business description , Enter a brief description of your business that shows in the \"From the business\" section of your Business Profile.",
+      "safe_wording": "Business description , Enter a brief description of your business that shows in the \"From the business\" section of your Business Profile.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "Business description — Enter a brief description of your business that shows in the \"From the business\" section of your Business Profile.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC26",
+      "token": "{{AC26}}",
+      "claim": "Do not exceed 750 characters in the description field.",
+      "safe_wording": "Do not exceed 750 characters in the description field.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "Do not exceed 750 characters in the description field.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC27",
+      "token": "{{AC27}}",
+      "claim": "Focus primarily on details about your business instead of details about promotions, prices, or sales.",
+      "safe_wording": "Focus primarily on details about your business instead of details about promotions, prices, or sales.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "Focus primarily on details about your business instead of details about promotions, prices, or sales.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC28",
+      "token": "{{AC28}}",
+      "claim": "To help make your Business Profile more attractive to customers, you can add photos or videos of your storefront, products, and services. When you add an exterior photo, it helps customers recognize your business when they visit.",
+      "safe_wording": "To help make your Business Profile more attractive to customers, you can add photos or videos of your storefront, products, and services. When you add an exterior photo, it helps customers recognize your business when they visit.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "To help make your Business Profile more attractive to customers, you can add photos or videos of your storefront, products, and services. When you add an exterior photo, it helps customers recognize your business when they visit.",
+      "about": "photos",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC29",
+      "token": "{{AC29}}",
+      "claim": "To update your customers on when you're open, set your business's main hours or mark it closed.",
+      "safe_wording": "To update your customers on when you're open, set your business's main hours or mark it closed.",
+      "source_id": "S4",
+      "url": "https://support.google.com/business/answer/3039617?hl=en",
+      "evidence": "To update your customers on when you're open, set your business's main hours or mark it closed.",
+      "about": "hours",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC30",
+      "token": "{{AC30}}",
+      "claim": "The My Business Q&A API was discontinued on November 3, 2025.",
+      "safe_wording": "The My Business Q&A API was discontinued on November 3, 2025.",
+      "source_id": "S5",
+      "url": "https://developers.google.com/my-business/content/qanda/change-log",
+      "evidence": "The My Business Q&A API was discontinued on November 3, 2025.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC31",
+      "token": "{{AC31}}",
+      "claim": "You can no longer read or post questions and answers using the API.",
+      "safe_wording": "You can no longer read or post questions and answers using the API.",
+      "source_id": "S5",
+      "url": "https://developers.google.com/my-business/content/qanda/change-log",
+      "evidence": "You can no longer read or post questions and answers using the API.",
+      "about": "excerpt",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC32",
+      "token": "{{AC32}}",
+      "claim": "On November 3, 2025, we will be discontinuing the My Business Q&A API as we are in the process of updating the Q&A functionality and user experience.",
+      "safe_wording": "On November 3, 2025, we will be discontinuing the My Business Q&A API as we are in the process of updating the Q&A functionality and user experience.",
+      "source_id": "S5",
+      "url": "https://developers.google.com/my-business/content/qanda/change-log",
+      "evidence": "On November 3, 2025, we will be discontinuing the My Business Q&A API as we are in the process of updating the Q&A functionality and user experience.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    },
+    {
+      "id": "AC33",
+      "token": "{{AC33}}",
+      "claim": "The My Business Q&A API was discontinued on November 3, 2025. You can no longer read or post questions and answers using the API.",
+      "safe_wording": "The My Business Q&A API was discontinued on November 3, 2025. You can no longer read or post questions and answers using the API.",
+      "source_id": "S5",
+      "url": "https://developers.google.com/my-business/content/qanda/change-log",
+      "evidence": "The My Business Q&A API was discontinued on November 3, 2025. You can no longer read or post questions and answers using the API.",
+      "about": "completeness",
+      "product": "google_business_profile",
+      "requires_citation": true
+    }
+  ],
+  "claim_tokens_used": [
+    "AC1",
+    "AC2",
+    "AC4",
+    "AC5",
+    "AC6",
+    "AC7",
+    "AC8",
+    "AC9",
+    "AC11",
+    "AC12",
+    "AC13",
+    "AC15",
+    "AC16",
+    "AC17",
+    "AC19",
+    "AC23",
+    "AC24",
+    "AC25",
+    "AC26",
+    "AC27",
+    "AC28"
+  ],
+  "approved_first_party_numbers": {
+    "money": [
+      0.19,
+      4.02,
+      400,
+      500,
+      600,
+      750,
+      1500,
+      2000,
+      3500,
+      5000,
+      10000
+    ],
+    "percents": [
+      15,
+      95
+    ],
+    "counts": [
+      2,
+      12,
+      13,
+      37,
+      74,
+      250,
+      968,
+      1963,
+      72309
+    ],
+    "timelines": [
+      "2–4 weeks",
+      "30 days"
+    ]
+  },
+  "claims": [
+    {
+      "claim": "Local results are mainly based on relevance, distance, and popularity.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC1"
+    },
+    {
+      "claim": "Together, these factors help Google find the best match for customers' searches.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC2"
+    },
+    {
+      "claim": "Relevance is how well a Business Profile matches what someone is searching for. To help Google better understand your business and match it to relevant searches, provide complete and detailed business info.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC4"
+    },
+    {
+      "claim": "Prominence means how well-known a business is. Prominent places are more likely to show up in search results. This factor's also based on info like how many websites link to your business and how many reviews you have. More reviews and positive ratings can help your business's local ranking.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC5"
+    },
+    {
+      "claim": "Businesses with complete and accurate info are more likely to show up in local search results. If your business info isn't accurate, your Business Profile might not show up for relevant searches in your area.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC6"
+    },
+    {
+      "claim": "When you reply to customer reviews, it shows that you value their feedback. Positive reviews and helpful replies can help your business stand out.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC7"
+    },
+    {
+      "claim": "You can show customers what you offer and tell the story of your business with photos and videos.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC8"
+    },
+    {
+      "claim": "Only verified businesses can show their business info on Maps and Search.",
+      "kind": "sourced_fact",
+      "source_id": "S2",
+      "allowed_claim_id": "AC9"
+    },
+    {
+      "claim": "Rankings for new businesses can take up to a month to appear in search results.",
+      "kind": "sourced_fact",
+      "source_id": "S2",
+      "allowed_claim_id": "AC11"
+    },
+    {
+      "claim": "Search results are based on algorithms that take a wide range of factors into account. When you edit your business info, it updates the search results, and changes can take up to 3 days to appear.",
+      "kind": "sourced_fact",
+      "source_id": "S2",
+      "allowed_claim_id": "AC12"
+    },
+    {
+      "claim": "Keep your business info up-to-date: To improve your business visibility in local search results, make sure your business info is correct, complete, and up to date.",
+      "kind": "sourced_fact",
+      "source_id": "S2",
+      "allowed_claim_id": "AC13"
+    },
+    {
+      "claim": "Your business categories inform your customers about what your business does.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC15"
+    },
+    {
+      "claim": "It helps your business connect you with customers who search for your products or services.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC16"
+    },
+    {
+      "claim": "The categories you select affect your local ranking on Google.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC17"
+    },
+    {
+      "claim": "Select a primary category that best describes your business. When you choose your category, select a specific category from the list that shows up. For example, instead of \"Salon,\" choose \"Nail salon.\".",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC19"
+    },
+    {
+      "claim": "You can update details like your address, hours, contact info, and photos to help customers find and learn more about your business.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC23"
+    },
+    {
+      "claim": "To show your business on Search, Maps, and other Google services, you must add or claim your business then verify your Business Profile.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC24"
+    },
+    {
+      "claim": "Business description , Enter a brief description of your business that shows in the \"From the business\" section of your Business Profile.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC25"
+    },
+    {
+      "claim": "Do not exceed 750 characters in the description field.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC26"
+    },
+    {
+      "claim": "Focus primarily on details about your business instead of details about promotions, prices, or sales.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC27"
+    },
+    {
+      "claim": "To help make your Business Profile more attractive to customers, you can add photos or videos of your storefront, products, and services. When you add an exterior photo, it helps customers recognize your business when they visit.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC28"
+    },
+    {
+      "claim": "Brandible built The Doorstep Detailer's website, branding, and Google presence from scratch in Hunterdon County, NJ, and it reached the top of relevant local searches and grew to 250+ customers with five-star feedback.",
+      "kind": "first_party"
+    },
+    {
+      "claim": "Local visibility for a business like The Doorstep Detailer came from a complete profile, real customer reviews, and a site that matched what people were searching for, not a trick or shortcut.",
+      "kind": "first_party"
+    },
+    {
+      "claim": "A roofing company whose website never mentions the town it serves is leaving relevance on the table, because location-specific content helps Google match your business to local searches.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "If your site is slow, thin on content, or hard for Google to read, it can hold your local visibility back alongside your Google Business Profile.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "Inconsistent business name, address, and phone number across your website, Google profile, and other listings creates confusion for Google and for customers.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "A site that clearly serves people tends to earn more trust from search engines.",
+      "kind": "opinion"
+    }
+  ],
+  "repairs": [
+    {
+      "round": 1,
+      "code": "V9_QUANTIFIER",
+      "action": "deleted_segment",
+      "reason": "unsupported quantifier"
+    },
+    {
+      "round": 2,
+      "code": "V7_CLAIM_LEDGER",
+      "action": "deleted_segment",
+      "reason": "raw platform assertion"
+    }
+  ],
+  "internal_links_catalog_note": "Internal URLs in the article must come from the approved catalog of live posts, services, and core pages."
+}

@@ -1,0 +1,37 @@
+{
+  "source_post_path": "Brandible/blogs/posts/2026-09-02-why-your-business-isnt-showing-up-on-google.md",
+  "slug": "why-your-business-isnt-showing-up-on-google",
+  "visual_brief": {
+    "thesis": "Local business search invisibility stems from unverified or incomplete foundational anchors; connecting key location data acts like plugging in a power source to illuminate a dark presence.",
+    "subject": "A sculptural, dark matte navy map pin object sitting unlit on a textured physical grid surface, directly adjacent to a glowing orange physical power pin about to slide into its base.",
+    "composition": "Centered tactile still-life. The main unlit map pin and its orange connector are framed dead center, with soft directional light casting delicate shadows across a spacious navy field.",
+    "mood": "Quiet, analytical, precise, tactile.",
+    "avoid": [
+      "text",
+      "letters",
+      "google logo",
+      "brandible logo",
+      "fake UI",
+      "screenshots",
+      "search bar",
+      "human faces",
+      "handshake",
+      "charts"
+    ],
+    "color_notes": "Deep navy background (#0A1633, #060D1F), warm vibrant orange accent (#F97316) illuminating the small connector piece, subtle electric blue (#2563EB) highlights on grid structure lines, matte cool light (#F5F7FA) defining object edges.",
+    "center_safe": "All focal elements—the central dark map pin and its orange connector—are held within the middle 65% of the frame horizontally and vertically, leaving generous dark navy padding on all sides for 16:10 cropping."
+  },
+  "final_generation_prompt": "Create one original Brandible blog featured image.\nQuiet tactile still-life. Slightly 3D physical objects. Matte materials. Soft directional light.\nNavy field (#0A1633 / #060D1F) with orange accent (#F97316). Electric blue only sparingly.\nNo typography. No logos. No fake UI. No stock photography tropes.\nGenerate as a 2K 16:9 landscape. Important subject stays in the center 70% horizontally and vertically, with breathing room on every edge, because the image will later be cropped to 16:10.\nThesis: Local business search invisibility stems from unverified or incomplete foundational anchors; connecting key location data acts like plugging in a power source to illuminate a dark presence.\nSubject: A sculptural, dark matte navy map pin object sitting unlit on a textured physical grid surface, directly adjacent to a glowing orange physical power pin about to slide into its base.\nComposition: Centered tactile still-life. The main unlit map pin and its orange connector are framed dead center, with soft directional light casting delicate shadows across a spacious navy field.\nMood: Quiet, analytical, precise, tactile.\nColor: Deep navy background (#0A1633, #060D1F), warm vibrant orange accent (#F97316) illuminating the small connector piece, subtle electric blue (#2563EB) highlights on grid structure lines, matte cool light (#F5F7FA) defining object edges.\nCenter-safe: All focal elements—the central dark map pin and its orange connector—are held within the middle 65% of the frame horizontally and vertically, leaving generous dark navy padding on all sides for 16:10 cropping.\nDo not appear:\n- readable text, headlines, captions, watermarks, or typography\n- Brandible logo, wordmark, or letter B\n- fake Google, Meta, Ads, or Search UI and readable screenshots\n- generic corporate stock: handshakes, laptops on white desks, smiling teams\n- cyberpunk, cartoon, or glossy AI-glass people\n- text\n- letters\n- google logo\n- brandible logo\n- fake UI\n- screenshots\n- search bar\n- human faces\n- handshake\n- charts\nOutput the image only. Do not render words in the picture.",
+  "provider": "gemini",
+  "model": "gemini-3.1-flash-image",
+  "generated_at": "2026-09-02T00:19:38.740Z",
+  "generation_mode": "new",
+  "regeneration_notes": null,
+  "final_dimensions": {
+    "width": 1920,
+    "height": 1200
+  },
+  "final_byte_size": 32858,
+  "final_image_path": "Brandible/assets/blog-images/why-your-business-isnt-showing-up-on-google.webp",
+  "licensing": "Original AI-generated imagery created under the provider's API terms, with generation provenance recorded."
+}
