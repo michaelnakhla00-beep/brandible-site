@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: "Why Your Business Isn't Showing Up on Google (and What to Fix First)"
 slug: "why-your-business-isnt-showing-up-on-google"
 date: 2026-09-02T00:19:15.067Z
