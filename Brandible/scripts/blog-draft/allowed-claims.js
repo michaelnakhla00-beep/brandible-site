@@ -66,6 +66,7 @@ function toSafeWording(quote) {
     .replace(/\s+/g, ' ')
     .trim();
   if (!text) return '';
+  text = text.replace(/\s+([.!?])/g, '$1').replace(/([.!?]){2,}/g, '$1');
   if (!/[.!?]$/.test(text)) text += '.';
   return text;
 }
@@ -138,9 +139,11 @@ function allowedClaimsForPrompt(claims) {
     ].join('\n');
   }
   const lines = [
-    'Approved claim tokens. Insert a token in the body. Do not write or paraphrase the factual sentence.',
-    'Code replaces each token with the safe wording and, when required, the markdown source link.',
-    'Do not include sourced_fact rows in claims[]. Code derives those from tokens actually used.',
+    'Approved claim tokens. Write a concise Brandible sentence that the approved evidence actually supports, then insert the token immediately after that sentence.',
+    'Code replaces each token with a short [Source](url) marker. Do not paste the evidence quote as the visible sentence. Do not wrap the evidence quote in a Markdown link.',
+    'Do not write a second sentence that repeats the same sourced fact in near-identical wording.',
+    'Use at most one {{AC#}} token per paragraph unless two distinct approved facts are both required.',
+    'Do not include sourced_fact rows in claims[]. Code derives those from tokens actually used, using the Brandible sentence bound to each token.',
     ''
   ];
   for (const item of claims) {

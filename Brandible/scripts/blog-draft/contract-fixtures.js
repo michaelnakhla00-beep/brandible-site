@@ -12,7 +12,9 @@ const {
   buildSourcedClaims,
   mergeNonSourcedClaims,
   refreshAssemblyState,
-  unwrapClaimTokenWrappers
+  unwrapClaimTokenWrappers,
+  SOURCE_LINK_LABEL,
+  citationMarkup
 } = require('./assemble');
 const {
   validateGeneratedArticle,
@@ -92,6 +94,30 @@ function baseFields() {
     excerpt: 'Most of the work is on the listing and the site, not on a new campaign.',
     category: 'SEO'
   };
+}
+
+function approvedClaimSentence(claim) {
+  return String((claim && (claim.safe_wording || claim.claim)) || '').replace(/\s+/g, ' ').trim();
+}
+
+function tokenAfterClaim(claim) {
+  return `${approvedClaimSentence(claim)} {{${claim.id}}}`;
+}
+
+function adsVoiceAround(claim) {
+  return [
+    'Keeping spend honest matters.',
+    tokenAfterClaim(claim),
+    'That does not mean raising the bid first.'
+  ].join(' ');
+}
+
+function editorialAround(claim) {
+  return [
+    "There's no way Brandible can skip the mechanics.",
+    tokenAfterClaim(claim),
+    'That does not mean raising the bid first.'
+  ].join(' ');
 }
 
 const OPERATIONAL_PADDING = [
@@ -639,19 +665,17 @@ async function run() {
 
   const adsAllowed = buildAllowedClaims(adsPack());
   const adsClaim = adsAllowed[0];
-  const resolved = resolveClaimTokens(
-    `Keeping spend honest matters because {{${adsClaim.id}}} That does not mean raising the bid first.`,
-    adsAllowed
-  );
+  const resolved = resolveClaimTokens(adsVoiceAround(adsClaim), adsAllowed);
   assert('claim token is removed during resolution', !resolved.text.includes(`{{${adsClaim.id}}}`), resolved.text);
   assert(
     'renderer inserts reader-facing markdown citation',
-    resolved.text.includes(`](${adsClaim.url})`),
+    resolved.text.includes(`](${adsClaim.url})`) && resolved.text.includes(`[${SOURCE_LINK_LABEL}](`),
     resolved.text
   );
   assert(
-    'renderer uses approved safe wording',
-    resolved.text.includes((adsClaim.safe_wording || adsClaim.claim).replace(/[.!?]$/, '')),
+    'renderer keeps approved wording as Brandible prose, not as the link label',
+    resolved.text.includes((adsClaim.safe_wording || adsClaim.claim).replace(/[.!?]$/, '')) &&
+      (resolved.text.match(/\[[^\]]+\]\([^)]+\)/g) || []).every((item) => item.startsWith(`[${SOURCE_LINK_LABEL}](`)),
     resolved.text
   );
 
@@ -686,7 +710,7 @@ async function run() {
     linkedEvidenceClaim && linkedEvidenceClaim.safe_wording
   );
 
-  const citedFromMarkdown = resolveClaimTokens(`{{${linkedEvidenceClaim.id}}}`, linkedEvidenceClaims);
+  const citedFromMarkdown = resolveClaimTokens(tokenAfterClaim(linkedEvidenceClaim), linkedEvidenceClaims);
   const citedLinks = citedFromMarkdown.text.match(/\[[^\]]+\]\([^)]+\)/g) || [];
   assert(
     'renderer ignores research URL and links with allowed.url',
@@ -694,8 +718,8 @@ async function run() {
     citedFromMarkdown.text
   );
   assert(
-    'rendered AC claim contains exactly one Markdown link',
-    citedLinks.length === 1 && citedLinks[0] === `[Google Ads uses Ad Rank to determine whether your ad is eligible to show and where it appears](${adsClaim.url})`,
+    'rendered AC claim contains exactly one short Source marker',
+    citedLinks.length === 1 && citedLinks[0] === `[${SOURCE_LINK_LABEL}](${adsClaim.url})`,
     JSON.stringify(citedLinks)
   );
 
@@ -724,7 +748,10 @@ async function run() {
   };
   const unmatchedClaims = buildAllowedClaims(unmatchedBracketPack);
   const unmatchedClaim = unmatchedClaims.find((item) => /no way to request or pay/i.test(item.evidence));
-  const unmatchedRendered = resolveClaimTokens(`Start with the listing. {{${unmatchedClaim.id}}}`, unmatchedClaims);
+  const unmatchedRendered = resolveClaimTokens(
+    `Start with the listing. ${tokenAfterClaim(unmatchedClaim)}`,
+    unmatchedClaims
+  );
   assert(
     'unmatched leading bracket does not survive in safe_wording',
     unmatchedClaim && !unmatchedClaim.safe_wording.startsWith('[') && !unmatchedClaim.safe_wording.includes('[['),
@@ -756,8 +783,8 @@ async function run() {
     { cite: true }
   );
   assert(
-    'quoted citation wrapper renders a clean canonical link',
-    quotedRendered.includes(`](${adsClaim.url})`) &&
+    'quoted citation wrapper renders a clean canonical Source marker',
+    quotedRendered === `[${SOURCE_LINK_LABEL}](${adsClaim.url})` &&
       !quotedRendered.includes('[[') &&
       (quotedRendered.match(/\[[^\]]+\]\([^)]+\)/g) || []).length === 1,
     quotedRendered
@@ -778,7 +805,7 @@ async function run() {
     !nestedPlain.startsWith('[') &&
       !nestedPlain.includes(foreignUrl) &&
       !nestedRendered.includes('[[') &&
-      nestedRendered.includes(`](${adsClaim.url})`) &&
+      nestedRendered === `[${SOURCE_LINK_LABEL}](${adsClaim.url})` &&
       (nestedRendered.match(/\[[^\]]+\]\([^)]+\)/g) || []).length === 1,
     `${nestedPlain} | ${nestedRendered}`
   );
@@ -787,7 +814,7 @@ async function run() {
     { claim: 'Invented Google ranking guarantee.', kind: 'sourced_fact', source_id: 'S9', allowed_claim_id: 'AC99' },
     { claim: 'If tracking is already in place, you may not need Brandible.', kind: 'opinion', source_id: null }
   ];
-  const sourced = buildSourcedClaims(resolved.usedIds, adsAllowed);
+  const sourced = buildSourcedClaims(resolved.rendered, adsAllowed);
   const merged = mergeNonSourcedClaims(fakeModelClaims, sourced);
   assert(
     'programmatic ledger uses allowed_claim_id from the token',
@@ -795,8 +822,8 @@ async function run() {
     JSON.stringify(sourced)
   );
   assert(
-    'programmatic ledger wording matches approved evidence',
-    sourced[0].claim === (adsClaim.safe_wording || adsClaim.claim)
+    'programmatic ledger wording is the user-facing Brandible sentence',
+    sourced[0].claim === approvedClaimSentence(adsClaim)
   );
   assert(
     'model sourced_fact rows are discarded',
@@ -1149,7 +1176,7 @@ async function run() {
       '',
       'Raising spend does not by itself make an ad eligible to show.',
       '',
-      `Keeping spend honest matters because {{${adsClaim.id}}} That does not mean raising the bid first.`,
+        adsVoiceAround(adsClaim),
       '',
       'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
     ].join('\n'),
@@ -1283,7 +1310,7 @@ async function run() {
       body: [
         '## How the auction works',
         '',
-        `{{${adsClaim.id}}}`,
+        tokenAfterClaim(adsClaim),
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n')
@@ -1320,7 +1347,7 @@ async function run() {
       body: [
         '## How the auction works',
         '',
-        `Keeping spend honest matters because {{${adsClaim.id}}} That does not mean raising the bid first.`,
+          adsVoiceAround(adsClaim),
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n'),
@@ -1382,7 +1409,7 @@ async function run() {
       body: [
         '## How the auction works',
         '',
-        `Keeping spend honest matters because {{${linkedEvidenceClaim.id}}} That does not mean raising the bid first.`,
+        adsVoiceAround(linkedEvidenceClaim),
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n'),
@@ -1456,7 +1483,7 @@ async function run() {
       body: [
         '## How the auction works',
         '',
-        `There's no way Brandible can skip the mechanics: {{${adsClaim.id}}} That does not mean raising the bid first.`,
+        editorialAround(adsClaim),
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n'),
@@ -1730,7 +1757,7 @@ async function run() {
   function runPostRevisionPipeline(tokenized) {
     const assembled = assembleArticle(tokenized, rankingClaims);
     const mid = validateGeneratedArticle(assembled, rankingCtx);
-    const fallback = applySafetyFallback(assembled, mid);
+    const fallback = applySafetyFallback(assembled, mid, { allowedClaims: rankingClaims });
     let article = assembled;
     if (fallback.applied.length && !fallback.refused) {
       article = fallback.article;
@@ -1790,7 +1817,7 @@ async function run() {
         '',
         'Everyone can get a listing to show up overnight.',
         '',
-        '{{AC3}}',
+        tokenAfterClaim(ac3),
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n')
@@ -1808,7 +1835,7 @@ async function run() {
       [
         '## Local ranking',
         '',
-        'Everyone can get a listing to show up overnight. {{AC3}}',
+        `Everyone can get a listing to show up overnight. ${tokenAfterClaim(ac3)}`,
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n')
@@ -1826,7 +1853,9 @@ async function run() {
       [
         '## Local ranking',
         '',
-        'Everyone can get a listing to show up overnight. {{AC3}}',
+        OPERATIONAL_PADDING,
+        '',
+        `Everyone can get a listing to show up overnight. ${tokenAfterClaim(ac3)}`,
         '',
         "There's no way to request or pay for a better local ranking on Google if the listing is incomplete.",
         '',
@@ -1846,13 +1875,16 @@ async function run() {
   );
 
   const wrapperBodies = {
-    '{{AC3}}': '{{AC3}}',
-    '[{{AC3}}]': '[{{AC3}}]',
-    '"{{AC3}}"': '"{{AC3}}"',
-    '**{{AC3}}**': '**{{AC3}}**',
-    '[{{AC3}}](some-model-url)': '[{{AC3}}](https://example.com/not-the-approved-source)'
+    '{{AC3}}': tokenAfterClaim(ac3),
+    '[{{AC3}}]': `[{{AC3}}]`.replace('{{AC3}}', `{{${ac3.id}}}`),
+    '"{{AC3}}"': `"{{${ac3.id}}}"`,
+    '**{{AC3}}**': `**{{${ac3.id}}}**`,
+    '[{{AC3}}](some-model-url)': `[{{${ac3.id}}}](https://example.com/not-the-approved-source)`
   };
   for (const [label, token] of Object.entries(wrapperBodies)) {
+    const wrappedToken = /AC3/.test(token) && !token.includes(approvedClaimSentence(ac3))
+      ? `${approvedClaimSentence(ac3)} ${token}`
+      : token;
     assert(
       `wrapper ${label} unwraps to a bare token`,
       unwrapClaimTokenWrappers(token).replace(/\s+/g, '') === '{{AC3}}' ||
@@ -1864,7 +1896,7 @@ async function run() {
         [
           '## Local ranking',
           '',
-          token,
+          wrappedToken,
           '',
           'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
         ].join('\n')
@@ -1927,24 +1959,24 @@ async function run() {
   const categoryClaim = neverSplitClaims[1];
   const moreLikelyCited = renderCitedClaim(moreLikelyClaim, { cite: true });
   const categoryCited = renderCitedClaim(categoryClaim, { cite: true });
-  const claimedNeverPara = `If you've claimed the profile but never finished setting it up, you're in a similar position. ${moreLikelyCited}`;
-  const categoryNeverPara = `If you've never looked at your category selection, that's worth doing this week. ${categoryCited}`;
+  const claimedNeverPara = `If you've claimed the profile but never finished setting it up, you're in a similar position. ${approvedClaimSentence(moreLikelyClaim)} ${moreLikelyCited}`;
+  const categoryNeverPara = `If you've never looked at your category selection, that's worth doing this week. ${approvedClaimSentence(categoryClaim)} ${categoryCited}`;
   const claimedNeverParts = splitSentences(claimedNeverPara);
   const categoryNeverParts = splitSentences(categoryNeverPara);
   assert(
-    'never + AC citation splits into two sentences',
-    claimedNeverParts.length === 2 &&
+    'never + AC citation splits commentary from the sourced unit',
+    claimedNeverParts.length >= 2 &&
       /never finished/.test(claimedNeverParts[0]) &&
-      /more likely/.test(claimedNeverParts[1]) &&
-      !/\bnever\b/i.test(claimedNeverParts[1]),
+      claimedNeverParts.some((item) => /more likely/.test(item) && !/\bnever\b/i.test(item)) &&
+      claimedNeverParts.some((item) => item.includes(moreLikelyCited) && !/\bnever\b/i.test(item)),
     JSON.stringify(claimedNeverParts)
   );
   assert(
-    'never + category citation splits into two sentences',
-    categoryNeverParts.length === 2 &&
+    'never + category citation splits commentary from the sourced unit',
+    categoryNeverParts.length >= 2 &&
       /never looked/.test(categoryNeverParts[0]) &&
-      /might be asked/.test(categoryNeverParts[1]) &&
-      !/\bnever\b/i.test(categoryNeverParts[1]),
+      categoryNeverParts.some((item) => /might be asked/.test(item) && !/\bnever\b/i.test(item)) &&
+      categoryNeverParts.some((item) => item.includes(categoryCited) && !/\bnever\b/i.test(item)),
     JSON.stringify(categoryNeverParts)
   );
 
@@ -1973,9 +2005,7 @@ async function run() {
       [
         '## Local ranking',
         '',
-        "If you've claimed the profile but never finished setting it up, you're in a similar position. {{" +
-          moreLikelyClaim.id +
-          '}}',
+        `If you've claimed the profile but never finished setting it up, you're in a similar position. ${tokenAfterClaim(moreLikelyClaim)}`,
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n')
@@ -1997,9 +2027,7 @@ async function run() {
       [
         '## Local ranking',
         '',
-        "If you've never looked at your category selection, that's worth doing this week. {{" +
-          categoryClaim.id +
-          '}}',
+        `If you've never looked at your category selection, that's worth doing this week. ${tokenAfterClaim(categoryClaim)}`,
         '',
         'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
       ].join('\n')
@@ -2075,7 +2103,8 @@ async function run() {
   const verifiedHeading = '## Your Google Business Profile Might Be the First Problem';
   const verifiedPathForward = 'So the path forward is giving Google more signal.';
   const verifiedCommentary = 'For local searches, some commentary goes here.';
-  const verifiedCitation = `[${verifiedLabel}](${verifiedUrl})`;
+  const verifiedDisplay = `${verifiedLabel}.`;
+  const verifiedCitation = `[${SOURCE_LINK_LABEL}](${verifiedUrl})`;
   const unmatchedGoogle = "[There's no way to request or pay for a better local ranking on Google.";
   const githubSpanBody = [
     unmatchedGoogle,
@@ -2085,6 +2114,8 @@ async function run() {
     verifiedHeading,
     '',
     verifiedCommentary,
+    '',
+    verifiedDisplay,
     '',
     verifiedCitation,
     '',
@@ -2099,8 +2130,8 @@ async function run() {
     JSON.stringify(githubSpanLinks)
   );
   assert(
-    'GitHub parsed link label is the verified-businesses citation',
-    githubSpanLinks[0].label === verifiedLabel,
+    'GitHub parsed link label is the short Source marker',
+    githubSpanLinks[0].label === SOURCE_LINK_LABEL,
     githubSpanLinks[0] && githubSpanLinks[0].label
   );
   assert(
@@ -2300,9 +2331,9 @@ async function run() {
     [
       '## Local ranking',
       '',
-      "If you've claimed the profile but never finished setting it up, you're in a similar position. {{AC6}}",
+      `If you've claimed the profile but never finished setting it up, you're in a similar position. ${tokenAfterClaim(ac6)}`,
       '',
-      "If you've never looked at your category selection, that's worth doing this week. {{AC21}}",
+      `If you've never looked at your category selection, that's worth doing this week. ${tokenAfterClaim(ac21)}`,
       '',
       'Everyone can get a listing to show up overnight.',
       '',
@@ -2395,7 +2426,7 @@ async function run() {
       '',
       '### No Reviews, or Reviews That Never Get a Response',
       '',
-      '{{AC5}}',
+      tokenAfterClaim(ac5),
       '',
       'Everyone assumes the listing fixes itself.',
       '',
@@ -2408,7 +2439,8 @@ async function run() {
   const latestUnits = segmentMarkdownSentences(latestAssembled.body);
   const commentaryUnit = latestUnits.find((item) => item === 'That depends on what the site actually has.');
   const headingUnit = latestUnits.find((item) => item === '### No Reviews, or Reviews That Never Get a Response');
-  const ac5Unit = latestUnits.find((item) => item.includes(ac5Cited) || /Prominence means how well-known a business is/.test(item));
+  const prominenceUnit = latestUnits.find((item) => /Prominence means how well-known a business is/.test(item));
+  const ac5CiteUnit = latestUnits.find((item) => item.includes(ac5Cited));
   assert(
     'latest-run commentary before ### is its own sentence',
     Boolean(commentaryUnit) && !/No Reviews/.test(commentaryUnit) && !/Prominence/.test(commentaryUnit),
@@ -2424,11 +2456,13 @@ async function run() {
   );
   assert(
     'latest-run AC5 is its own cited factual unit',
-    Boolean(ac5Unit) &&
-      ac5Unit !== commentaryUnit &&
-      ac5Unit !== headingUnit &&
-      /Prominence means how well-known a business is/.test(ac5Unit),
-    JSON.stringify({ ac5Cited, ac5Unit, units: latestUnits })
+    Boolean(prominenceUnit) &&
+      Boolean(ac5CiteUnit) &&
+      prominenceUnit !== commentaryUnit &&
+      prominenceUnit !== headingUnit &&
+      ac5CiteUnit !== commentaryUnit &&
+      ac5CiteUnit !== headingUnit,
+    JSON.stringify({ ac5Cited, prominenceUnit, ac5CiteUnit, units: latestUnits })
   );
 
   const latestFirst = validateGeneratedArticle(latestAssembled, latestCtx);
@@ -2512,7 +2546,7 @@ async function run() {
       '',
       '### No Reviews, or Reviews That Never Get a Response',
       '',
-      '{{AC5}}',
+      tokenAfterClaim(ac5),
       '',
       'Everyone assumes the listing fixes itself.',
       '',
@@ -2623,7 +2657,10 @@ async function run() {
       'Google Ads runs an auction every time a search happens and that sentence is long enough to dominate this short draft body for the content-loss budget check.',
       '',
       'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
-    ].join('\n')
+    ].join('\n'),
+    rendered_facts: [],
+    claim_tokens_used: [],
+    claims: (tokenArticle.claims || []).filter((item) => item.kind !== 'sourced_fact')
   };
   const percentLossProblems = validateGeneratedArticle(percentLossArticle, adsCtx);
   const percentLossFallback = applySafetyFallback(percentLossArticle, percentLossProblems, {
@@ -2694,7 +2731,7 @@ async function run() {
       '',
       'Businesses with complete and accurate info will show up in local search results.',
       '',
-      `{{${ciProminence.id}}}`,
+      tokenAfterClaim(ciProminence),
       '',
       'Everyone assumes the listing fixes itself.',
       '',
@@ -2754,8 +2791,9 @@ async function run() {
       !/There's no way to request or pay for a better local ranking on Google/.test(ciArticle.body) &&
       !/perform better than/.test(ciArticle.body) &&
       !/will show up in local search results/.test(ciArticle.body) &&
-      ciArticle.body.includes(ciProminenceCited) &&
-      ciArticle.body.includes(ciLikelyCited),
+      /more likely to show up/.test(ciArticle.body) &&
+      /Prominence means how well-known a business is/.test(ciArticle.body) &&
+      (ciArticle.body.match(/\[Source\]\(/g) || []).length >= 2,
     ciArticle.body
   );
   assert(
@@ -2836,28 +2874,24 @@ async function run() {
     }
   });
   assert(
-    'staged emergence round 1 is only V9',
+    'staged emergence round 1 is V9 plus the leftover raw Ad Rank fragment',
     stagedRoundCodes[0] &&
-      stagedRoundCodes[0].length === 1 &&
-      stagedRoundCodes[0][0] === 'V9_QUANTIFIER',
+      stagedRoundCodes[0].includes('V9_QUANTIFIER') &&
+      stagedRoundCodes[0].includes('V7_CLAIM_LEDGER'),
     JSON.stringify(stagedRoundCodes)
   );
   assert(
-    'staged emergence round 2 surfaces V6 and V7 that round 1 did not know',
-    stagedRoundCodes[1] &&
-      stagedRoundCodes[1].includes('V6_ABSOLUTE_WORDING') &&
-      stagedRoundCodes[1].includes('V7_CLAIM_LEDGER') &&
-      !stagedRoundCodes[0].includes('V6_ABSOLUTE_WORDING') &&
-      !stagedRoundCodes[0].includes('V7_CLAIM_LEDGER'),
+    'staged leftover Ad Rank fragment is no longer hidden behind a giant evidence anchor',
+    stagedRoundCodes[0].includes('V7_CLAIM_LEDGER') &&
+      (stagedRoundCodes.length === 1 || (stagedRoundCodes[1] && stagedRoundCodes[1].length === 0) || stagedResult.problems.length === 0),
     JSON.stringify(stagedRoundCodes)
   );
   assert(
-    'staged emergence round 3 is zero problems',
+    'staged emergence finishes clean after deleting the leftover fragment and everyone',
     stagedResult.refused === false &&
-      stagedResult.rounds === 2 &&
-      stagedRoundCodes[2] &&
-      stagedRoundCodes[2].length === 0 &&
-      stagedResult.problems.length === 0,
+      stagedResult.problems.length === 0 &&
+      stagedRoundCodes[stagedRoundCodes.length - 1] &&
+      stagedRoundCodes[stagedRoundCodes.length - 1].length === 0,
     JSON.stringify({
       refused: stagedResult.refused,
       reason: stagedResult.reason,
@@ -2867,10 +2901,9 @@ async function run() {
     })
   );
   assert(
-    'staged emergence audit includes both rounds and counts deletions against the original body',
-    stagedResult.repairs.some((item) => item.round === 1 && item.code === 'V9_QUANTIFIER') &&
-      stagedResult.repairs.some((item) => item.round === 2 && item.code === 'V6_ABSOLUTE_WORDING') &&
-      stagedResult.repairs.some((item) => item.round === 2 && item.code === 'V7_CLAIM_LEDGER') &&
+    'staged emergence audit counts deletions against the original body',
+    stagedResult.repairs.some((item) => item.code === 'V9_QUANTIFIER') &&
+      stagedResult.repairs.some((item) => item.code === 'V7_CLAIM_LEDGER') &&
       stagedResult.originalBodyChars === stagedAssembled.body.length &&
       stagedResult.deletedChars <= Math.floor(stagedAssembled.body.length * 0.2) &&
       stagedResult.deletedSegments <= MAX_DELETED_SEGMENTS,
@@ -3055,6 +3088,241 @@ async function run() {
       repairs: v4RoundResult.repairs,
       calls: v4RoundCalls
     })
+  );
+
+  const migratePack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S1',
+        url: 'https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes',
+        title: 'Site moves with URL changes',
+        excerpt:
+          'Expect temporary fluctuation in site ranking during the move. With any significant change to a site, you may experience ranking fluctuations while Google recrawls and reindexes your site.'
+      }
+    ]
+  };
+  const migrateClaims = buildAllowedClaims(migratePack);
+  const migrateClaim =
+    migrateClaims.find((item) => /significant change to a site/i.test(item.evidence || item.claim)) || migrateClaims[1];
+  assert('migration pack exposes a significant-change claim', Boolean(migrateClaim), JSON.stringify(migrateClaims));
+  const migrateCtx = ctx(migratePack, migrateClaims);
+  const migrateParaphrase =
+    'Google notes that significant site changes can cause temporary ranking fluctuations.';
+  const conciseSourced = assembleArticle(
+    {
+      ...baseFields(),
+      title: 'What to check before you raise ad spend',
+      slug: 'what-to-check-before-you-raise-ad-spend',
+      meta_title: 'What to check before you raise ad spend',
+      category: 'Marketing',
+      excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+      meta_description:
+        'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+      body: [
+        '## Site moves',
+        '',
+        `${migrateParaphrase} {{${migrateClaim.id}}}`,
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n'),
+      claims: [],
+      cta: {
+        names_brandible: true,
+        fit_case: 'If it is not, Brandible can set it up.',
+        walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+      }
+    },
+    migrateClaims
+  );
+  const conciseLinks = extractMarkdownLinks(conciseSourced.body);
+  const conciseProblems = validateGeneratedArticle(conciseSourced, migrateCtx);
+  assert(
+    'concise sourced claim keeps Brandible prose and a short Source marker',
+    conciseSourced.body.includes(migrateParaphrase) &&
+      conciseLinks.length === 1 &&
+      conciseLinks[0].label === SOURCE_LINK_LABEL &&
+      conciseLinks[0].href === migrateClaim.url &&
+      !conciseSourced.body.includes(`[${String(migrateClaim.safe_wording || '').replace(/[.!?]$/, '')}](`),
+    conciseSourced.body
+  );
+  assert(
+    'concise sourced claim does not use the raw evidence sentence as the anchor',
+    conciseLinks[0].label !== String(migrateClaim.evidence || '').replace(/[.!?]$/, '') &&
+      conciseLinks[0].label.split(/\s+/).length <= 2,
+    JSON.stringify(conciseLinks)
+  );
+  assert(
+    'sourced claim audit mapping still passes',
+    conciseSourced.rendered_facts.some(
+      (item) =>
+        item.id === migrateClaim.id &&
+        item.display_claim.includes('significant site changes') &&
+        item.text === citationMarkup(migrateClaim.url)
+    ) &&
+      conciseSourced.claims.some(
+        (item) => item.kind === 'sourced_fact' && item.allowed_claim_id === migrateClaim.id && /significant site changes/.test(item.claim)
+      ) &&
+      conciseProblems.length === 0,
+    JSON.stringify({
+      rendered: conciseSourced.rendered_facts,
+      claims: conciseSourced.claims,
+      problems: conciseProblems.map((item) => `${item.id}: ${item.message}`)
+    })
+  );
+
+  const giantEvidenceAnchor = {
+    ...conciseSourced,
+    body: `${conciseSourced.body.trim()}\n\n[${String(migrateClaim.safe_wording || migrateClaim.claim).replace(/[.!?]$/, '')}](${migrateClaim.url})\n`
+  };
+  const giantProblems = validateGeneratedArticle(giantEvidenceAnchor, migrateCtx);
+  assert(
+    'no giant raw-evidence anchors',
+    giantProblems.some((item) => /giant evidence anchor/i.test(item.message)),
+    giantProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const adjacentSourceOnly = {
+    ...conciseSourced,
+    body: [
+      '## Site moves',
+      '',
+      citationMarkup(migrateClaim.url),
+      citationMarkup(migrateClaim.url),
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  };
+  const adjacentProblems = validateGeneratedArticle(adjacentSourceOnly, migrateCtx);
+  assert(
+    'no adjacent source-only citation sentences',
+    adjacentProblems.some((item) => /adjacent source-only/i.test(item.message)),
+    adjacentProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const combinedPack = {
+    needed: true,
+    sources: [
+      ...migratePack.sources.map((item) => ({ ...item, id: item.id === 'S1' ? 'S-MIGRATE' : item.id })),
+      ...adsPack().sources.map((item) => ({ ...item, id: 'S-ADS' }))
+    ]
+  };
+  const combinedClaims = buildAllowedClaims(combinedPack);
+  const combinedMigrate = combinedClaims.find((item) => /significant change to a site/i.test(item.evidence || item.claim));
+  const combinedAds = combinedClaims.find((item) => /ad rank to determine/i.test(item.evidence || item.claim));
+  const combinedExpect = combinedClaims.find((item) => /expect temporary fluctuation/i.test(item.evidence || item.claim));
+  assert(
+    'combined pack exposes distinct migrate and ads claims',
+    Boolean(combinedMigrate && combinedAds && combinedExpect && combinedMigrate.id !== combinedAds.id),
+    JSON.stringify(combinedClaims.map((item) => item.id))
+  );
+  const densityBody = {
+    ...conciseSourced,
+    body: [
+      '## Site moves',
+      '',
+      `${migrateParaphrase} ${citationMarkup(combinedMigrate.url)} ${approvedClaimSentence(combinedAds)} ${citationMarkup(combinedAds.url)} ${approvedClaimSentence(combinedExpect)} ${citationMarkup(combinedExpect.url)}`,
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  };
+  const densityAssembled = refreshAssemblyState(densityBody, combinedClaims);
+  const densityCtx = ctx(combinedPack, combinedClaims);
+  const densityProblems = validateGeneratedArticle(densityAssembled, densityCtx);
+  assert(
+    'maximum citation density behavior',
+    densityProblems.some((item) => /external source citations/i.test(item.message) && /keep one by default/i.test(item.message)),
+    densityProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const twoDistinct = assembleArticle(
+    {
+      ...conciseSourced,
+      body: [
+        '## Site moves',
+        '',
+        `${migrateParaphrase} {{${combinedMigrate.id}}} ${approvedClaimSentence(combinedAds)} {{${combinedAds.id}}}`,
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n')
+    },
+    combinedClaims
+  );
+  const twoDistinctProblems = validateGeneratedArticle(twoDistinct, densityCtx);
+  assert(
+    'two distinct facts in one paragraph remain allowed',
+    twoDistinctProblems.length === 0,
+    twoDistinctProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const restated = {
+    ...conciseSourced,
+    body: [
+      '## Site moves',
+      '',
+      `${migrateParaphrase} ${citationMarkup(migrateClaim.url)}`,
+      '',
+      'Google notes that significant site changes can cause temporary ranking fluctuations.',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  };
+  const restatedAssembled = refreshAssemblyState(restated, migrateClaims);
+  const restatedProblems = validateGeneratedArticle(restatedAssembled, migrateCtx);
+  assert(
+    'no immediate semantic restatement of a sourced claim',
+    restatedProblems.some((item) => /immediately restated/i.test(item.message)),
+    restatedProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  const neighbor = {
+    ...conciseSourced,
+    body: [
+      '## Site moves',
+      '',
+      `${migrateParaphrase} ${citationMarkup(migrateClaim.url)}`,
+      'That is why a rebuild should be planned as a migration, not a surprise.',
+      '',
+      'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+    ].join('\n')
+  };
+  const neighborAssembled = refreshAssemblyState(neighbor, migrateClaims);
+  const neighborProblems = validateGeneratedArticle(neighborAssembled, migrateCtx);
+  assert(
+    'legitimate neighboring sentence is not treated as a restatement',
+    neighborProblems.length === 0 &&
+      /rebuild should be planned as a migration/.test(neighborAssembled.body),
+    neighborProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
+  assert(
+    'approved external links still pass',
+    conciseProblems.length === 0 &&
+      conciseLinks.length === 1 &&
+      conciseLinks[0].href === migrateClaim.url &&
+      /^https?:\/\//i.test(conciseLinks[0].href),
+    JSON.stringify(conciseLinks)
+  );
+
+  const unapprovedExternal = {
+    ...conciseSourced,
+    body: `${conciseSourced.body.trim()}\n\nSee [a random blog](https://example.com/not-approved).\n`
+  };
+  const unapprovedLinkProblems = validateGeneratedArticle(unapprovedExternal, migrateCtx);
+  assert(
+    'unapproved external links still fail',
+    unapprovedLinkProblems.some((item) => /External link is not in the source pack/i.test(item.message)),
+    unapprovedLinkProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+  const unapprovedFallback = applySafetyFallback(unapprovedExternal, unapprovedLinkProblems, {
+    allowedClaims: migrateClaims
+  });
+  assert(
+    'unapproved external links still unwrap',
+    !unapprovedFallback.refused &&
+      /See a random blog/.test(unapprovedFallback.article.body) &&
+      !unapprovedFallback.article.body.includes('https://example.com/not-approved'),
+    unapprovedFallback.article.body
   );
 
   if (failed) {

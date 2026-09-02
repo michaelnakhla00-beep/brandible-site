@@ -404,6 +404,15 @@ function repairForProblem(article, problem, options) {
     if (!sentence) return refuse(message);
     return deletionRepair('v7_body', problem, sentence, 'raw platform assertion');
   }
+  if (
+    code === 'V7_CLAIM_LEDGER' &&
+    /source-only citation|adjacent source-only|immediately restated|giant evidence anchor/i.test(message)
+  ) {
+    const quoted = quotedFromMessage(message);
+    const sentence = quoted ? findShortestSegmentContaining(body, quoted) : null;
+    if (!sentence) return refuse(message);
+    return deletionRepair('v7_body', problem, sentence, 'citation quality');
+  }
   if (code === 'V7_CLAIM_LEDGER') {
     return refuse(`Unrecognized V7 failure: ${message}`);
   }
@@ -472,6 +481,7 @@ function sortRepairs(repairs) {
 }
 
 function applySafetyFallback(article, problems, options) {
+  const allowedClaims = (options && options.allowedClaims) || [];
   const compiled = compileRepairs(article, problems, options);
   if (compiled.refused) {
     return {
@@ -552,7 +562,10 @@ function applySafetyFallback(article, problems, options) {
     }
     if (repair.type === 'v6_replace_token') {
       if (bodyHasText(next, repair.sentence) && repair.tokenId) {
-        next = { ...next, body: String(next.body).replace(repair.sentence, `{{${repair.tokenId}}}`) };
+        const allowed = findAllowedClaim(allowedClaims, repair.tokenId);
+        const wording = String((allowed && (allowed.safe_wording || allowed.claim)) || '').replace(/\s+/g, ' ').trim();
+        const replacement = wording ? `${wording} {{${repair.tokenId}}}` : `{{${repair.tokenId}}}`;
+        next = { ...next, body: String(next.body).replace(repair.sentence, replacement) };
         needsAssemble = true;
       }
       applied.push('v6_replace_token');

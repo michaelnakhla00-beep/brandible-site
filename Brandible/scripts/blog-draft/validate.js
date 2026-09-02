@@ -5,7 +5,7 @@ const { allowedUrlSet } = require('./catalog');
 const { extractMarkdownHrefs, extractMarkdownLinks, stripMarkdownLinks } = require('./markdown-links');
 const { buildAllowlist, moneySetHas } = require('./facts');
 const { findAllowedClaim, isAbsoluteUpgrade } = require('./allowed-claims');
-const { matchingRenderedFact, isRenderedAllowedFact, extractClaimTokens, ctaNamesBrandible } = require('./assemble');
+const { matchingRenderedFact, isRenderedAllowedFact, extractClaimTokens, ctaNamesBrandible, SOURCE_LINK_LABEL } = require('./assemble');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const {
   sourceUrlSet,
@@ -75,7 +75,7 @@ const PHASE2_GROUNDING_CHECKS = [
   'If the article includes factual guidance on categories, services, reviews, description limits, photos, hours, or other platform features, the source pack must contain support for those sections. Do not introduce platform guidance the pack does not cover.',
   'claims[] is a complete ledger. Every material externally verifiable fact in the final title, meta fields, excerpt, or body must be recorded there as sourced_fact, first_party, hypothetical, or opinion. Omitting a fact from claims[] does not exempt it.',
   'Unsupported quantifiers (most people, most businesses, most local business owners, everyone) are checked in title, meta_title, meta_description, excerpt, and body.',
-  'Externally researched platform facts need a natural reader-facing markdown link to the supporting source pack URL. Do not require citations on Brandible opinion, hypotheticals, or first-party Brandible pricing/results.',
+  'Externally researched platform facts need a short reader-facing [Source](url) marker on the Brandible sentence they support. Do not paste the evidence quote as the link label. Do not require citations on Brandible opinion, hypotheticals, or first-party Brandible pricing/results.',
   'Do not use absolute wording (for example “there’s no residual benefit”) unless the stored source excerpt or evidence quotes support that exact level of certainty.'
 ];
 
@@ -448,7 +448,18 @@ function articleDiscussedProduct(article, topic) {
 function evidenceHasTerm(evidence, term) {
   if (evidence.includes(term)) return true;
   if (term === 'information' && /\binfo\b/.test(evidence)) return true;
+  if (term.endsWith('s') && term.length > 4 && evidence.includes(term.slice(0, -1))) return true;
+  if (!term.endsWith('s') && term.length > 3 && evidence.includes(`${term}s`)) return true;
   return false;
+}
+
+function stripClaimFraming(text) {
+  return String(text || '')
+    .replace(
+      /^(?:google|the (?:source|documentation|help (?:center|article)))\s+(?:notes|says|explains|states|reports|writes)\s+that\s+/i,
+      ''
+    )
+    .trim();
 }
 
 function excerptSupportsClaim(claimText, excerpt) {
@@ -456,7 +467,7 @@ function excerptSupportsClaim(claimText, excerpt) {
   if (evidence.length < 20) {
     return { ok: false, reason: 'Source excerpt is empty or too thin to support the claim.' };
   }
-  const terms = significantTerms(claimText);
+  const terms = significantTerms(stripClaimFraming(claimText));
   if (terms.length) {
     const hits = terms.filter((term) => evidenceHasTerm(evidence, term));
     const ratio = hits.length / terms.length;
@@ -470,7 +481,7 @@ function excerptSupportsClaim(claimText, excerpt) {
       };
     }
   }
-  for (const num of numbersIn(claimText)) {
+  for (const num of numbersIn(stripClaimFraming(claimText))) {
     if (!evidence.includes(num)) {
       return {
         ok: false,
@@ -846,11 +857,185 @@ function renderedFactHasCanonicalCitation(renderedFact, allowed) {
   const links = extractMarkdownLinks(text).filter((link) => /^https?:\/\//i.test(link.href));
   if (links.length !== 1) return false;
   if (links[0].href !== allowed.url) return false;
+  if (String(links[0].label || '').trim() !== SOURCE_LINK_LABEL) return false;
   if (/\[/.test(links[0].label) || /\]\(/.test(links[0].label)) return false;
   const leftoverOpen = (text.match(/\[/g) || []).length;
   const leftoverClose = (text.match(/\]/g) || []).length;
   if (leftoverOpen !== 1 || leftoverClose !== 1) return false;
   return true;
+}
+
+function isCitationOnlyUnit(unit) {
+  const text = String(unit || '').trim().replace(/[.!?]$/, '');
+  const links = extractMarkdownLinks(text);
+  if (links.length !== 1) return false;
+  const href = links[0].rawHref != null ? links[0].rawHref : links[0].href;
+  return text === `[${links[0].label}](${href})`;
+}
+
+function isGiantSourceAnchor(label) {
+  const plain = String(label || '').trim();
+  if (!plain) return false;
+  if (plain.toLowerCase() === SOURCE_LINK_LABEL.toLowerCase()) return false;
+  const words = plain.split(/\s+/).filter(Boolean);
+  return plain.length > 48 || words.length > 8;
+}
+
+function isNearRestatement(left, right) {
+  const na = normalizeEvidence(stripClaimFraming(stripMarkdownLinks(left)));
+  const nb = normalizeEvidence(stripClaimFraming(stripMarkdownLinks(right)));
+  if (!na || !nb) return false;
+  const wordsA = na.split(' ').filter(Boolean);
+  const wordsB = nb.split(' ').filter(Boolean);
+  if (na === nb) return wordsA.length >= 6;
+  const termsA = significantTerms(na);
+  const termsB = significantTerms(nb);
+  if (termsA.length < 6 || termsB.length < 6) return false;
+  const setA = new Set(termsA);
+  const setB = new Set(termsB);
+  const overlap = (terms, other) => terms.filter((term) => other.has(term)).length / terms.length;
+  if (overlap(termsA, setB) < 0.85 || overlap(termsB, setA) < 0.85) return false;
+  const lenRatio = Math.min(na.length, nb.length) / Math.max(na.length, nb.length);
+  return lenRatio >= 0.75;
+}
+
+function checkRenderedCitations(article, sourcePack, allowedClaims) {
+  const problems = [];
+  const plan = allowedClaims || [];
+  const body = String((article && article.body) || '');
+  for (const rendered of article.rendered_facts || []) {
+    const allowed = findAllowedClaim(plan, rendered && rendered.id);
+    if (!allowed) continue;
+    const display = String((rendered && rendered.display_claim) || '').trim();
+    if (!display) {
+      const cite = String((rendered && rendered.text) || '');
+      const lone = segmentMarkdownSentences(body).some(
+        (unit) => isCitationOnlyUnit(unit) && cite && unit.includes(cite)
+      );
+      if (lone) {
+        problems.push({
+          code: 'V7_CLAIM_LEDGER',
+          message: `Approved claim ${allowed.id} is a source-only citation missing Brandible claim wording: “${stripMarkdownLinks(rendered.text || '')}” Write a concise Brandible sentence the evidence supports, then the {{${allowed.id}}} token.`
+        });
+      } else if (allowed.requires_citation) {
+        const renderedInBody = Boolean(cite) && body.includes(cite);
+        if (!renderedFactHasCanonicalCitation(rendered, allowed) || !renderedInBody) {
+          problems.push({
+            code: 'V4_MISSING_SOURCE_LINK',
+            message: `Approved claim ${allowed.id} is missing its reader-facing source link: “${stripMarkdownLinks(cite)}” Code should insert a markdown link to ${allowed.url}.`
+          });
+        }
+      }
+      continue;
+    }
+    if (allowed.requires_citation) {
+      const renderedInBody = Boolean(rendered.text) && body.includes(rendered.text);
+      if (!renderedFactHasCanonicalCitation(rendered, allowed) || !renderedInBody) {
+        problems.push({
+          code: 'V4_MISSING_SOURCE_LINK',
+          message: `Approved claim ${allowed.id} is missing its reader-facing source link: “${display}” Code should insert a markdown link to ${allowed.url}.`
+        });
+      }
+    }
+    const evidence = `${allowed.evidence || ''} ${allowed.claim || ''} ${allowed.safe_wording || ''}`.trim();
+    const source = findSource(sourcePack, allowed.source_id);
+    const excerpt = source ? sourceEvidenceText(source) : evidence;
+    const entailment = excerptSupportsClaim(display, excerpt);
+    if (!entailment.ok) {
+      problems.push({
+        code: 'V3_SOURCE_ENTAILMENT',
+        message: `User-facing sourced wording is not supported by approved claim ${allowed.id}: ${entailment.reason} Claim: “${display}”`
+      });
+    }
+    const stronger = claimStrongerThanSource(display, excerpt);
+    if (stronger) {
+      const absolute = /absolute/i.test(stronger);
+      problems.push({
+        code: absolute ? 'V6_ABSOLUTE_WORDING' : 'V3_SOURCE_ENTAILMENT',
+        message: `User-facing sourced wording is stronger than approved claim ${allowed.id}: ${stronger} Claim: “${display}”`
+      });
+    }
+  }
+  return problems;
+}
+
+function checkCitationQuality(article, sourcePack, allowedClaims) {
+  const problems = [];
+  if (!sourcePack || !sourcePack.needed) return problems;
+  const body = String((article && article.body) || '');
+  const allowedUrls = sourceUrlSet(sourcePack);
+
+  for (const link of extractMarkdownLinks(body)) {
+    if (!/^https?:\/\//i.test(link.href) || !allowedUrls.has(link.href)) continue;
+    if (!isGiantSourceAnchor(link.label)) continue;
+    const source = (sourcePack.sources || []).find((item) => item.url === link.href);
+    if (source && claimStrongerThanSource(link.label, sourceEvidenceText(source))) continue;
+    problems.push({
+      code: 'V7_CLAIM_LEDGER',
+      message: `Source citation uses a giant evidence anchor instead of a short Source marker: “${link.label}”`
+    });
+  }
+
+  for (const paragraph of body.split(/\n\s*\n/)) {
+    const cites = extractMarkdownLinks(paragraph).filter(
+      (link) => /^https?:\/\//i.test(link.href) && allowedUrls.has(link.href)
+    );
+    if (cites.length > 2) {
+      problems.push({
+        code: 'V10_OTHER',
+        message: `Paragraph has ${cites.length} external source citations; keep one by default and two only when two distinct facts are required.`
+      });
+    }
+  }
+
+  const units = segmentMarkdownSentences(body);
+  for (let i = 1; i < units.length; i += 1) {
+    if (isMarkdownHeading(units[i]) || isMarkdownHeading(units[i - 1])) continue;
+    if (isCitationOnlyUnit(units[i]) && isCitationOnlyUnit(units[i - 1])) {
+      problems.push({
+        code: 'V7_CLAIM_LEDGER',
+        message: `Adjacent source-only citation sentences are not allowed: “${stripMarkdownLinks(units[i])}”`
+      });
+    }
+  }
+
+  for (const rendered of article.rendered_facts || []) {
+    const display = String((rendered && rendered.display_claim) || '').trim();
+    if (!display) continue;
+    const allowed = findAllowedClaim(allowedClaims, rendered.id);
+    const displayNorm = normalizeEvidence(display);
+    let from = -1;
+    for (let i = 0; i < units.length; i += 1) {
+      if (displayNorm && normalizeEvidence(stripMarkdownLinks(units[i]).replace(/\bSource\b/g, '')) === displayNorm) {
+        from = i;
+        break;
+      }
+    }
+    if (from < 0) continue;
+    let next = null;
+    for (let j = from + 1; j < units.length; j += 1) {
+      if (isMarkdownHeading(units[j])) break;
+      if (isCitationOnlyUnit(units[j])) continue;
+      next = units[j];
+      break;
+    }
+    if (!next || looksLikeAdvice(next) || looksLikeHypothetical(next) || looksLikeFirstParty(next)) continue;
+    const nextPlain = normalizeEvidence(stripMarkdownLinks(next).replace(/\bSource\b/g, ''));
+    const otherDisplay = (article.rendered_facts || []).some((item) => {
+      if (!item || item.id === rendered.id) return false;
+      return normalizeEvidence(item.display_claim || '') === nextPlain;
+    });
+    if (otherDisplay) continue;
+    const evidence = allowed ? allowed.evidence || allowed.claim || allowed.safe_wording : '';
+    if (isNearRestatement(next, display) || (evidence && isNearRestatement(next, evidence))) {
+      problems.push({
+        code: 'V7_CLAIM_LEDGER',
+        message: `Sourced claim is immediately restated in near-identical wording: “${stripMarkdownLinks(next)}”`
+      });
+    }
+  }
+
+  return problems;
 }
 
 function formatV4Diagnostics(article, problems, allowedClaims) {
@@ -1221,7 +1406,7 @@ function revisionRepairHints(problems) {
   }
   if (hasCode('V4_MISSING_SOURCE_LINK')) {
     hints.push(
-      'V4_MISSING_SOURCE_LINK: replace the raw factual sentence with the matching {{AC#}} token, or delete it. Code inserts the source link.'
+      'V4_MISSING_SOURCE_LINK: write concise Brandible wording the approved claim supports, then the matching {{AC#}} token, or delete it. Code inserts [Source](url).'
     );
   }
   if (hasCode('V2_CTA_SELF_QUALIFY')) {
@@ -1236,7 +1421,7 @@ function revisionRepairHints(problems) {
   }
   if (hasCode('V3_SOURCE_ENTAILMENT')) {
     hints.push(
-      'V3_SOURCE_ENTAILMENT: replace unsupported factual copy with an approved {{AC#}} token, or delete it. Do not paraphrase a sourced sentence.'
+      'V3_SOURCE_ENTAILMENT: replace unsupported factual copy with concise Brandible wording entailed by an approved claim, then the matching {{AC#}} token, or delete it. Do not dump the evidence quote as a giant Markdown link.'
     );
   }
   if (hasCode('V8_OUT_OF_SCOPE')) {
@@ -1310,6 +1495,8 @@ function validateGeneratedArticle(article, context) {
   problems.push(...checkTopicScope(article, context.topic));
   problems.push(...checkUnresolvedTokens(article));
   problems.push(...checkClaimLedger(article, sourcePack, allowedClaims));
+  problems.push(...checkRenderedCitations(article, sourcePack, allowedClaims));
+  problems.push(...checkCitationQuality(article, sourcePack, allowedClaims));
   problems.push(...checkAbsoluteWording(article, allowedClaims));
   return stampProblems(problems);
 }
