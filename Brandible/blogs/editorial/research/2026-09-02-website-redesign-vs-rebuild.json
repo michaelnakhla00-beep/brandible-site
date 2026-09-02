@@ -1,0 +1,653 @@
+{
+  "post": "2026-09-02-website-redesign-vs-rebuild.md",
+  "topic_id": "04",
+  "generated_at": "2026-09-02T16:44:10.680Z",
+  "facts_last_verified": "2026-08-31",
+  "research": {
+    "needed": true,
+    "skipped_reason": null,
+    "queries": [
+      "Google Search ranking signals website quality technical SEO",
+      "Google Search Central site migration keep SEO equity domain",
+      "Google core web vitals page experience ranking 2024 2025"
+    ],
+    "retrieved_at": "2026-09-02T16:43:17.915Z"
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "title": "Understanding Google Page Experience | Google Search Central",
+      "publisher": "Google Search Central",
+      "excerpt": "Google's core ranking systems look to reward content that provides a good page experience. Site owners seeking to be successful with our systems should not focus on only one or two aspects of page experience. Instead, check if you're providing an overall great page experience across many aspects.",
+      "evidence": [
+        {
+          "about": "ranking",
+          "quote": "There is no single signal. Our core ranking systems look at a variety of signals that align with overall page experience."
+        },
+        {
+          "about": "ranking",
+          "quote": "Core Web Vitals are used by our ranking systems. We recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally."
+        },
+        {
+          "about": "ranking",
+          "quote": "Keep in mind that getting good results in reports like Search Console's Core Web Vitals report or third-party tools doesn't guarantee that your pages will rank at the top of Google Search results; there's more to great page experience than Core Web Vitals scores alone."
+        },
+        {
+          "about": "ranking",
+          "quote": "Beyond Core Web Vitals, other page experience aspects don't directly help your website rank higher in search results."
+        },
+        {
+          "about": "ranking",
+          "quote": "Do your pages have good Core Web Vitals? Are your pages served in a secure fashion? Does your content display well on mobile devices? Does your content avoid using an excessive amount of ads that distract from or interfere with the main content? Do your pages avoid using intrusive interstitials? Is your page designed so visitors can easily distinguish the main content from other content on your page?"
+        }
+      ],
+      "why_selected": "Primary Google Search Central doc explicitly defining which page experience signals are used in ranking — directly covers the 'is my site past saving' question around technical quality thresholds that trigger a redesign vs rebuild decision.",
+      "product": "google_search",
+      "features": [
+        "ranking",
+        "organic_search"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "title": "Understanding Core Web Vitals and Google search results | Google Search Central",
+      "publisher": "Google Search Central",
+      "excerpt": "Core Web Vitals is a set of metrics that measure real-world user experience for loading performance, interactivity, and visual stability of the page. We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "evidence": [
+        {
+          "about": "ranking",
+          "quote": "We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally. This, along with other page experience aspects, aligns with what our core ranking systems seek to reward."
+        },
+        {
+          "about": "ranking",
+          "quote": "Largest Contentful Paint (LCP): Measures loading performance. To provide a good user experience, strive to have LCP occur within the first 2.5 seconds of the page starting to load."
+        },
+        {
+          "about": "ranking",
+          "quote": "Interaction To Next Paint (INP): Measures responsiveness. To provide a good user experience, strive to have an INP of less than 200 milliseconds."
+        },
+        {
+          "about": "ranking",
+          "quote": "Cumulative Layout Shift (CLS): Measures visual stability. To provide a good user experience, strive to have a CLS score of less than 0.1."
+        },
+        {
+          "about": "ranking",
+          "quote": "Check the Core Web Vitals report in Search Console. This shows how your pages perform."
+        }
+      ],
+      "why_selected": "Official Google Search Central doc providing the exact current CWV metric names (LCP, INP, CLS), their numerical thresholds, and the confirmation that INP replaced FID in March 2024 — directly needed to advise owners on whether an old CMS/template site can pass or requires a rebuild.",
+      "product": "google_search",
+      "features": [
+        "ranking",
+        "organic_search"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "title": "Site Moves and Migrations | Google Search Central",
+      "publisher": "Google Search Central",
+      "excerpt": "This document describes how to change the URLs of existing pages on your site while minimizing negative impact on your Google Search results.",
+      "evidence": [
+        {
+          "about": "indexing",
+          "quote": "Expect temporary fluctuation in site ranking during the move. With any significant change to a site, you may experience ranking fluctuations while Google recrawls and reindexes your site."
+        },
+        {
+          "about": "indexing",
+          "quote": "As a general rule: for medium-sized websites, it can take a few weeks or more for Google to gradually start showing the new URLs instead of the old ones (and for larger sites, even longer)."
+        },
+        {
+          "about": "indexing",
+          "quote": "Don't worry about link credit. 301 and other permanent redirects don't cause a loss in PageRank."
+        },
+        {
+          "about": "indexing",
+          "quote": "Change only one thing at a time. Plan your changes to your site one after the other, not everything at the same time. For example, if you want to move your site to a new domain name, change your content management system (CMS), and update your site to use a new layout, do them one at a time: move to a new domain, then change your site's layout."
+        },
+        {
+          "about": "indexing",
+          "quote": "Submitting a sitemap can help make the discovery process quicker, and it's fine to move your site in sections."
+        },
+        {
+          "about": "indexing",
+          "quote": "Keep the redirects for as long as possible, generally at least 1 year. This timeframe allows Google to transfer all signals to the new URLs, including recrawling and reassigning links on other sites that point to your old URLs."
+        }
+      ],
+      "why_selected": "Official Google Search Central doc covering how to preserve SEO equity during a site migration with URL changes — directly answers the FAQ claim that Brandible migrates sites while keeping domain and SEO equity, and explains the 301-redirect/PageRank-preservation mechanism.",
+      "product": "google_search",
+      "features": [
+        "organic_search",
+        "indexing"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S4",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "title": "SEO Starter Guide: The Basics | Google Search Central",
+      "publisher": "Google Search Central",
+      "excerpt": "SEO—short for search engine optimization—is about helping search engines understand your content, and helping users find your site and make a decision about whether they should visit your site through a search engine.",
+      "evidence": [
+        {
+          "about": "indexing",
+          "quote": "If your site is hiding important components that make up your website (like CSS and JavaScript), Google might not be able to understand your pages, which means they might not show up in search results or rank well for the terms you're targeting."
+        },
+        {
+          "about": "indexing",
+          "quote": "Some changes might take effect in a few hours, others could take several months. In general, you likely want to wait a few weeks to assess whether your work had beneficial effects in Google Search results."
+        },
+        {
+          "about": "ranking",
+          "quote": "When you're setting up or redoing your site, it can be good to organize it in a logical way because it can help search engines and users understand how your pages relate to the rest of your site."
+        },
+        {
+          "about": "indexing",
+          "quote": "Google primarily finds pages through links from other pages it already crawled. In many cases, these are other websites that are linking to your pages."
+        }
+      ],
+      "why_selected": "Google's foundational SEO guide confirming crawlability of CSS/JS as a pass/fail technical requirement, and the time-lag reality after site changes — supports claims about how a broken old CMS structure can prevent Google from understanding a site, reinforcing rebuild-vs-patch decisions.",
+      "product": "google_search",
+      "features": [
+        "organic_search",
+        "indexing",
+        "ranking"
+      ],
+      "feature_status": "current"
+    }
+  ],
+  "allowed_claims": [
+    {
+      "id": "AC1",
+      "token": "{{AC1}}",
+      "claim": "Google's core ranking systems look to reward content that provides a good page experience.",
+      "safe_wording": "Google's core ranking systems look to reward content that provides a good page experience.",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "Google's core ranking systems look to reward content that provides a good page experience.",
+      "about": "excerpt",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC2",
+      "token": "{{AC2}}",
+      "claim": "Site owners seeking to be successful with our systems should not focus on only one or two aspects of page experience.",
+      "safe_wording": "Site owners seeking to be successful with our systems should not focus on only one or two aspects of page experience.",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "Site owners seeking to be successful with our systems should not focus on only one or two aspects of page experience.",
+      "about": "excerpt",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC3",
+      "token": "{{AC3}}",
+      "claim": "Instead, check if you're providing an overall great page experience across many aspects.",
+      "safe_wording": "Instead, check if you're providing an overall great page experience across many aspects.",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "Instead, check if you're providing an overall great page experience across many aspects.",
+      "about": "excerpt",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC4",
+      "token": "{{AC4}}",
+      "claim": "There is no single signal. Our core ranking systems look at a variety of signals that align with overall page experience.",
+      "safe_wording": "There is no single signal. Our core ranking systems look at a variety of signals that align with overall page experience.",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "There is no single signal. Our core ranking systems look at a variety of signals that align with overall page experience.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC5",
+      "token": "{{AC5}}",
+      "claim": "Core Web Vitals are used by our ranking systems. We recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "safe_wording": "Core Web Vitals are used by our ranking systems. We recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "Core Web Vitals are used by our ranking systems. We recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC6",
+      "token": "{{AC6}}",
+      "claim": "Keep in mind that getting good results in reports like Search Console's Core Web Vitals report or third-party tools doesn't guarantee that your pages will rank at the top of Google Search results; there's more to great page experience than Core Web Vitals scores alone.",
+      "safe_wording": "Keep in mind that getting good results in reports like Search Console's Core Web Vitals report or third-party tools doesn't guarantee that your pages will rank at the top of Google Search results; there's more to great page experience than Core Web Vitals scores alone.",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "Keep in mind that getting good results in reports like Search Console's Core Web Vitals report or third-party tools doesn't guarantee that your pages will rank at the top of Google Search results; there's more to great page experience than Core Web Vitals scores alone.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC7",
+      "token": "{{AC7}}",
+      "claim": "Beyond Core Web Vitals, other page experience aspects don't directly help your website rank higher in search results.",
+      "safe_wording": "Beyond Core Web Vitals, other page experience aspects don't directly help your website rank higher in search results.",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "Beyond Core Web Vitals, other page experience aspects don't directly help your website rank higher in search results.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC8",
+      "token": "{{AC8}}",
+      "claim": "Do your pages have good Core Web Vitals? Are your pages served in a secure fashion? Does your content display well on mobile devices? Does your content avoid using an excessive amount of ads that distract from or interfere with the main content? Do your pages avoid using intrusive interstitials? Is your page designed so visitors can easily distinguish the main content from other content on your page?",
+      "safe_wording": "Do your pages have good Core Web Vitals? Are your pages served in a secure fashion? Does your content display well on mobile devices? Does your content avoid using an excessive amount of ads that distract from or interfere with the main content? Do your pages avoid using intrusive interstitials? Is your page designed so visitors can easily distinguish the main content from other content on your page?",
+      "source_id": "S1",
+      "url": "https://developers.google.com/search/docs/appearance/page-experience",
+      "evidence": "Do your pages have good Core Web Vitals? Are your pages served in a secure fashion? Does your content display well on mobile devices? Does your content avoid using an excessive amount of ads that distract from or interfere with the main content? Do your pages avoid using intrusive interstitials? Is your page designed so visitors can easily distinguish the main content from other content on your page?",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC9",
+      "token": "{{AC9}}",
+      "claim": "Core Web Vitals is a set of metrics that measure real-world user experience for loading performance, interactivity, and visual stability of the page.",
+      "safe_wording": "Core Web Vitals is a set of metrics that measure real-world user experience for loading performance, interactivity, and visual stability of the page.",
+      "source_id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "evidence": "Core Web Vitals is a set of metrics that measure real-world user experience for loading performance, interactivity, and visual stability of the page.",
+      "about": "excerpt",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC10",
+      "token": "{{AC10}}",
+      "claim": "We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "safe_wording": "We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "source_id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "evidence": "We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "about": "excerpt",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC11",
+      "token": "{{AC11}}",
+      "claim": "We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally. This, along with other page experience aspects, aligns with what our core ranking systems seek to reward.",
+      "safe_wording": "We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally. This, along with other page experience aspects, aligns with what our core ranking systems seek to reward.",
+      "source_id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "evidence": "We highly recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally. This, along with other page experience aspects, aligns with what our core ranking systems seek to reward.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC12",
+      "token": "{{AC12}}",
+      "claim": "Largest Contentful Paint (LCP): Measures loading performance. To provide a good user experience, strive to have LCP occur within the first 2.5 seconds of the page starting to load.",
+      "safe_wording": "Largest Contentful Paint (LCP): Measures loading performance. To provide a good user experience, strive to have LCP occur within the first 2.5 seconds of the page starting to load.",
+      "source_id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "evidence": "Largest Contentful Paint (LCP): Measures loading performance. To provide a good user experience, strive to have LCP occur within the first 2.5 seconds of the page starting to load.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC13",
+      "token": "{{AC13}}",
+      "claim": "Interaction To Next Paint (INP): Measures responsiveness. To provide a good user experience, strive to have an INP of less than 200 milliseconds.",
+      "safe_wording": "Interaction To Next Paint (INP): Measures responsiveness. To provide a good user experience, strive to have an INP of less than 200 milliseconds.",
+      "source_id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "evidence": "Interaction To Next Paint (INP): Measures responsiveness. To provide a good user experience, strive to have an INP of less than 200 milliseconds.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC14",
+      "token": "{{AC14}}",
+      "claim": "Cumulative Layout Shift (CLS): Measures visual stability. To provide a good user experience, strive to have a CLS score of less than 0.1.",
+      "safe_wording": "Cumulative Layout Shift (CLS): Measures visual stability. To provide a good user experience, strive to have a CLS score of less than 0.1.",
+      "source_id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "evidence": "Cumulative Layout Shift (CLS): Measures visual stability. To provide a good user experience, strive to have a CLS score of less than 0.1.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC15",
+      "token": "{{AC15}}",
+      "claim": "Check the Core Web Vitals report in Search Console. This shows how your pages perform.",
+      "safe_wording": "Check the Core Web Vitals report in Search Console. This shows how your pages perform.",
+      "source_id": "S2",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "evidence": "Check the Core Web Vitals report in Search Console. This shows how your pages perform.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC16",
+      "token": "{{AC16}}",
+      "claim": "This document describes how to change the URLs of existing pages on your site while minimizing negative impact on your Google Search results.",
+      "safe_wording": "This document describes how to change the URLs of existing pages on your site while minimizing negative impact on your Google Search results.",
+      "source_id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "evidence": "This document describes how to change the URLs of existing pages on your site while minimizing negative impact on your Google Search results.",
+      "about": "excerpt",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC17",
+      "token": "{{AC17}}",
+      "claim": "Expect temporary fluctuation in site ranking during the move. With any significant change to a site, you may experience ranking fluctuations while Google recrawls and reindexes your site.",
+      "safe_wording": "Expect temporary fluctuation in site ranking during the move. With any significant change to a site, you may experience ranking fluctuations while Google recrawls and reindexes your site.",
+      "source_id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "evidence": "Expect temporary fluctuation in site ranking during the move. With any significant change to a site, you may experience ranking fluctuations while Google recrawls and reindexes your site.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC18",
+      "token": "{{AC18}}",
+      "claim": "As a general rule: for medium-sized websites, it can take a few weeks or more for Google to gradually start showing the new URLs instead of the old ones (and for larger sites, even longer).",
+      "safe_wording": "As a general rule: for medium-sized websites, it can take a few weeks or more for Google to gradually start showing the new URLs instead of the old ones (and for larger sites, even longer).",
+      "source_id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "evidence": "As a general rule: for medium-sized websites, it can take a few weeks or more for Google to gradually start showing the new URLs instead of the old ones (and for larger sites, even longer).",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC19",
+      "token": "{{AC19}}",
+      "claim": "Don't worry about link credit. 301 and other permanent redirects don't cause a loss in PageRank.",
+      "safe_wording": "Don't worry about link credit. 301 and other permanent redirects don't cause a loss in PageRank.",
+      "source_id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "evidence": "Don't worry about link credit. 301 and other permanent redirects don't cause a loss in PageRank.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC20",
+      "token": "{{AC20}}",
+      "claim": "Change only one thing at a time. Plan your changes to your site one after the other, not everything at the same time. For example, if you want to move your site to a new domain name, change your content management system (CMS), and update your site to use a new layout, do them one at a time: move to a new domain, then change your site's layout.",
+      "safe_wording": "Change only one thing at a time. Plan your changes to your site one after the other, not everything at the same time. For example, if you want to move your site to a new domain name, change your content management system (CMS), and update your site to use a new layout, do them one at a time: move to a new domain, then change your site's layout.",
+      "source_id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "evidence": "Change only one thing at a time. Plan your changes to your site one after the other, not everything at the same time. For example, if you want to move your site to a new domain name, change your content management system (CMS), and update your site to use a new layout, do them one at a time: move to a new domain, then change your site's layout.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC21",
+      "token": "{{AC21}}",
+      "claim": "Submitting a sitemap can help make the discovery process quicker, and it's fine to move your site in sections.",
+      "safe_wording": "Submitting a sitemap can help make the discovery process quicker, and it's fine to move your site in sections.",
+      "source_id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "evidence": "Submitting a sitemap can help make the discovery process quicker, and it's fine to move your site in sections.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC22",
+      "token": "{{AC22}}",
+      "claim": "Keep the redirects for as long as possible, generally at least 1 year. This timeframe allows Google to transfer all signals to the new URLs, including recrawling and reassigning links on other sites that point to your old URLs.",
+      "safe_wording": "Keep the redirects for as long as possible, generally at least 1 year. This timeframe allows Google to transfer all signals to the new URLs, including recrawling and reassigning links on other sites that point to your old URLs.",
+      "source_id": "S3",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
+      "evidence": "Keep the redirects for as long as possible, generally at least 1 year. This timeframe allows Google to transfer all signals to the new URLs, including recrawling and reassigning links on other sites that point to your old URLs.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC23",
+      "token": "{{AC23}}",
+      "claim": "SEO, short for search engine optimization, is about helping search engines understand your content, and helping users find your site and make a decision about whether they should visit your site through a search engine.",
+      "safe_wording": "SEO, short for search engine optimization, is about helping search engines understand your content, and helping users find your site and make a decision about whether they should visit your site through a search engine.",
+      "source_id": "S4",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "evidence": "SEO—short for search engine optimization—is about helping search engines understand your content, and helping users find your site and make a decision about whether they should visit your site through a search engine.",
+      "about": "excerpt",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC24",
+      "token": "{{AC24}}",
+      "claim": "If your site is hiding important components that make up your website (like CSS and JavaScript), Google might not be able to understand your pages, which means they might not show up in search results or rank well for the terms you're targeting.",
+      "safe_wording": "If your site is hiding important components that make up your website (like CSS and JavaScript), Google might not be able to understand your pages, which means they might not show up in search results or rank well for the terms you're targeting.",
+      "source_id": "S4",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "evidence": "If your site is hiding important components that make up your website (like CSS and JavaScript), Google might not be able to understand your pages, which means they might not show up in search results or rank well for the terms you're targeting.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC25",
+      "token": "{{AC25}}",
+      "claim": "Some changes might take effect in a few hours, others could take several months. In general, you likely want to wait a few weeks to assess whether your work had beneficial effects in Google Search results.",
+      "safe_wording": "Some changes might take effect in a few hours, others could take several months. In general, you likely want to wait a few weeks to assess whether your work had beneficial effects in Google Search results.",
+      "source_id": "S4",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "evidence": "Some changes might take effect in a few hours, others could take several months. In general, you likely want to wait a few weeks to assess whether your work had beneficial effects in Google Search results.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC26",
+      "token": "{{AC26}}",
+      "claim": "When you're setting up or redoing your site, it can be good to organize it in a logical way because it can help search engines and users understand how your pages relate to the rest of your site.",
+      "safe_wording": "When you're setting up or redoing your site, it can be good to organize it in a logical way because it can help search engines and users understand how your pages relate to the rest of your site.",
+      "source_id": "S4",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "evidence": "When you're setting up or redoing your site, it can be good to organize it in a logical way because it can help search engines and users understand how your pages relate to the rest of your site.",
+      "about": "ranking",
+      "product": "google_search",
+      "requires_citation": true
+    },
+    {
+      "id": "AC27",
+      "token": "{{AC27}}",
+      "claim": "Google primarily finds pages through links from other pages it already crawled. In many cases, these are other websites that are linking to your pages.",
+      "safe_wording": "Google primarily finds pages through links from other pages it already crawled. In many cases, these are other websites that are linking to your pages.",
+      "source_id": "S4",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "evidence": "Google primarily finds pages through links from other pages it already crawled. In many cases, these are other websites that are linking to your pages.",
+      "about": "indexing",
+      "product": "google_search",
+      "requires_citation": true
+    }
+  ],
+  "claim_tokens_used": [
+    "AC5",
+    "AC9",
+    "AC13",
+    "AC17",
+    "AC18",
+    "AC19",
+    "AC20",
+    "AC21",
+    "AC22",
+    "AC24",
+    "AC26"
+  ],
+  "approved_first_party_numbers": {
+    "money": [
+      0.19,
+      4.02,
+      400,
+      500,
+      600,
+      750,
+      1500,
+      2000,
+      3500,
+      5000,
+      10000
+    ],
+    "percents": [
+      15,
+      95
+    ],
+    "counts": [
+      2,
+      12,
+      13,
+      37,
+      74,
+      250,
+      968,
+      1963,
+      72309
+    ],
+    "timelines": [
+      "2–4 weeks",
+      "30 days"
+    ]
+  },
+  "claims": [
+    {
+      "claim": "Core Web Vitals are used by our ranking systems. We recommend site owners achieve good Core Web Vitals for success with Search and to ensure a great user experience generally.",
+      "kind": "sourced_fact",
+      "source_id": "S1",
+      "allowed_claim_id": "AC5"
+    },
+    {
+      "claim": "Core Web Vitals is a set of metrics that measure real-world user experience for loading performance, interactivity, and visual stability of the page.",
+      "kind": "sourced_fact",
+      "source_id": "S2",
+      "allowed_claim_id": "AC9"
+    },
+    {
+      "claim": "Interaction To Next Paint (INP): Measures responsiveness. To provide a good user experience, strive to have an INP of less than 200 milliseconds.",
+      "kind": "sourced_fact",
+      "source_id": "S2",
+      "allowed_claim_id": "AC13"
+    },
+    {
+      "claim": "Expect temporary fluctuation in site ranking during the move. With any significant change to a site, you may experience ranking fluctuations while Google recrawls and reindexes your site.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC17"
+    },
+    {
+      "claim": "As a general rule: for medium-sized websites, it can take a few weeks or more for Google to gradually start showing the new URLs instead of the old ones (and for larger sites, even longer).",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC18"
+    },
+    {
+      "claim": "Don't worry about link credit. 301 and other permanent redirects don't cause a loss in PageRank.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC19"
+    },
+    {
+      "claim": "Change only one thing at a time. Plan your changes to your site one after the other, not everything at the same time. For example, if you want to move your site to a new domain name, change your content management system (CMS), and update your site to use a new layout, do them one at a time: move to a new domain, then change your site's layout.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC20"
+    },
+    {
+      "claim": "Submitting a sitemap can help make the discovery process quicker, and it's fine to move your site in sections.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC21"
+    },
+    {
+      "claim": "Keep the redirects for as long as possible, generally at least 1 year. This timeframe allows Google to transfer all signals to the new URLs, including recrawling and reassigning links on other sites that point to your old URLs.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC22"
+    },
+    {
+      "claim": "If your site is hiding important components that make up your website (like CSS and JavaScript), Google might not be able to understand your pages, which means they might not show up in search results or rank well for the terms you're targeting.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC24"
+    },
+    {
+      "claim": "When you're setting up or redoing your site, it can be good to organize it in a logical way because it can help search engines and users understand how your pages relate to the rest of your site.",
+      "kind": "sourced_fact",
+      "source_id": "S4",
+      "allowed_claim_id": "AC26"
+    },
+    {
+      "claim": "A full rebuild with proper 301 redirects and an updated sitemap protects SEO equity better than keeping a broken site.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "If a site's mobile experience is fundamentally broken at the structural level, a visual redesign layer typically cannot fix it.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "When a business has outgrown what a site was built to do, the site usually needs a structural rebuild rather than a visual refresh.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "Brandible's custom website projects typically run $2,000 to $10,000+, depending on scope. That is Brandible's range, not a market average.",
+      "kind": "first_party"
+    },
+    {
+      "claim": "A site built on a template platform that can't support booking forms, location-specific service pages, or a quote flow may be a rebuild candidate rather than a redesign candidate.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "If the business itself has changed significantly, the site usually needs to reflect that structurally, not just visually.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "Sequencing major site changes (domain, platform, content) one at a time makes individual issues easier to diagnose.",
+      "kind": "opinion"
+    }
+  ],
+  "repairs": [
+    {
+      "round": 1,
+      "code": "V5_UNLABELED_FIRST_PARTY",
+      "action": "attributed_first_party",
+      "reason": "label approved first-party figure as Brandible"
+    },
+    {
+      "round": 1,
+      "code": "V3_SOURCE_ENTAILMENT",
+      "action": "deleted_segment",
+      "reason": "unsupported source entailment"
+    },
+    {
+      "round": 1,
+      "code": "V3_SOURCE_ENTAILMENT",
+      "action": "deleted_segment",
+      "reason": "unsupported source entailment"
+    }
+  ],
+  "internal_links_catalog_note": "Internal URLs in the article must come from the approved catalog of live posts, services, and core pages."
+}

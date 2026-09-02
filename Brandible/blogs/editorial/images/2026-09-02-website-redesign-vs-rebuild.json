@@ -1,0 +1,38 @@
+{
+  "source_post_path": "Brandible/blogs/posts/2026-09-02-website-redesign-vs-rebuild.md",
+  "slug": "website-redesign-vs-rebuild",
+  "visual_brief": {
+    "thesis": "Determining whether a site needs a simple surface update or a complete rebuild depends on diagnosing whether the core structural foundation is broken or intact.",
+    "subject": "A tactile, matte 3D architectural block model resting on a dark surface, cleanly cut in a cross-section to reveal an intact polished outer shell on one side and a glowing, exposed internal orange beam structure on the other.",
+    "composition": "Single centered focal subject with soft macro depth of field, balanced by generous dark blue negative space on all sides.",
+    "mood": "Analytical, quiet, tactile, diagnostic.",
+    "avoid": [
+      "text",
+      "typography",
+      "logos",
+      "fake UI",
+      "website screenshots",
+      "laptops",
+      "monitors",
+      "handshakes",
+      "people",
+      "split-screen infographics",
+      "blueprints with readable text"
+    ],
+    "color_notes": "Deep navy background (#060D1F, #0A1633). Electric blue (#2563EB) accenting structural edge lines. Vibrant orange light (#F97316) emanating precisely from the inner exposed foundation frame.",
+    "center_safe": "Keep the entire sculptural cross-section model within the middle 65% of the frame so horizontal and vertical 16:10 cropping preserves the full subject."
+  },
+  "final_generation_prompt": "Create one original Brandible blog featured image.\nQuiet tactile still-life. Slightly 3D physical objects. Matte materials. Soft directional light.\nNavy field (#0A1633 / #060D1F) with orange accent (#F97316). Electric blue only sparingly.\nNo typography. No logos. No fake UI. No stock photography tropes.\nGenerate as a 2K 16:9 landscape. Important subject stays in the center 70% horizontally and vertically, with breathing room on every edge, because the image will later be cropped to 16:10.\nThesis: Determining whether a site needs a simple surface update or a complete rebuild depends on diagnosing whether the core structural foundation is broken or intact.\nSubject: A tactile, matte 3D architectural block model resting on a dark surface, cleanly cut in a cross-section to reveal an intact polished outer shell on one side and a glowing, exposed internal orange beam structure on the other.\nComposition: Single centered focal subject with soft macro depth of field, balanced by generous dark blue negative space on all sides.\nMood: Analytical, quiet, tactile, diagnostic.\nColor: Deep navy background (#060D1F, #0A1633). Electric blue (#2563EB) accenting structural edge lines. Vibrant orange light (#F97316) emanating precisely from the inner exposed foundation frame.\nCenter-safe: Keep the entire sculptural cross-section model within the middle 65% of the frame so horizontal and vertical 16:10 cropping preserves the full subject.\nDo not appear:\n- readable text, headlines, captions, watermarks, or typography\n- Brandible logo, wordmark, or letter B\n- fake Google, Meta, Ads, or Search UI and readable screenshots\n- generic corporate stock: handshakes, laptops on white desks, smiling teams\n- cyberpunk, cartoon, or glossy AI-glass people\n- text\n- typography\n- logos\n- fake UI\n- website screenshots\n- laptops\n- monitors\n- handshakes\n- people\n- split-screen infographics\n- blueprints with readable text\nOutput the image only. Do not render words in the picture.",
+  "provider": "gemini",
+  "model": "gemini-3.1-flash-image",
+  "generated_at": "2026-09-02T16:44:38.948Z",
+  "generation_mode": "new",
+  "regeneration_notes": null,
+  "final_dimensions": {
+    "width": 1920,
+    "height": 1200
+  },
+  "final_byte_size": 48394,
+  "final_image_path": "Brandible/assets/blog-images/website-redesign-vs-rebuild.webp",
+  "licensing": "Original AI-generated imagery created under the provider's API terms, with generation provenance recorded."
+}
