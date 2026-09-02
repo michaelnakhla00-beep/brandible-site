@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { loadFacts, buildAllowlist, factsForPrompt, moneySetHas } = require('./facts');
 const { buildAllowedClaims, isAbsoluteUpgrade, toSafeWording, toPlainDisplayText } = require('./allowed-claims');
 const {
@@ -22,6 +23,7 @@ const {
 const { applySafetyFallback, collectSafetyRepairs, dedupeInternalLink, MAX_DELETED_SEGMENTS, MAX_DETERMINISTIC_ROUNDS, runDeterministicRepairsToFixedPoint } = require('./safety-fallback');
 const { segmentMarkdownSentences, isMarkdownHeading } = require('./segments');
 const { extractMarkdownLinks, extractMarkdownHrefs } = require('./markdown-links');
+const { conciseGeminiError } = require('../blog-image-check');
 const {
   GENERATION_TOOL_NAME,
   REVISION_TOOL_NAME,
@@ -440,6 +442,54 @@ async function structuredOutputFixtures() {
       !/mode: 'revision'/.test(automationSrc) &&
       !/Running the single revision pass/.test(automationSrc) &&
       /one structured generation plus deterministic cleanup/.test(automationSrc)
+  );
+
+  geminiPreflightFixtures();
+}
+
+function geminiPreflightFixtures() {
+  const workflowSrc = fs.readFileSync(path.join(__dirname, '../../../.github/workflows/blog-draft.yml'), 'utf8');
+  const checkPath = path.join(__dirname, '../blog-image-check.js');
+  const checkSrc = fs.readFileSync(checkPath, 'utf8');
+  const preflightIdx = workflowSrc.indexOf('name: Gemini preflight');
+  const generateIdx = workflowSrc.indexOf('name: Generate draft package');
+  assert(
+    'workflow runs Gemini preflight before Generate draft package',
+    preflightIdx !== -1 && generateIdx !== -1 && preflightIdx < generateIdx &&
+      /run: node Brandible\/scripts\/blog-image-check\.js/.test(workflowSrc),
+    'Gemini preflight step missing or out of order'
+  );
+  assert(
+    'preflight script uses the shared Gemini client and env helpers',
+    /require\('\.\/blog-image\/gemini'\)/.test(checkSrc) &&
+      /generateContent/.test(checkSrc) &&
+      /getGeminiApiKey/.test(checkSrc) &&
+      /getBriefModel/.test(checkSrc) &&
+      /Reply with OK/.test(checkSrc) &&
+      /Gemini preflight passed:/.test(checkSrc)
+  );
+
+  const authError = conciseGeminiError(
+    new Error(
+      'Gemini request failed (400) for gemini-3.6-flash: {"error":{"code":400,"message":"API key not valid. Please pass a valid API key.","status":"INVALID_ARGUMENT"}}'
+    )
+  );
+  assert(
+    'preflight error extracts a concise API-key failure',
+    /Gemini authentication failed/.test(authError) &&
+      /API key not valid/.test(authError) &&
+      !/"error"/.test(authError),
+    authError
+  );
+
+  const missingKey = spawnSync(process.execPath, [checkPath], {
+    env: { ...process.env, GEMINI_API_KEY: '' },
+    encoding: 'utf8'
+  });
+  assert(
+    'missing GEMINI_API_KEY fails before a Gemini request',
+    missingKey.status === 1 && /GEMINI_API_KEY is not set/.test(String(missingKey.stderr || '')),
+    JSON.stringify({ status: missingKey.status, stdout: missingKey.stdout, stderr: missingKey.stderr })
   );
 }
 

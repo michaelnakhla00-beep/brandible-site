@@ -36,6 +36,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Gemini preflight
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BLOG_IMAGE_BRIEF_MODEL: ${{ vars.BLOG_IMAGE_BRIEF_MODEL || 'gemini-3.6-flash' }}
+        run: node Brandible/scripts/blog-image-check.js
+
       - name: Generate draft package
         id: generate
         env:
