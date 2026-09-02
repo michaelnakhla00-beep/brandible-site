@@ -20,7 +20,7 @@ There isn't one reason a local business stays invisible. A few gaps usually sit 
 
 ## You Might Not Be Claiming the Right Ground
 
-[Local results are mainly based on relevance, distance, and popularity](https://support.google.com/business/answer/7091?hl=en). Your Google Business Profile is how you show up in those results on Maps and Search.
+[Local results are mainly based on relevance, distance, and popularity](https://support.google.com/business/answer/7091?hl=en). Your Google Business Profile is a major part of how you show up in those local results on Maps and Search.
 
 [Only verified businesses can show their business info on Maps and Search](https://support.google.com/business/answer/145585?hl=en). If you haven't claimed and verified the profile, you're not in that set yet.
 
@@ -32,23 +32,23 @@ This is the first check. Search your business name. If the profile is missing, u
 
 If the profile exists, the next question is whether it actually describes the business.
 
-The category you pick is how Google matches you to searches. Choose the specific option from the list, not the broadest label that still feels true.
+The category you pick helps Google understand what kind of business you are and which searches you may match. Choose the specific option from the list, not the broadest label that still feels true.
 
 [Select a primary category that best describes your business. When you choose your category, select a specific category from the list that shows up. For example, instead of "Salon," choose "Nail salon."](https://support.google.com/business/answer/7249669?hl=en)
 
-Same idea if you're a contractor: "Kitchen Remodeler" beats a vague "Contractor" when that's the work.
+Same idea if you're a contractor: "Kitchen Remodeler" is more specific than a vague "Contractor" when that's the work.
 
 The description is for the business, not a sale. [Do not exceed 750 characters in the description field](https://support.google.com/business/answer/3039617?hl=en). Say what you do and who you help. Skip promotions and pricing.
 
-Keep hours, phone, address, and photos current. [When you edit your business info, it updates the search results, and changes can take up to 3 days to appear](https://support.google.com/business/answer/145585?hl=en).
+Keep hours, phone, address, and photos current.
 
 ## You Haven't Built Any Credibility Yet
 
 [More reviews and positive ratings can help your business's local ranking](https://support.google.com/business/answer/7091?hl=en). Links to your site sit in the same picture: signs that the business is real and known.
 
-If you have no reviews, or a handful from two years ago, that's a gap. [When you reply to customer reviews, it shows that you value their feedback](https://support.google.com/business/answer/7091?hl=en).
+If you have no reviews, or only old ones, that's a gap. [When you reply to customer reviews, it shows that you value their feedback](https://support.google.com/business/answer/7091?hl=en).
 
-You don't need a huge pile. You need a handful of honest, recent ones, and replies that show you're paying attention.
+Focus on honest, recent reviews, and reply when customers leave them.
 
 We learned this running The Doorstep Detailer in Hunterdon County. Completing the profile, collecting real reviews, and matching the website to what people search for was the work. There was no ranking shortcut.
 
@@ -66,7 +66,9 @@ If the site itself is the leak, that's [website work](/services/web-design/), no
 
 ## You Haven't Given It Enough Time
 
-[Rankings for new businesses can take up to a month to appear in search results](https://support.google.com/business/answer/145585?hl=en). If you recently claimed or updated the profile, wait that window out before assuming it's broken.
+[Rankings for new businesses can take up to a month to appear in search results](https://support.google.com/business/answer/145585?hl=en). That's the wait after a new listing is verified.
+
+[When you edit your business info, it updates the search results, and changes can take up to 3 days to appear](https://support.google.com/business/answer/145585?hl=en). If the profile already exists and you changed hours, address, or photos, use that shorter window before assuming nothing happened.
 
 ## What to Fix First
 
@@ -78,7 +80,7 @@ If you're not showing up, work through this in order:
 
 **3. Add photos.** [You can show customers what you offer and tell the story of your business with photos and videos](https://support.google.com/business/answer/7091?hl=en). Real photos of the work, the space, or the team give someone something to trust.
 
-**4. Get your first reviews, or respond to the ones you have.** A handful of honest, recent ones, plus replies, is enough to start.
+**4. Get your first reviews, or respond to the ones you have.** Focus on honest, recent reviews, and reply when customers leave them.
 
 **5. Look at your website.** If it doesn't name what you do and where you operate, fix that. If it's one page with no structure, that's worth addressing.
 
