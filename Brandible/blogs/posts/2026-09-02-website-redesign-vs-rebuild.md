@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 title: "Redesign or Rebuild? How to Know When Your Website Is Past Saving"
 slug: "website-redesign-vs-rebuild"
 date: 2026-09-02T16:44:10.679Z
