@@ -1,0 +1,36 @@
+{
+  "source_post_path": "Brandible/blogs/posts/2026-09-03-website-vs-facebook-page.md",
+  "slug": "website-vs-facebook-page",
+  "visual_brief": {
+    "thesis": "Social media creates temporary reach on rented ground, but an owned website provides a solid, permanent foundation of trust and complete control over the customer journey.",
+    "subject": "A solid, heavy matte navy pedestal with a warm orange illuminated structural core anchored firmly to a smooth dark workbench, while light electric-blue wireframe panels float transiently in the background atmosphere.",
+    "composition": "Centered single focal subject with generous dark negative space, soft directional lighting from the side, shallow depth of field, clear separation between the solid grounded base and subtle background airiness.",
+    "mood": "Grounded, reassuring, tactile, calm, structured, quiet editorial.",
+    "avoid": [
+      "text",
+      "readable UI",
+      "Facebook logos or icons",
+      "Brandible logo or letter B",
+      "people or faces",
+      "handshakes",
+      "laptops or phone screens showing social feeds",
+      "flat graphics or 2D diagrams",
+      "split-screen versus layout"
+    ],
+    "color_notes": "Deep navy background (#060D1F, #0A1633) as the dominant field; warm orange (#F97316) used precisely to light the core anchor pedestal; subtle electric blue (#2563EB) accenting the floating structure; cool cloud highlights (#F5F7FA) along edges.",
+    "center_safe": "The anchored pedestal object is fully contained within the center 60% of the frame, ensuring breathing room for 16:10 cropping without cutting off structural details."
+  },
+  "final_generation_prompt": "Create one original Brandible blog featured image.\nQuiet tactile still-life. Slightly 3D physical objects. Matte materials. Soft directional light.\nNavy field (#0A1633 / #060D1F) with orange accent (#F97316). Electric blue only sparingly.\nNo typography. No logos. No fake UI. No stock photography tropes.\nGenerate as a 2K 16:9 landscape. Important subject stays in the center 70% horizontally and vertically, with breathing room on every edge, because the image will later be cropped to 16:10.\nThesis: Social media creates temporary reach on rented ground, but an owned website provides a solid, permanent foundation of trust and complete control over the customer journey.\nSubject: A solid, heavy matte navy pedestal with a warm orange illuminated structural core anchored firmly to a smooth dark workbench, while light electric-blue wireframe panels float transiently in the background atmosphere.\nComposition: Centered single focal subject with generous dark negative space, soft directional lighting from the side, shallow depth of field, clear separation between the solid grounded base and subtle background airiness.\nMood: Grounded, reassuring, tactile, calm, structured, quiet editorial.\nColor: Deep navy background (#060D1F, #0A1633) as the dominant field; warm orange (#F97316) used precisely to light the core anchor pedestal; subtle electric blue (#2563EB) accenting the floating structure; cool cloud highlights (#F5F7FA) along edges.\nCenter-safe: The anchored pedestal object is fully contained within the center 60% of the frame, ensuring breathing room for 16:10 cropping without cutting off structural details.\nDo not appear:\n- readable text, headlines, captions, watermarks, or typography\n- Brandible logo, wordmark, or letter B\n- fake Google, Meta, Ads, or Search UI and readable screenshots\n- generic corporate stock: handshakes, laptops on white desks, smiling teams\n- cyberpunk, cartoon, or glossy AI-glass people\n- text\n- readable UI\n- Facebook logos or icons\n- Brandible logo or letter B\n- people or faces\n- handshakes\n- laptops or phone screens showing social feeds\n- flat graphics or 2D diagrams\n- split-screen versus layout\nOutput the image only. Do not render words in the picture.",
+  "provider": "gemini",
+  "model": "gemini-3.1-flash-image",
+  "generated_at": "2026-09-03T18:53:24.567Z",
+  "generation_mode": "new",
+  "regeneration_notes": null,
+  "final_dimensions": {
+    "width": 1920,
+    "height": 1200
+  },
+  "final_byte_size": 30552,
+  "final_image_path": "Brandible/assets/blog-images/website-vs-facebook-page.webp",
+  "licensing": "Original AI-generated imagery created under the provider's API terms, with generation provenance recorded."
+}
