@@ -1,0 +1,470 @@
+{
+  "post": "2026-09-03-website-vs-facebook-page.md",
+  "topic_id": "07",
+  "generated_at": "2026-09-03T18:52:56.947Z",
+  "facts_last_verified": "2026-08-31",
+  "research": {
+    "needed": true,
+    "skipped_reason": null,
+    "queries": [
+      "Facebook Pages for business official overview Meta",
+      "Meta Business Suite website link Facebook Page features",
+      "Facebook Pages features 2024 2025 business tools official"
+    ],
+    "retrieved_at": "2026-09-03T18:51:32.204Z"
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://www.facebook.com/business/help/1968057156746246?id=939256796236247",
+      "title": "Set Up Your Facebook Business Page | Meta Business Help Center",
+      "publisher": "Meta for Business",
+      "excerpt": "Information about your business: To get the most out of your Page, add details about your company or organization, like address, areas serviced, email, phone number, website, hours, story, images and more.",
+      "evidence": [
+        {
+          "about": "completeness",
+          "quote": "Information about your business: To get the most out of your Page, add details about your company or organization, like address, areas serviced, email, phone number, website, hours, story, images and more."
+        },
+        {
+          "about": "completeness",
+          "quote": "Category: Select a category for your Page. The category you choose will provide unique features for your business."
+        },
+        {
+          "about": "ranking",
+          "quote": "Stay active: Typically, Facebook Pages perform best when you interact with your Page fans, post often, include contact details and other information and use Page Insights."
+        },
+        {
+          "about": "completeness",
+          "quote": "After you create your Page, use its free features to start connecting with new and existing customers and Page fans."
+        }
+      ],
+      "why_selected": "Official Meta setup guide that explicitly lists 'website' as a Page info field alongside hours, phone, and address — directly evidences that Meta itself treats a website URL as a distinct, recommended business data point on a Facebook Page, not a replacement for one.",
+      "product": "meta",
+      "features": [
+        "organic_search",
+        "conversion_tracking"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S2",
+      "url": "https://www.facebook.com/business/help/477457986066066",
+      "title": "What's New with Facebook Pages | Meta Business Help Center",
+      "publisher": "Meta for Business",
+      "excerpt": "Pages allow you to create a presence for your business on Facebook, reach your customers, share information and run ads.",
+      "evidence": [
+        {
+          "about": "completeness",
+          "quote": "Pages allow you to create a presence for your business on Facebook, reach your customers, share information and run ads."
+        },
+        {
+          "about": "completeness",
+          "quote": "Facebook and Instagram Shops: Shops are a free way to create your own, unique shopping experience. Shops are virtual storefronts where your customers can browse, explore and even purchase your products, directly from your Instagram business account and Facebook business Page."
+        },
+        {
+          "about": "completeness",
+          "quote": "We're always improving Facebook Pages, adding new features, updating existing features and working to make Pages relevant and useful for every business that uses them."
+        }
+      ],
+      "why_selected": "Official Meta Pages changelog page that documents the actual feature surface of a Facebook Page — presence, reach, shopping, ads — making clear what Pages can and cannot do (no independent domain, no SEO outside Facebook, no owned data layer), supporting the article's central argument.",
+      "product": "meta",
+      "features": [
+        "organic_search",
+        "conversion_tracking"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S3",
+      "url": "https://www.facebook.com/business/help/205614130852988?id=765488040896522",
+      "title": "About Facebook Business Suite | Meta Business Help Center",
+      "publisher": "Meta for Business",
+      "excerpt": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place. It offers a variety of tools that makes it easier to manage your online presence for free.",
+      "evidence": [
+        {
+          "about": "completeness",
+          "quote": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place. It offers a variety of tools that makes it easier to manage your online presence for free."
+        },
+        {
+          "about": "completeness",
+          "quote": "Use Inbox: You can read new messages and comments from your Facebook Page, Messenger and Instagram accounts. You can also create automated responses to help save time when responding to questions people commonly ask."
+        },
+        {
+          "about": "completeness",
+          "quote": "Create ads: You can create new ads and place them on Facebook and Instagram, boost your posts, and promote your Page."
+        },
+        {
+          "about": "completeness",
+          "quote": "View insights: You can see details about your business's performance, such as trends, activity on the content you share and more information about your audience."
+        }
+      ],
+      "why_selected": "Official Meta Business Suite help article that enumerates the full scope of what the platform offers small businesses — posting, messaging, ads, insights — with no mention of a website builder or owned-domain capability, which supports the argument that Meta tools manage presence on Meta's platform, not an independent web presence.",
+      "product": "meta",
+      "features": [
+        "conversion_tracking",
+        "organic_search"
+      ],
+      "feature_status": "current"
+    },
+    {
+      "id": "S4",
+      "url": "https://www.facebook.com/business/help/720478807965744",
+      "title": "Add a Facebook Page to your business portfolio | Meta Business Help Center",
+      "publisher": "Meta for Business",
+      "excerpt": "Business Manager and Business settings are no longer available. To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance.",
+      "evidence": [
+        {
+          "about": "completeness",
+          "quote": "Business Manager and Business settings are no longer available. To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance."
+        },
+        {
+          "about": "completeness",
+          "quote": "Add a Facebook Page to your business portfolio to efficiently manage its activity and your business's online presence in Meta Business Suite."
+        }
+      ],
+      "why_selected": "Confirms the current platform architecture change (Business Manager deprecated in favour of Meta Business Suite Settings) and the scope of 'online presence' as defined by Meta — relevant for noting that even Meta's most advanced business tooling keeps your presence inside Meta's ecosystem, not on an independent domain.",
+      "product": "meta",
+      "features": [
+        "organic_search"
+      ],
+      "feature_status": "changing"
+    }
+  ],
+  "allowed_claims": [
+    {
+      "id": "AC1",
+      "token": "{{AC1}}",
+      "claim": "Information about your business: To get the most out of your Page, add details about your company or organization, like address, areas serviced, email, phone number, website, hours, story, images and more.",
+      "safe_wording": "Information about your business: To get the most out of your Page, add details about your company or organization, like address, areas serviced, email, phone number, website, hours, story, images and more.",
+      "source_id": "S1",
+      "url": "https://www.facebook.com/business/help/1968057156746246?id=939256796236247",
+      "evidence": "Information about your business: To get the most out of your Page, add details about your company or organization, like address, areas serviced, email, phone number, website, hours, story, images and more.",
+      "about": "excerpt",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC2",
+      "token": "{{AC2}}",
+      "claim": "Category: Select a category for your Page. The category you choose will provide unique features for your business.",
+      "safe_wording": "Category: Select a category for your Page. The category you choose will provide unique features for your business.",
+      "source_id": "S1",
+      "url": "https://www.facebook.com/business/help/1968057156746246?id=939256796236247",
+      "evidence": "Category: Select a category for your Page. The category you choose will provide unique features for your business.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC3",
+      "token": "{{AC3}}",
+      "claim": "Stay active: Typically, Facebook Pages perform best when you interact with your Page fans, post often, include contact details and other information and use Page Insights.",
+      "safe_wording": "Stay active: Typically, Facebook Pages perform best when you interact with your Page fans, post often, include contact details and other information and use Page Insights.",
+      "source_id": "S1",
+      "url": "https://www.facebook.com/business/help/1968057156746246?id=939256796236247",
+      "evidence": "Stay active: Typically, Facebook Pages perform best when you interact with your Page fans, post often, include contact details and other information and use Page Insights.",
+      "about": "ranking",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC4",
+      "token": "{{AC4}}",
+      "claim": "After you create your Page, use its free features to start connecting with new and existing customers and Page fans.",
+      "safe_wording": "After you create your Page, use its free features to start connecting with new and existing customers and Page fans.",
+      "source_id": "S1",
+      "url": "https://www.facebook.com/business/help/1968057156746246?id=939256796236247",
+      "evidence": "After you create your Page, use its free features to start connecting with new and existing customers and Page fans.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC5",
+      "token": "{{AC5}}",
+      "claim": "Pages allow you to create a presence for your business on Facebook, reach your customers, share information and run ads.",
+      "safe_wording": "Pages allow you to create a presence for your business on Facebook, reach your customers, share information and run ads.",
+      "source_id": "S2",
+      "url": "https://www.facebook.com/business/help/477457986066066",
+      "evidence": "Pages allow you to create a presence for your business on Facebook, reach your customers, share information and run ads.",
+      "about": "excerpt",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC6",
+      "token": "{{AC6}}",
+      "claim": "Facebook and Instagram Shops: Shops are a free way to create your own, unique shopping experience. Shops are virtual storefronts where your customers can browse, explore and even purchase your products, directly from your Instagram business account and Facebook business Page.",
+      "safe_wording": "Facebook and Instagram Shops: Shops are a free way to create your own, unique shopping experience. Shops are virtual storefronts where your customers can browse, explore and even purchase your products, directly from your Instagram business account and Facebook business Page.",
+      "source_id": "S2",
+      "url": "https://www.facebook.com/business/help/477457986066066",
+      "evidence": "Facebook and Instagram Shops: Shops are a free way to create your own, unique shopping experience. Shops are virtual storefronts where your customers can browse, explore and even purchase your products, directly from your Instagram business account and Facebook business Page.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC7",
+      "token": "{{AC7}}",
+      "claim": "We're always improving Facebook Pages, adding new features, updating existing features and working to make Pages relevant and useful for every business that uses them.",
+      "safe_wording": "We're always improving Facebook Pages, adding new features, updating existing features and working to make Pages relevant and useful for every business that uses them.",
+      "source_id": "S2",
+      "url": "https://www.facebook.com/business/help/477457986066066",
+      "evidence": "We're always improving Facebook Pages, adding new features, updating existing features and working to make Pages relevant and useful for every business that uses them.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC8",
+      "token": "{{AC8}}",
+      "claim": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place.",
+      "safe_wording": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place.",
+      "source_id": "S3",
+      "url": "https://www.facebook.com/business/help/205614130852988?id=765488040896522",
+      "evidence": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place.",
+      "about": "excerpt",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC9",
+      "token": "{{AC9}}",
+      "claim": "It offers a variety of tools that makes it easier to manage your online presence for free.",
+      "safe_wording": "It offers a variety of tools that makes it easier to manage your online presence for free.",
+      "source_id": "S3",
+      "url": "https://www.facebook.com/business/help/205614130852988?id=765488040896522",
+      "evidence": "It offers a variety of tools that makes it easier to manage your online presence for free.",
+      "about": "excerpt",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC10",
+      "token": "{{AC10}}",
+      "claim": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place. It offers a variety of tools that makes it easier to manage your online presence for free.",
+      "safe_wording": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place. It offers a variety of tools that makes it easier to manage your online presence for free.",
+      "source_id": "S3",
+      "url": "https://www.facebook.com/business/help/205614130852988?id=765488040896522",
+      "evidence": "Meta Business Suite lets small businesses and creators manage all of their connected accounts across Facebook and Instagram in one place. It offers a variety of tools that makes it easier to manage your online presence for free.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC11",
+      "token": "{{AC11}}",
+      "claim": "Use Inbox: You can read new messages and comments from your Facebook Page, Messenger and Instagram accounts. You can also create automated responses to help save time when responding to questions people commonly ask.",
+      "safe_wording": "Use Inbox: You can read new messages and comments from your Facebook Page, Messenger and Instagram accounts. You can also create automated responses to help save time when responding to questions people commonly ask.",
+      "source_id": "S3",
+      "url": "https://www.facebook.com/business/help/205614130852988?id=765488040896522",
+      "evidence": "Use Inbox: You can read new messages and comments from your Facebook Page, Messenger and Instagram accounts. You can also create automated responses to help save time when responding to questions people commonly ask.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC12",
+      "token": "{{AC12}}",
+      "claim": "Create ads: You can create new ads and place them on Facebook and Instagram, boost your posts, and promote your Page.",
+      "safe_wording": "Create ads: You can create new ads and place them on Facebook and Instagram, boost your posts, and promote your Page.",
+      "source_id": "S3",
+      "url": "https://www.facebook.com/business/help/205614130852988?id=765488040896522",
+      "evidence": "Create ads: You can create new ads and place them on Facebook and Instagram, boost your posts, and promote your Page.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC13",
+      "token": "{{AC13}}",
+      "claim": "View insights: You can see details about your business's performance, such as trends, activity on the content you share and more information about your audience.",
+      "safe_wording": "View insights: You can see details about your business's performance, such as trends, activity on the content you share and more information about your audience.",
+      "source_id": "S3",
+      "url": "https://www.facebook.com/business/help/205614130852988?id=765488040896522",
+      "evidence": "View insights: You can see details about your business's performance, such as trends, activity on the content you share and more information about your audience.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC14",
+      "token": "{{AC14}}",
+      "claim": "Business Manager and Business settings are no longer available.",
+      "safe_wording": "Business Manager and Business settings are no longer available.",
+      "source_id": "S4",
+      "url": "https://www.facebook.com/business/help/720478807965744",
+      "evidence": "Business Manager and Business settings are no longer available.",
+      "about": "excerpt",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC15",
+      "token": "{{AC15}}",
+      "claim": "To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance.",
+      "safe_wording": "To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance.",
+      "source_id": "S4",
+      "url": "https://www.facebook.com/business/help/720478807965744",
+      "evidence": "To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance.",
+      "about": "excerpt",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC16",
+      "token": "{{AC16}}",
+      "claim": "Business Manager and Business settings are no longer available. To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance.",
+      "safe_wording": "Business Manager and Business settings are no longer available. To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance.",
+      "source_id": "S4",
+      "url": "https://www.facebook.com/business/help/720478807965744",
+      "evidence": "Business Manager and Business settings are no longer available. To manage your business portfolio, use Settings in Meta Business Suite, which has been updated to have the same features and better performance.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    },
+    {
+      "id": "AC17",
+      "token": "{{AC17}}",
+      "claim": "Add a Facebook Page to your business portfolio to efficiently manage its activity and your business's online presence in Meta Business Suite.",
+      "safe_wording": "Add a Facebook Page to your business portfolio to efficiently manage its activity and your business's online presence in Meta Business Suite.",
+      "source_id": "S4",
+      "url": "https://www.facebook.com/business/help/720478807965744",
+      "evidence": "Add a Facebook Page to your business portfolio to efficiently manage its activity and your business's online presence in Meta Business Suite.",
+      "about": "completeness",
+      "product": "meta",
+      "requires_citation": true
+    }
+  ],
+  "claim_tokens_used": [
+    "AC5",
+    "AC10"
+  ],
+  "approved_first_party_numbers": {
+    "money": [
+      0.19,
+      4.02,
+      400,
+      500,
+      600,
+      750,
+      1500,
+      2000,
+      3500,
+      5000,
+      10000
+    ],
+    "percents": [
+      15,
+      95
+    ],
+    "counts": [
+      2,
+      12,
+      13,
+      37,
+      74,
+      250,
+      968,
+      1963,
+      72309
+    ],
+    "timelines": [
+      "2–4 weeks",
+      "30 days"
+    ]
+  },
+  "claims": [
+    {
+      "claim": "A Facebook Page lets you create a presence for your business on Facebook, reach your customers, share information, and run ads.",
+      "kind": "sourced_fact",
+      "source_id": "S2",
+      "allowed_claim_id": "AC5"
+    },
+    {
+      "claim": "If you're running a Page seriously, Meta Business Suite lets you manage your Facebook and Instagram accounts in one place, view performance trends, respond to messages, and create ads.",
+      "kind": "sourced_fact",
+      "source_id": "S3",
+      "allowed_claim_id": "AC10"
+    },
+    {
+      "claim": "A Facebook Page lets you create a presence for your business on Facebook, reach your customers, share information, and run ads.",
+      "kind": "opinion",
+      "source_id": "S2"
+    },
+    {
+      "claim": "Facebook Pages improve and change over time as Meta updates features and adjusts what Pages can do.",
+      "kind": "opinion",
+      "source_id": "S2"
+    },
+    {
+      "claim": "A well-run Facebook Page with consistent posts, real engagement, and complete contact details is a strong top-of-funnel asset.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "A website is where trust and conversion signals live: your own domain, your own layout, your own photos, and your own words, with no algorithm deciding what visitors see next.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "Customers comparing two businesses will find a website with photos, a service list, and a booking option more persuasive than a Messenger thread alone.",
+      "kind": "hypothetical"
+    },
+    {
+      "claim": "A business that only has a Facebook Page is asking customers to make a hiring decision with less information than they'd want.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "The gap between someone interested and someone booked is what a website is built to close.",
+      "kind": "opinion"
+    },
+    {
+      "claim": "Brandible builds custom websites typically in the $2,000 to $10,000+ range, usually from start to launch in 2–4 weeks.",
+      "kind": "first_party"
+    }
+  ],
+  "repairs": [
+    {
+      "round": 1,
+      "code": "V3_SOURCE_ENTAILMENT",
+      "action": "deleted_segment",
+      "reason": "unsupported source entailment"
+    },
+    {
+      "round": 1,
+      "code": "V3_SOURCE_ENTAILMENT",
+      "action": "deleted_segment",
+      "reason": "unsupported source entailment"
+    },
+    {
+      "round": 1,
+      "code": "V10_OTHER",
+      "action": "normalized_em_dash",
+      "reason": "em dash"
+    },
+    {
+      "round": 2,
+      "code": "V3_SOURCE_ENTAILMENT",
+      "action": "deleted_segment",
+      "reason": "unsupported source entailment"
+    },
+    {
+      "round": 2,
+      "code": "V3_SOURCE_ENTAILMENT",
+      "action": "deleted_segment",
+      "reason": "unsupported source entailment"
+    },
+    {
+      "round": 3,
+      "code": "V7_CLAIM_LEDGER",
+      "action": "deleted_segment",
+      "reason": "citation quality"
+    },
+    {
+      "round": 4,
+      "code": "V7_CLAIM_LEDGER",
+      "action": "deleted_segment",
+      "reason": "citation quality"
+    }
+  ],
+  "internal_links_catalog_note": "Internal URLs in the article must come from the approved catalog of live posts, services, and core pages."
+}
