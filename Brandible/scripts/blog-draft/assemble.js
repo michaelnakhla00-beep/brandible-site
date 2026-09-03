@@ -1,8 +1,11 @@
 'use strict';
 
 const { findAllowedClaim, toPlainDisplayText } = require('./allowed-claims');
+const { extractMarkdownLinks } = require('./markdown-links');
+const { isMarkdownHeading } = require('./segments');
 
 const CLAIM_TOKEN_RE = /\{\{\s*(AC\d+)\s*\}\}/g;
+const SOURCE_LINK_LABEL = 'Source';
 
 function normalizeForMatch(text) {
   return String(text || '')
@@ -67,23 +70,100 @@ function unwrapClaimTokenWrappers(text) {
   return next;
 }
 
-function linkSafeWording(wording, url) {
-  const text = toPlainDisplayText(wording);
-  if (!text || !url) return text;
-  const ended = /[.!?]$/.test(text);
-  const core = ended ? text.slice(0, -1) : text;
-  const mark = ended ? text.slice(-1) : '';
-  return `[${core}](${url})${mark}`;
+function citationMarkup(url) {
+  if (!url) return '';
+  return `[${SOURCE_LINK_LABEL}](${url})`;
+}
+
+function normalizeDisplayClaim(text) {
+  let next = String(text || '')
+    .replace(/\[Source\]\(https?:\/\/[^)]+\)/gi, ' ')
+    .replace(new RegExp(CLAIM_TOKEN_RE.source, 'g'), ' ');
+  next = toPlainDisplayText(next);
+  next = next.replace(/\s+/g, ' ').trim();
+  next = next.replace(/\s+([.!?])/g, '$1');
+  next = next.replace(/([.!?]){2,}/g, '$1');
+  return next;
+}
+
+function hasClaimSubstance(text) {
+  const plain = normalizeDisplayClaim(text);
+  if (plain.length < 24) return false;
+  const words = plain.split(' ').filter((word) => word.length > 2);
+  return words.length >= 4;
+}
+
+function splitLocalSentences(text) {
+  return String(text || '')
+    .split(/(?<=[.!?])\s+(?=[A-Z*"“\[{])/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function precedingProseSentence(text) {
+  const trimmed = String(text || '').replace(/[^\S\n]+$/g, '').replace(/\s+$/, '');
+  if (!trimmed) return '';
+  const paragraphs = trimmed.split(/\n\s*\n/);
+  while (paragraphs.length) {
+    const para = paragraphs.pop().trim();
+    if (!para) continue;
+    if (isMarkdownHeading(para)) return '';
+    const sentences = splitLocalSentences(para.replace(/\n+/g, ' '));
+    if (!sentences.length) continue;
+    const last = normalizeDisplayClaim(sentences[sentences.length - 1]);
+    return hasClaimSubstance(last) ? last : '';
+  }
+  return '';
+}
+
+function isDirtyHost(text) {
+  const plain = String(text || '');
+  if (/\bevery(?:one|body)\b/i.test(plain)) return true;
+  if (/\[/.test(plain) && !/\]\(/.test(plain)) return true;
+  return false;
+}
+
+function bindDisplayClaim(text, matchStart, matchEnd) {
+  const before = String(text || '').slice(0, matchStart);
+  const beforeTrim = before.replace(/[^\S\n]+$/g, '').replace(/\s+$/, '');
+  if (/[.!?]$/.test(beforeTrim)) {
+    const previous = precedingProseSentence(beforeTrim);
+    return isDirtyHost(previous) ? '' : previous;
+  }
+  const paraStart = Math.max(before.lastIndexOf('\n\n') + 2, 0);
+  const rest = String(text || '').slice(matchEnd);
+  const paraEndRel = rest.search(/\n\s*\n/);
+  const paraEnd = paraEndRel >= 0 ? matchEnd + paraEndRel : String(text || '').length;
+  const paragraph = String(text || '').slice(paraStart, paraEnd);
+  const localStart = matchStart - paraStart;
+  const localEnd = matchEnd - paraStart;
+  const withoutToken = `${paragraph.slice(0, localStart)}${paragraph.slice(localEnd)}`;
+  const inline = normalizeDisplayClaim(withoutToken.replace(/\n+/g, ' '));
+  if (hasClaimSubstance(inline) && !isDirtyHost(inline)) return inline;
+  const previous = precedingProseSentence(beforeTrim);
+  return isDirtyHost(previous) ? '' : previous;
+}
+
+function normalizeCitationPunctuation(text) {
+  let next = String(text || '');
+  next = next.replace(/[ \t]+\n/g, '\n');
+  next = next.replace(/\[\s+Source\s*\]/gi, '[Source]');
+  next = next.replace(/\][ \t]+\(/g, '](');
+  next = next.replace(/([.!?])\[Source\]/g, '$1 [Source]');
+  next = next.replace(/[^\S\n]{2,}/g, ' ');
+  next = next.replace(/[^\S\n]+([.!?])/g, '$1');
+  next = next.replace(/([.!?]){2,}/g, '$1');
+  next = next.replace(/\[Source\]\((https?:\/\/[^)]+)\)[.!?]+/g, '[Source]($1)');
+  return next;
 }
 
 function renderCitedClaim(claim, options) {
   const cite = !options || options.cite !== false;
-  const wording = String((claim && (claim.safe_wording || claim.claim)) || '').trim();
-  if (!wording) return '';
-  if (cite && claim.requires_citation && claim.url) {
-    return linkSafeWording(wording, claim.url);
+  if (!cite) return '';
+  if (claim && claim.requires_citation && claim.url) {
+    return citationMarkup(claim.url);
   }
-  return wording;
+  return '';
 }
 
 function resolveClaimTokens(text, allowedClaims, options) {
@@ -92,27 +172,91 @@ function resolveClaimTokens(text, allowedClaims, options) {
   const unknownIds = [];
   const rendered = [];
   const unwrapped = unwrapClaimTokenWrappers(text);
-  const resolved = String(unwrapped || '').replace(CLAIM_TOKEN_RE, (match, id) => {
+  const bindings = [];
+  const finder = new RegExp(CLAIM_TOKEN_RE.source, 'g');
+  let found;
+  while ((found = finder.exec(unwrapped)) !== null) {
+    bindings.push({
+      id: found[1],
+      start: found.index,
+      display_claim: bindDisplayClaim(unwrapped, found.index, found.index + found[0].length)
+    });
+  }
+  let bindIndex = 0;
+  const resolvedRaw = String(unwrapped || '').replace(CLAIM_TOKEN_RE, (match, id) => {
     const claim = byId.get(id);
+    const binding = bindings[bindIndex];
+    bindIndex += 1;
     if (!claim) {
       unknownIds.push(id);
       return match;
     }
     if (!usedIds.includes(id)) usedIds.push(id);
     const replacement = renderCitedClaim(claim, options);
-    rendered.push({ id, text: replacement });
+    rendered.push({
+      id,
+      text: replacement,
+      display_claim: binding && binding.id === id ? binding.display_claim : '',
+      url: claim.url
+    });
     return replacement;
   });
-  return { text: resolved, usedIds, unknownIds, rendered };
+  return {
+    text: normalizeCitationPunctuation(resolvedRaw),
+    usedIds,
+    unknownIds,
+    rendered
+  };
 }
 
-function buildSourcedClaims(usedIds, allowedClaims) {
+function overlapScore(display, evidence) {
+  const left = normalizeForMatch(display)
+    .split(' ')
+    .filter((word) => word.length > 3);
+  if (!left.length) return 0;
+  const right = normalizeForMatch(evidence);
+  const hits = left.filter((word) => right.includes(word));
+  return hits.length / left.length;
+}
+
+function pickBestClaim(display, candidates) {
+  if (!candidates.length) return null;
+  if (candidates.length === 1) return candidates[0];
+  let best = candidates[0];
+  let bestScore = -1;
+  for (const item of candidates) {
+    const score = overlapScore(display, `${item.evidence || ''} ${item.claim || ''} ${item.safe_wording || ''}`);
+    if (score > bestScore) {
+      best = item;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+function displayClaimForCitation(body, link, fromIndex) {
+  const href = link.rawHref != null ? link.rawHref : link.href;
+  const markup = `[${link.label}](${href})`;
+  const idx = String(body || '').indexOf(markup, fromIndex || 0);
+  if (idx < 0) return { display: '', nextIndex: fromIndex || 0 };
+  return {
+    display: bindDisplayClaim(body, idx, idx + markup.length),
+    nextIndex: idx + markup.length
+  };
+}
+
+function buildSourcedClaims(renderedFacts, allowedClaims) {
   const rows = [];
-  for (const id of usedIds || []) {
+  for (const item of renderedFacts || []) {
+    const id = typeof item === 'string' ? item : item && item.id;
     const allowed = findAllowedClaim(allowedClaims, id);
     if (!allowed) continue;
+    const display =
+      typeof item === 'string' ? '' : normalizeDisplayClaim(item && item.display_claim);
+    const claimText = display || String(allowed.safe_wording || allowed.claim || '').trim();
+    if (!claimText) continue;
     rows.push({
-      claim: allowed.safe_wording || allowed.claim,
+      claim: claimText,
       kind: 'sourced_fact',
       source_id: allowed.source_id,
       allowed_claim_id: allowed.id
@@ -165,7 +309,7 @@ function assembleArticle(article, allowedClaims) {
   const metaTitleTokens = extractClaimTokens(article.meta_title);
   const metaDescTokens = extractClaimTokens(article.meta_description);
   const usedIds = uniqueIds([bodyResult.usedIds, excerptResult.usedIds]);
-  const sourced = buildSourcedClaims(usedIds, plan);
+  const sourced = buildSourcedClaims(bodyResult.rendered, plan);
   const next = assembleCta({
     ...article,
     excerpt: excerptResult.text,
@@ -189,48 +333,70 @@ function refreshAssemblyState(article, allowedClaims) {
   const body = String(article.body || '');
   const rendered_facts = [];
   const usedIds = [];
-  for (const claim of plan) {
-    const cited = renderCitedClaim(claim, { cite: true });
-    if (!cited || !body.includes(cited)) continue;
-    if (!usedIds.includes(claim.id)) usedIds.push(claim.id);
-    rendered_facts.push({ id: claim.id, text: cited });
+  const links = extractMarkdownLinks(body).filter((link) => {
+    return String(link.label || '').trim() === SOURCE_LINK_LABEL && /^https?:\/\//i.test(link.href);
+  });
+  let cursor = 0;
+  for (const link of links) {
+    const bound = displayClaimForCitation(body, link, cursor);
+    cursor = bound.nextIndex;
+    const display = bound.display;
+    const candidates = plan.filter(
+      (item) => item && item.requires_citation && item.url === link.href && !usedIds.includes(item.id)
+    );
+    const matched = pickBestClaim(display, candidates);
+    if (!matched) continue;
+    usedIds.push(matched.id);
+    rendered_facts.push({
+      id: matched.id,
+      text: citationMarkup(matched.url),
+      display_claim: display,
+      url: matched.url
+    });
   }
   return {
     ...article,
     rendered_facts,
     claim_tokens_used: usedIds,
-    claims: mergeNonSourcedClaims(article.claims, buildSourcedClaims(usedIds, plan))
+    claims: mergeNonSourcedClaims(article.claims, buildSourcedClaims(rendered_facts, plan))
   };
 }
 
 function isRenderedAllowedFact(sentence, renderedFacts) {
-  const plain = normalizeForMatch(sentence);
-  if (!plain) return false;
-  return (renderedFacts || []).some((item) => {
-    const fact = normalizeForMatch(item && item.text);
-    if (!fact) return false;
-    return plain === fact || plain.includes(fact) || fact.includes(plain);
-  });
+  return Boolean(matchingRenderedFact(sentence, renderedFacts));
 }
 
 function matchingRenderedFact(sentence, renderedFacts) {
+  const raw = String(sentence || '');
   const plain = normalizeForMatch(sentence);
   if (!plain) return null;
   return (
     (renderedFacts || []).find((item) => {
-      const fact = normalizeForMatch(item && item.text);
-      if (!fact) return false;
-      return plain === fact || plain.includes(fact) || fact.includes(plain);
+      const cite = String((item && item.text) || '');
+      if (cite && raw.includes(cite)) return true;
+      const display = normalizeForMatch(item && item.display_claim);
+      if (!display) return false;
+      if (plain === display) return true;
+      if (cite) {
+        const withoutCite = normalizeForMatch(raw.split(cite).join(' '));
+        if (withoutCite === display) return true;
+      }
+      return false;
     }) || null
   );
 }
 
 module.exports = {
   CLAIM_TOKEN_RE,
+  SOURCE_LINK_LABEL,
   extractClaimTokens,
   unwrapClaimTokenWrappers,
   resolveClaimTokens,
   renderCitedClaim,
+  citationMarkup,
+  bindDisplayClaim,
+  normalizeCitationPunctuation,
+  normalizeDisplayClaim,
   buildSourcedClaims,
   mergeNonSourcedClaims,
   assembleCta,
