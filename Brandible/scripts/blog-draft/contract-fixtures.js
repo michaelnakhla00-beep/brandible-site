@@ -3295,6 +3295,132 @@ async function run() {
     neighborProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
   );
 
+  const sameSourceUrl = 'https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes';
+  const sameSourcePack = {
+    needed: true,
+    sources: [
+      {
+        id: 'S-MOVE',
+        url: sameSourceUrl,
+        title: 'Site moves with URL changes',
+        excerpt: [
+          'Expect temporary fluctuation in site ranking during the move.',
+          'Processing a site move can take time as Google discovers and recrawls the new URLs.',
+          'Keep redirects in place so users and Googlebot can find the new location.'
+        ].join(' ')
+      }
+    ]
+  };
+  const sameSourceClaims = buildAllowedClaims(sameSourcePack);
+  const fluctuationClaim = sameSourceClaims.find((item) => /temporary fluctuation in site ranking/i.test(item.evidence || ''));
+  const processingClaim = sameSourceClaims.find((item) => /discovers and recrawls the new urls/i.test(item.evidence || ''));
+  const redirectClaim = sameSourceClaims.find((item) => /keep redirects in place/i.test(item.evidence || ''));
+  assert(
+    'same-source pack exposes three distinct approved claims',
+    Boolean(fluctuationClaim && processingClaim && redirectClaim) &&
+      new Set([fluctuationClaim.id, processingClaim.id, redirectClaim.id]).size === 3 &&
+      [fluctuationClaim, processingClaim, redirectClaim].every((item) => item.url === sameSourceUrl) &&
+      sameSourceClaims.indexOf(fluctuationClaim) < sameSourceClaims.indexOf(processingClaim) &&
+      sameSourceClaims.indexOf(processingClaim) < sameSourceClaims.indexOf(redirectClaim),
+    JSON.stringify(sameSourceClaims.map((item) => ({ id: item.id, evidence: item.evidence })))
+  );
+  const fluctuationDisplay =
+    'Google notes that a site move can cause temporary ranking fluctuation.';
+  const processingDisplay =
+    'Google notes that processing a site move can take time as Google discovers and recrawls the new URLs.';
+  const redirectDisplay =
+    'Google notes that keeping redirects in place helps users and Googlebot find the new location.';
+  const sameSourceExpected = [
+    { display: redirectDisplay, id: redirectClaim.id },
+    { display: fluctuationDisplay, id: fluctuationClaim.id },
+    { display: processingDisplay, id: processingClaim.id }
+  ];
+  assert(
+    'same-source body order differs from the allowed-claims array',
+    sameSourceExpected.map((item) => item.id).join(',') !==
+      [fluctuationClaim.id, processingClaim.id, redirectClaim.id].join(','),
+    sameSourceExpected.map((item) => item.id).join(',')
+  );
+  const sameSourceAssembled = assembleArticle(
+    {
+      ...baseFields(),
+      title: 'What to check before you raise ad spend',
+      slug: 'what-to-check-before-you-raise-ad-spend',
+      meta_title: 'What to check before you raise ad spend',
+      category: 'Marketing',
+      excerpt: 'Get the tracking and the landing page honest before you add more budget to the campaign.',
+      meta_description:
+        'A practical order of operations for local shops that want paid clicks to turn into calls, not just more spend.',
+      body: [
+        '## Site moves',
+        '',
+        `${redirectDisplay} {{${redirectClaim.id}}}`,
+        '',
+        `${fluctuationDisplay} {{${fluctuationClaim.id}}}`,
+        '',
+        `${processingDisplay} {{${processingClaim.id}}}`,
+        '',
+        'If tracking is already in place, you may not need Brandible. If it is not, Brandible can set it up.'
+      ].join('\n'),
+      claims: [],
+      cta: {
+        names_brandible: true,
+        fit_case: 'If it is not, Brandible can set it up.',
+        walk_away_case: 'If tracking is already in place, you may not need Brandible.'
+      }
+    },
+    sameSourceClaims
+  );
+  const sameSourceLinks = extractMarkdownLinks(sameSourceAssembled.body).filter((link) =>
+    /^https?:\/\//i.test(link.href)
+  );
+  assert(
+    'same-source assembled citations are short Source markers to one URL',
+    sameSourceLinks.length === 3 &&
+      sameSourceLinks.every(
+        (link) => link.label === SOURCE_LINK_LABEL && link.href === sameSourceUrl
+      ) &&
+      sameSourceExpected.every((item) => sameSourceAssembled.body.includes(item.display)),
+    JSON.stringify({ body: sameSourceAssembled.body, links: sameSourceLinks })
+  );
+  const sameSourceRefreshed = refreshAssemblyState(sameSourceAssembled, sameSourceClaims);
+  const refreshedByDisplay = new Map(
+    (sameSourceRefreshed.rendered_facts || []).map((item) => [String(item.display_claim || '').trim(), item])
+  );
+  const mappingOk = sameSourceExpected.every((item) => {
+    const rendered = refreshedByDisplay.get(item.display);
+    return rendered && rendered.id === item.id && rendered.text === citationMarkup(sameSourceUrl);
+  });
+  const ledgerOk = sameSourceExpected.every((item) =>
+    (sameSourceRefreshed.claims || []).some(
+      (row) =>
+        row.kind === 'sourced_fact' &&
+        row.allowed_claim_id === item.id &&
+        String(row.claim || '').trim() === item.display
+    )
+  );
+  assert(
+    'same-source refresh maps each Brandible sentence to the correct allowed_claim_id',
+    mappingOk && (sameSourceRefreshed.rendered_facts || []).length === 3,
+    JSON.stringify({
+      expected: sameSourceExpected,
+      rendered: sameSourceRefreshed.rendered_facts,
+      claims: sameSourceRefreshed.claims
+    })
+  );
+  assert(
+    'same-source sourced ledger keeps the correct claim-to-AC mapping',
+    ledgerOk &&
+      (sameSourceRefreshed.claims || []).filter((row) => row.kind === 'sourced_fact').length === 3,
+    JSON.stringify(sameSourceRefreshed.claims)
+  );
+  const sameSourceProblems = validateGeneratedArticle(sameSourceRefreshed, ctx(sameSourcePack, sameSourceClaims));
+  assert(
+    'same-source multi-claim article passes final validation',
+    sameSourceProblems.length === 0,
+    sameSourceProblems.map((item) => `${item.id}: ${item.message}`).join(' | ')
+  );
+
   assert(
     'approved external links still pass',
     conciseProblems.length === 0 &&
