@@ -1,9 +1,8 @@
 name: Brandible blog draft
 
 on:
-  # Enable after the first successful workflow_dispatch review:
-  # schedule:
-  #   - cron: '0 14 * * 2'
+  schedule:
+    - cron: '0 14 * * 2'
   workflow_dispatch:
     inputs:
       topic_id:
